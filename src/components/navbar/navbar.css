@@ -1,0 +1,11 @@
+.imgContain{
+    width: 10rem;
+}
+.avatar{
+    width: 2.9rem;
+    border-radius: 5rem;
+}
+button{
+    border-radius: 5rem;
+    overflow: hidden;
+}
