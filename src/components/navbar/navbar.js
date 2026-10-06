@@ -10,7 +10,7 @@ export default function Navbar() {
   const [open, setOpen]=useState(false)
   return (
 
-    <nav className="flex flex-row items-center text-xl text-black bg-blue-50  justify-around">
+    <nav className="flex flex-row items-center text-xl text-emerald-950 bg-blue-50  justify-around">
       <div className='imgContain'>
         <Image src={logo} alt="logo"  />
       </div>
