@@ -31,7 +31,7 @@ export default function Navbar() {
         </div>
       
         <Link href="/novel/2" > <BellIcon/>  </Link>
-        {login?<button className='bg-primary hover:bg-primary-hover text-white font-medium px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap' onClick={()=>setLogin(false)}>
+        {login?<button className='bg-primary hover:bg-primary-hover text-white font-medium px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap' onClick={() =>setLogin(false)}>
           Đăng nhập
         </button>:<button className='bg-primary hover:bg-primary-hover text-white font-medium px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap'>
           Mua gói Vip

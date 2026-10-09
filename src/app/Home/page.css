@@ -1,0 +1,14 @@
+.homeContaint {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem; /* Giới hạn độ rộng tối đa cho khung chứa */
+    padding: 1.5rem;
+}
+
+.cardContain {
+    display: grid;
+    /* Tự động chia cột linh hoạt theo kích thước màn hình */
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 1.5rem;
+    justify-items: center; /* Căn giữa các card trong từng ô grid */
+}
