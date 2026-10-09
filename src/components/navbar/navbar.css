@@ -9,3 +9,9 @@ button{
     border-radius: 5rem;
     overflow: hidden;
 }
+.btn-login{
+    background-color: var(--primary);
+    padding: 6px 15px;
+    border: var(--color-border);
+    color: var(--color-primary-foreground);
+}
