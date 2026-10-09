@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f8fa; /* Nền sáng nhẹ đặc trưng phong cách MangaToon */
+  --foreground: #1a1a1a; /* Chữ chính đậm dễ đọc */
+  
+  /* Màu nhận diện thương hiệu (MangaToon Style) */
+  --primary: #ff5722;
+  --primary-hover: #f4511e;
+  --primary-foreground: #ffffff; /* Màu chữ trên nút chính */
+
+  /* Màu cho nút phụ / outline ở chế độ sáng */
+  --secondary-bg: #e2e8f0;
+  --secondary-hover: #cbd5e1;
+  --secondary-foreground: #1e293b;
+
+  /* Màu phụ trợ */
+  --card-bg: #ffffff;
+  --text-muted: #757575;
+  --border-color: #e5e7eb;
+
+  /* === BIẾN MÀU CHO INPUT (Light Mode) === */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db; /* Viền xám nhạt */
+  --input-focus: #ff5722;  /* Viền cam MangaToon khi bấm vào */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary-bg: var(--secondary-bg);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-card: var(--card-bg);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border-color);
+
+  /* === ĐĂNG KÝ MÀU INPUT VỚI TAILWIND === */
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+  --color-input-focus: var(--input-focus);
+  
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f172a; /* Nền tối sâu sang trọng cho trang đọc truyện */
+    --foreground: #f8fafc;
+    
+    --primary: #ff5722;
+    --primary-hover: #ff7043;
+    --primary-foreground: #ffffff;
+
+    /* Màu cho nút phụ / outline ở chế độ tối */
+    --secondary-bg: #334155;
+    --secondary-hover: #475569;
+    --secondary-foreground: #f8fafc;
+
+    --card-bg: #1e293b; /* Màu nền cho thẻ truyện (card) ở chế độ tối */
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+
+    /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
+    --input-bg: #1e293b;        /* Nền tối cho input */
+    --input-border: #475569;    /* Viền xám tối */
+    --input-focus: #ff5722;     /* Vẫn giữ màu cam chủ đạo khi focus */
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
