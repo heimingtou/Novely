@@ -12,3 +12,8 @@
     gap: 1.5rem;
     justify-items: center; /* Căn giữa các card trong từng ô grid */
 }
+.catContaint {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
