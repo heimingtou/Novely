@@ -1,5 +1,6 @@
 'use client';
-import { BellCheckIcon, BellIcon, SearchAlertIcon, SearchIcon } from 'lucide-react';
+import { BellCheckIcon, BellIcon, ChevronDown, SearchAlertIcon, SearchIcon } from 'lucide-react';
+
 import Link from 'next/link';
 import logoLight from '../../../public/logo.png'
 import logoDark from '../../../public/darklogo.png'
@@ -9,17 +10,57 @@ import './navbar.css'
 import { useState } from 'react';
 export default function Navbar() {
   const [open, setOpen]=useState(false)
+  const [openGen, setOpenGen]=useState(false)
   const [login, setLogin]=useState(true)
+  const genres = [
+    "Ngôn Tình",
+    "Đam Mỹ",
+    "Bách Hợp",
+    "Tiên Hiệp",
+    "Kiếm Hiệp",
+    "Huyền Huyễn",
+    "Đô Thị",
+    "Khoa Huyễn",
+    "Trọng Sinh",
+    "Xuyên Không",
+    "Hệ Thống",
+    "Trinh Thám",
+    "Kinh Dị",
+    "Hài Hước",
+    "Trường Học",
+    "Cổ Đại",
+    "Mạt Thế",
+    "Dinh Dưỡng",
+    "Võ Luyện",
+    "Lịch Sử"
+];
   return (
     <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around ">
       <div className='imgContain'>
-        
-        <Image src={logoLight} alt="logo" className="block dark:hidden" />
-       
-        <Image src={logoDark} alt="logo" className="hidden dark:block" />
+        <Link href="/">
+          <Image src={logoLight} alt="logo" className="block dark:hidden" />
+          <Image src={logoDark} alt="logo" className="hidden dark:block" />
+        </Link>
       </div>
       <div className='flex flex-row justify-around gap-5 items-center w-[75%] mt-3 mb-3'>
-        <Link href="/">Trang chủ</Link>
+        <div className='relative'>
+          <button className='flex flex-row items-center ' onClick={()=>setOpenGen(!openGen)}>
+          <span>Điều hướng</span><span><ChevronDown/></span>   
+          </button>
+          {
+            openGen&&
+            <div className='listGenre absolute left-2 top-full w-[30rem] h-[25rem] rounded-lg shadow-xl!'>
+            {
+              
+              genres.map((genre)=>(
+                <button key={genre}>{genre}</button>
+              ))
+            }
+          </div>
+          }
+          
+        </div>
+        
         <Link href="/novel/1" >Thư viện</Link>
         <div className='flex flex-row items-center gap-3 bg-background border border-input-border h-[2.5em] w-[20em] px-3 rounded-2xl focus-within:border-primary transition-all'>
         <SearchIcon className="text-muted shrink-0" />
@@ -38,9 +79,13 @@ export default function Navbar() {
         </button>}
         
         <div className='avatar relative'>
-          <button className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' onClick={()=>setOpen(!open)}>
-          <Image src={avatar} alt='avatar'/>
+          <button className='flex flex-row gap-1.5 items-center' onClick={()=>setOpen(!open)}>
+             <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
+              <Image src={avatar} alt='avatar'/> 
+            </div>
+            <ChevronDown/>
           </button>
+         
           {open&&
           <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
           <button>setting</button>

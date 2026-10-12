@@ -2,11 +2,10 @@
     width: 10rem;
 }
 .avatar{
-    width: 2.9rem;
+    width: 5rem;
     border-radius: 5rem;
 }
 button{
-    border-radius: 5rem;
     overflow: hidden;
 }
 .btn-login{
@@ -14,4 +13,13 @@ button{
     padding: 6px 15px;
     border: var(--color-border);
     color: var(--color-primary-foreground);
+}
+.listGenre{
+    padding: 25px;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border: var(--color-border);
+    justify-items: start;
 }
