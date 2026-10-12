@@ -1,3 +1,27 @@
 .titleCard{
-    text-align: center;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+.content{
+
+   width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    
+}
+.title{
+    
+    width: 100%;
+    overflow: hidden;
+}
+.tag{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
