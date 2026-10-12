@@ -42,7 +42,7 @@ export default function Navbar() {
           <Image src={avatar} alt='avatar'/>
           </button>
           {open&&
-          <div className='absolute left-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
+          <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
           <button>setting</button>
           <button> profile</button>
           <button>writer</button>

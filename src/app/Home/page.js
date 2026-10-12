@@ -23,7 +23,7 @@ export default async function Homepage(){
             id: faker.string.uuid(),
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
-            genres: cat.name + ' / Truyện Hay',
+            genres: cat.name + ' / Truyện Hay/fanfic',
             coverImage: faker.image.url(),
         }))
     }));
