@@ -34,7 +34,7 @@ export default async function Homepage(){
             <div className='catContaint '>
                  {fakeCategoriesData.map((cat)=>(
                 <div key={cat.categoryId}>
-                     <h1 className='text-5xl mt-1 mb-2'>{cat.categoryName}</h1>
+                     <h1 className='cat text-[32px] mt-1 mb-2'>{cat.categoryName}</h1>
                      <div className='cardContain'>
                         {
                         cat.novels.map((novel)=>(
