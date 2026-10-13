@@ -1,0 +1,15 @@
+.ContaintGenre{
+    
+}
+.gridContain{
+    margin:5px 55px;
+    display: grid;
+    /* Tự động chia cột linh hoạt theo kích thước màn hình */
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 1.5rem;
+    justify-items: center; /* Căn giữa các card trong từng ô grid */
+}
+.Genre{
+    font-size: 48px;
+    margin: 2px 55px;
+}

@@ -49,11 +49,14 @@ export default function Navbar() {
           </button>
           {
             openGen&&
-            <div className='listGenre absolute left-2 top-full w-[30rem] h-[25rem] rounded-lg shadow-xl!'>
+            <div className='listGenre absolute left-5 top-20 w-120 h-100 rounded-lg shadow-xl!'>
             {
               
               genres.map((genre)=>(
-                <button key={genre}>{genre}</button>
+                <Link key={genre} href={`/novel/${genre}`} >
+                   <button onClick={()=>setOpenGen(false)} >{genre}</button>
+                </Link>
+               
               ))
             }
           </div>

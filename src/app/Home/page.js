@@ -19,6 +19,7 @@ export default async function Homepage(){
     const fakeCategoriesData = categories.map((cat) => ({
         categoryId: cat.id,
         categoryName: cat.name,
+        
         novels: Array.from({ length: 15 }, () => ({
             id: faker.string.uuid(),
             title: faker.book.title(),
