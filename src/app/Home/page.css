@@ -4,7 +4,9 @@
     max-width: 80rem; /* Giới hạn độ rộng tối đa cho khung chứa */
     padding: 1.5rem;
 }
-
+.cat{
+    font-size: clamp(24px,2vw,32px);
+}
 .cardContain {
     display: grid;
     /* Tự động chia cột linh hoạt theo kích thước màn hình */

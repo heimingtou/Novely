@@ -49,12 +49,11 @@ export default async function NovelDetailPage({ params }) {
 
   // 2. Lấy ra mảng các truyện thuộc thể loại đó (nếu tìm thấy thì trả về mảng novels, ngược lại trả về mảng rỗng [])
   const novelsInCategory = matchedCategory ? matchedCategory.novels: [];
-   console.log(novelsInCategory)
   return (
     
-    <div className="ContaintGenre">
-     
-      <h1 className="Genre">{decodedId}</h1>
+    <div className="">
+      <div className="ContaintGenre">
+        <h1 className="Genre">{decodedId}</h1>
       <div className="gridContain">
         {
         novelsInCategory&&(
@@ -69,6 +68,8 @@ export default async function NovelDetailPage({ params }) {
         )
        }
       </div>
+      </div>
+      
        
     </div>
   );

@@ -3,8 +3,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    margin-right: 5px;
-    margin-left: 5px;
+    font-size: clamp(12px,2vw,18px);
 }
 .content{
 
@@ -12,6 +11,8 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+    font-size: clamp(10px,2vw,14px);
+    padding: 2px 2px 10px 1px;
     
 }
 .title{
