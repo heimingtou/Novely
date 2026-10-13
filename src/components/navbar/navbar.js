@@ -7,11 +7,13 @@ import logoDark from '../../../public/darklogo.png'
 import Image from 'next/image'
 import avatar from '../../../public/avarta.jpg'
 import './navbar.css'
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 export default function Navbar() {
   const [open, setOpen]=useState(false)
   const [openGen, setOpenGen]=useState(false)
   const [login, setLogin]=useState(true)
+  const genreRef=useRef(null)
+  const avartaRef=useRef(null)
   const genres = [
     "Ngôn Tình",
     "Đam Mỹ",
@@ -33,7 +35,21 @@ export default function Navbar() {
     "Dinh Dưỡng",
     "Võ Luyện",
     "Lịch Sử"
-];
+];  
+  useEffect(()=>{
+    function handleClosePopup(event){
+      if (genreRef.current && !genreRef.current.contains(event.target)) {
+        setOpenGen(false);
+      }
+      if (avartaRef.current && !avartaRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClosePopup);
+    return () => {
+      document.removeEventListener('mousedown', handleClosePopup);
+    };
+  },[]);
   return (
     <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around ">
       <div className='imgContain'>
@@ -49,11 +65,14 @@ export default function Navbar() {
           </button>
           {
             openGen&&
-            <div className='listGenre absolute left-2 top-full w-[30rem] h-[25rem] rounded-lg shadow-xl!'>
+            <div className='listGenre absolute left-5 top-20 w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
             {
               
               genres.map((genre)=>(
-                <button key={genre}>{genre}</button>
+                <Link key={genre} href={`/novel/${genre}`} >
+                   <button onClick={()=>setOpenGen(false)} >{genre}</button>
+                </Link>
+               
               ))
             }
           </div>
@@ -80,7 +99,7 @@ export default function Navbar() {
         
         <div className='avatar relative'>
           <button className='flex flex-row gap-1.5 items-center' onClick={()=>setOpen(!open)}>
-             <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
+             <div ref={avartaRef} className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
               <Image src={avatar} alt='avatar'/> 
             </div>
             <ChevronDown/>

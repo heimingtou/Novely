@@ -6,7 +6,7 @@ export default function CardStory({ title, like, genres, coverImage }){
     return(
         <div className="CardContaint w-46 flex flex-col items-center ">
             <div className="imgCard">
-                <img src={coverImage}className="h-[12rem] w-full object-cover" />
+                <img src={coverImage}className="h-[12rem] w-full object-cover" alt="img"/>
             </div>
             <div className="content">
                 <div className="title">
