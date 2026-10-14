@@ -6,7 +6,10 @@
 }
 .cat{
     font-size: clamp(24px,2vw,32px);
+    margin-top: 1px;
+    margin-bottom: 2px
 }
+
 .cardContain {
     display: grid;
     /* Tự động chia cột linh hoạt theo kích thước màn hình */
