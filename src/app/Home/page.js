@@ -6,13 +6,12 @@ import './page.css'
 export default async function Homepage(){
     const categories = [
         { id: 'cat-1', name: 'Trending' },
-        { id: 'cat-2', name: 'Newly updated' },
+        { id: 'cat-2', name: 'For you' },
         { id: 'cat-3', name: 'Top rated' },
         { id: 'cat-4', name: 'Most Followed' },
         { id: 'cat-5', name: 'Mood Discovery' },
-        { id: 'cat-6', name: 'For you' },
+        { id: 'cat-6', name: 'Newly updated' },
         { id: 'cat-7', name: 'Surprise' },
-        { id: 'cat-8', name: 'Genre' }
     ];
 
     // Tạo dữ liệu giả: mỗi thể loại chứa một danh sách truyện riêng
@@ -34,7 +33,7 @@ export default async function Homepage(){
             <div className='catContaint '>
                  {fakeCategoriesData.map((cat)=>(
                 <div key={cat.categoryId}>
-                     <h1 className='cat text-[32px] mt-1 mb-2'>{cat.categoryName}</h1>
+                     <h1 className='cat '>{cat.categoryName}</h1>
                      <div className='cardContain'>
                         {
                         cat.novels.map((novel)=>(

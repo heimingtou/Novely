@@ -12,12 +12,7 @@ button{
 .navText{
     font-size: clamp(12px, 2vw, 20px);
 }
-.btn-login{
-    background-color: var(--primary);
-    padding: 6px 15px;
-    border: var(--color-border);
-    color: var(--color-primary-foreground);
-}
+
 .listGenre{
     padding: 25px;
     display: grid;
@@ -26,4 +21,43 @@ button{
     color: var(--color-foreground);
     border: 1px solid var(--color-border);
     justify-items: start;
+}
+
+.btn_nav {
+  background-color: var(--primary); /* Hoặc mã màu thực tế của bạn, ví dụ: #3b82f6 */
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.375rem 1rem; /* Tương ứng py-1.5 px-4 */
+  border-radius: 9999px; /* Tương ứng rounded-full */
+  font-size: 0.75rem; /* Tương ứng text-xs */
+  flex-shrink: 0; /* Tương ứng shrink-0 */
+  transition: all 0.2s ease-in-out; /* Tương ứng transition-all */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Tương ứng shadow-sm */
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn_nav:hover {
+  background-color: var(--primary-hover); /* Hoặc mã màu hover thực tế */
+}
+
+/* Responsive cho màn hình từ small (sm) trở lên */
+@media (min-width: 640px) {
+  .btn_nav {
+    font-size: 0.875rem; /* Tương ứng sm:text-sm */
+  }
+}
+
+/* Responsive cho màn hình từ medium (md) trở lên */
+@media (min-width: 768px) {
+  .btn_nav {
+    padding: 0.5rem 1.25rem; /* Tương ứng md:py-2 md:px-5 */
+    font-size: 1rem; /* Tương ứng md:text-base */
+  }
+}
+
+.btn_search{
+    background-color: var(--primary);
+    padding: 0.375rem 1rem;
+    border-radius: 12px;
 }

@@ -1,5 +1,5 @@
 'use client';
-import { BellCheckIcon, BellIcon, ChevronDown, SearchAlertIcon, SearchIcon } from 'lucide-react';
+import { BellCheckIcon, BellIcon, ChevronDown, SearchAlertIcon, SearchIcon, TextSearch } from 'lucide-react';
 
 import Link from 'next/link';
 import logoLight from '../../../public/logo.png'
@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 export default function Navbar() {
   const [open, setOpen]=useState(false)
   const [openGen, setOpenGen]=useState(false)
-  const [login, setLogin]=useState(true)
+  const [login, setLogin]=useState(false)
   const genreRef=useRef(null)
   const avartaRef=useRef(null)
   const genres = [
@@ -51,7 +51,7 @@ export default function Navbar() {
     };
   },[]);
   return (
-    <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around ">
+    <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around w-full">
       <div className='imgContain '>
         <Link href="/">
           <Image src={logoLight} alt="logo" className="block dark:hidden " />
@@ -82,20 +82,20 @@ export default function Navbar() {
           <div>
             <Link href="/novel/1" ><span className='navText'>Thư viện</span></Link>
           </div>  
-          <div className='flex flex-row items-center gap-3 bg-background border border-input-border h-[2.5em] w-[30rem] px-3 rounded-2xl           focus-within:border-primary transition-all'>
-            <SearchIcon className="text-muted shrink-0" />
-            <input 
-            type='text' 
-            placeholder='search story' 
-            className='h-full w-full bg-transparent text-foreground outline-none border-none text-[18px] placeholder:text-muted'/>
-          </div>
+          
         </div>
         <div className='flex flex-row justify-around items-center w-[30%]'>
+          <Link href="/search" >
+            <button className='btn_search'>
+              <TextSearch/>
+            </button>
+          
+          </Link>
           <Link href="/novel/2" > <BellIcon/>  </Link> 
           <div>
-            {login?<button className='bg-primary hover:bg-primary-hover text-white font-medium px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap' onClick={() =>setLogin(false)}>
+            {!login?<button className='btn_nav ' onClick={() =>setLogin(true)}>
             Đăng nhập
-            </button>:<button className='bg-primary hover:bg-primary-hover text-white font-medium px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap'>
+            </button>:<button className='btn_nav'>
             Mua gói Vip</button>}
           </div>
           <div className='avatar relative'>
@@ -107,10 +107,16 @@ export default function Navbar() {
             </button>
             {open&&
             <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
+            {login&&
+             ( <>
+              <button> profile</button>
+              <hr className='w-full'/>
+              <button>writer</button>
+             </> ) 
+            }
+            <hr className='w-full'/>
             <button>setting</button>
-            <button> profile</button>
-            <button>writer</button>
-            <button>logout</button>
+            {login&&<button>logout</button> }
             </div>} 
           </div>
         </div>  
