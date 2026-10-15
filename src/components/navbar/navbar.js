@@ -52,21 +52,21 @@ export default function Navbar() {
   },[]);
   return (
     <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around w-full">
-      <div className='imgContain '>
+      <div className='imgContain w-26 md:w-36 '>
         <Link href="/">
           <Image src={logoLight} alt="logo" className="block dark:hidden " />
           <Image src={logoDark} alt="logo" className="hidden dark:block" />
         </Link>
       </div>
       <div className='flex flex-row justify-between gap-5 items-center w-[85%] mt-3 mb-3'>
-        <div className='flex flex-row justify-between items-center gap-[3rem]'>
+        <div className=' navText flex flex-row justify-between items-center gap-[1rem] md:gap-[3rem]'>
           <div className='relative'>
             <button className='flex flex-row items-center ' onClick={()=>setOpenGen(!openGen)}>
-            <span className='navText'>Điều hướng</span><span><ChevronDown/></span>   
+            <span >Điều hướng</span><span><ChevronDown/></span>   
             </button>
             {
               openGen&&
-              <div className='listGenre absolute left-5 top-20 w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
+              <div className='listGenre  absolute left-5 top-20 w-[22rem] md:w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
               {
                 
                 genres.map((genre)=>(
@@ -80,19 +80,19 @@ export default function Navbar() {
             } 
           </div>
           <div>
-            <Link href="/novel/1" ><span className='navText'>Thư viện</span></Link>
+            <Link href="/novel/1" ><span >Thư viện</span></Link>
           </div>  
           
         </div>
-        <div className='flex flex-row justify-around items-center w-[30%]'>
+        <div className='flex flex-row justify-around items-center w-[50%] '>
           <Link href="/search" >
-            <button className='btn_search'>
+            <button className='btn_search '>
               <TextSearch/>
             </button>
-          
           </Link>
-          <Link href="/novel/2" > <BellIcon/>  </Link> 
-          <div>
+          
+          <div className='max-md:hidden flex flex-row items-center gap-8 ml-2 mr-2'>
+            <Link href="/novel/2"  > <BellIcon/>  </Link> 
             {!login?<button className='btn_nav ' onClick={() =>setLogin(true)}>
             Đăng nhập
             </button>:<button className='btn_nav'>
@@ -112,10 +112,13 @@ export default function Navbar() {
               <button> profile</button>
               <hr className='w-full'/>
               <button>writer</button>
+              <button className='block md:hidden'>thông báo</button>
+               <hr className='w-full'/>
              </> ) 
             }
-            <hr className='w-full'/>
+           
             <button>setting</button>
+            <button className='block md:hidden'>{!login?"Đăng nhập":"Nâng cấp"}</button>
             {login&&<button>logout</button> }
             </div>} 
           </div>

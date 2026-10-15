@@ -11,12 +11,14 @@
 }
 
 .cardContain {
-    display: grid;
-    /* Tự động chia cột linh hoạt theo kích thước màn hình */
-    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-    gap: 1.5rem;
-    justify-items: center; /* Căn giữa các card trong từng ô grid */
+    display: flex;
+    flex-direction: column; /* Xếp từ trên xuống dưới */
+    gap: 1rem;
+    width: 100%;
 }
+
+/* 2. TỪ MÀN HÌNH TABLET / PC TRỞ LÊN (min-width: 768px): Chuyển về dạng lưới (Grid) */
+
 .catContaint {
     display: flex;
     flex-direction: column;
