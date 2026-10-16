@@ -43,6 +43,17 @@ button{
   background-color: var(--primary-hover); /* Hoặc mã màu hover thực tế */
 }
 
+
+.btn_search{
+    width: fit-content;
+    background-color: var(--primary);
+    padding: 0.5rem 0.5rem;
+    border-radius: 10px;
+}
+.btn_Containt{
+  width: clamp(75%,2vw,20%);
+  justify-content: end;
+}
 /* Responsive cho màn hình từ small (sm) trở lên */
 @media (min-width: 640px) {
   .btn_nav {
@@ -59,15 +70,4 @@ button{
     font-size: 1rem; /* Tương ứng md:text-base */
   }
  
-}
-
-.btn_search{
-    width: fit-content;
-    background-color: var(--primary);
-    padding: 0.5rem 0.5rem;
-    border-radius: 10px;
-}
-.btn_Containt{
-  width: clamp(75%,2vw,20%);
-  justify-content: end;
 }

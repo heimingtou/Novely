@@ -57,7 +57,7 @@ export default function SearchPage() {
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
                 />
-                <button className="btn_search" onClick={search}>
+                <button className="btn_searchBar" onClick={search}>
                     <SearchIcon className="text-muted shrink-0" color="white"/>
                 </button>
             </div>

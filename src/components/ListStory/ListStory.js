@@ -3,7 +3,7 @@ import './ListStory.css'
 
 export default function ListStory({title,DataStory}){
     return(
-            <div className='catContain'>                
+            <div className='Contain'>                
                     <h1 className='cat '>{title}</h1>
                     <div className='cardContain'>
                     {

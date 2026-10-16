@@ -3,20 +3,30 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content:space-around ;
   gap: 0.75rem; /* Tương ứng gap-3 (0.75 * 16px = 12px) */
   background-color: var(--background);
   border: 1px solid var(--input-border);
-  height: clamp(3em,2vw, 3.5rem);
-  width:clamp(20rem,2vw,30rem) ;
+  height: clamp(3em,2vw, 3.5em);
+  width:clamp(20rem,2vw,50rem) ;
   margin-top: 15px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 0.75rem;
-  padding-right: 0.75rem; /* Tương ứng px-3 */
+  /* Tương ứng px-3 */
   border-radius: 1rem; /* Tương ứng rounded-2xl */
   transition: all 0.2s ease-in-out;
+  overflow: hidden;
 }
-
+.btn_searchBar{
+  background-color: var(--primary);
+  height: 100%;
+  width: 5rem;
+  justify-items: center;
+}
+.btn_searchBar:hover{
+  background-color: var(--color-primary-hover);
+}
 /* Hiệu ứng khi focus vào bất kỳ phần tử con nào bên trong khung */
 .containtSearch:focus-within {
   border-color: var(--primary); /* Tương ứng focus-within:border-primary */
@@ -36,14 +46,4 @@
 /* Tùy chỉnh màu chữ placeholder cho input */
 .containtSearch input::placeholder {
   color: var(--muted);
-}
-.resultSearch{
-    
-}
-.gridContaint{
-   
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-    gap: 5rem;
-    justify-items: center; /* Căn giữa các card trong từng ô grid */
 }

@@ -27,20 +27,3 @@
 .imgCard{
     width: 100%;
 }
-/* @media (max-width:620) {
-  .CardContaint{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-  }
-  .imgCard{
-    height: 300px;
-  }
-  .titleCard{
-    font-size: 30px;
-    
-  }
-  .content{
-    margin-left: 15px;
-  }
-} */

@@ -31,15 +31,12 @@ export default async function Homepage(){
     }));
 
     return(
-        <div className='homeContaint'>
-            <div className='catContaint '>
-                 {fakeCategoriesData.map((cat)=>(
-                <div key={cat.categoryId}>
+        <div className='homeContaint'>          
+            {fakeCategoriesData.map((cat)=>(
+            <div key={cat.categoryId}>
                     <ListStory title={cat.categoryName} DataStory={cat.novels}/>
-                </div>
-            ))}
             </div>
-           
+            ))}
         </div>
         
     )
