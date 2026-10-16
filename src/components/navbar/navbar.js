@@ -84,14 +84,14 @@ export default function Navbar() {
           </div>  
           
         </div>
-        <div className='flex flex-row justify-around items-center w-[50%] '>
-          <Link href="/search" >
-            <button className='btn_search '>
+        <div className='btn_Containt flex flex-row justify-around items-center w-[50%] gap-12'>
+          <Link href="/search" className='btn_search' >
+            
               <TextSearch/>
-            </button>
+           
           </Link>
           
-          <div className='max-md:hidden flex flex-row gap-[5rem] items-center  ml-2 mr-2'>
+          <div className='max-md:hidden flex flex-row gap-[3rem] items-center  ml-2 mr-2'>
             <Link href="/novel/2"  > <BellIcon/>  </Link> 
             {!login?<button className='btn_nav ' onClick={() =>setLogin(true)}>
             Đăng nhập
@@ -100,13 +100,13 @@ export default function Navbar() {
           </div>
           <div className='avatar relative'>
             <button className='flex flex-row gap-1.5 items-center' onClick={()=>setOpen(!open)}>
-            <div ref={avartaRef} className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
+            <div  className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
               <Image src={avatar} alt='avatar'/> 
             </div>
             <ChevronDown/>
             </button>
             {open&&
-            <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
+            <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white' ref={avartaRef}>
             {login&&
              ( <>
               <button> profile</button>
@@ -118,7 +118,11 @@ export default function Navbar() {
             }
            
             <button>setting</button>
-            <button className='block md:hidden'>{!login?"Đăng nhập":"Nâng cấp"}</button>
+            
+            {!login?<button className='block md:hidden'  onClick={() =>setLogin(true)}>
+            Đăng nhập
+            </button>:<button className='block md:hidden' >
+            Mua gói Vip</button>}
             {login&&<button>logout</button> }
             </div>} 
           </div>

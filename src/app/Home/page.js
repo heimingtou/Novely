@@ -3,6 +3,7 @@ import CardStory from '@/components/cardStory/cardStory';
 import { faker } from '@faker-js/faker';
 import './page.css'
 import cardImg from '../../../public/CardStory.jpg'
+import ListStory from '@/components/ListStory/ListStory';
 
 export default async function Homepage(){
     const categories = [
@@ -34,20 +35,7 @@ export default async function Homepage(){
             <div className='catContaint '>
                  {fakeCategoriesData.map((cat)=>(
                 <div key={cat.categoryId}>
-                     <h1 className='cat '>{cat.categoryName}</h1>
-                     <div className='cardContain'>
-                        {
-                        cat.novels.map((novel)=>(
-                            <CardStory
-                            key={novel.id}
-                             title={novel.title} like={novel.likes}
-                            genres={novel.genres}
-                            coverImage={novel.coverImage} 
-                            />
-                        ))
-                     }
-                     </div>
-                     
+                    <ListStory title={cat.categoryName} DataStory={cat.novels}/>
                 </div>
             ))}
             </div>
