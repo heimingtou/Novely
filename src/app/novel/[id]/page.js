@@ -1,7 +1,7 @@
 import CardStory from "@/components/cardStory/cardStory";
 import { faker } from '@faker-js/faker';
 import './page.css'
-
+import cardImg from '../../../../public/CardStory.jpg'
 export default async function NovelDetailPage({ params }) {
   const { id } = await params;
 
@@ -37,7 +37,7 @@ export default async function NovelDetailPage({ params }) {
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: cat + ' / Truyện Hay/fanfic',
-            coverImage: faker.image.url(),
+            coverImage: cardImg,
         }))
     }));
   

@@ -91,7 +91,7 @@ export default function Navbar() {
             </button>
           </Link>
           
-          <div className='max-md:hidden flex flex-row items-center gap-8 ml-2 mr-2'>
+          <div className='max-md:hidden flex flex-row gap-[5rem] items-center  ml-2 mr-2'>
             <Link href="/novel/2"  > <BellIcon/>  </Link> 
             {!login?<button className='btn_nav ' onClick={() =>setLogin(true)}>
             Đăng nhập

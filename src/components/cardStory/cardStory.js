@@ -1,12 +1,12 @@
 import { EyeIcon } from "lucide-react";
 import './cardStory.css'
-
+import Image from "next/image";
 export default function CardStory({ title, like, genres, coverImage }){
 
     return(
-        <div className="CardContaint w-46  flex flex-col items-center ">
+        <div className="CardContaint w-full  flex flex-col items-center ">
             <div className="imgCard">
-                <img src={coverImage}className=" h-[15rem] object-cover" alt="img"/>
+                <Image src={coverImage} className=" w-full object-cover" alt="img" />
             </div>
             <div className="content w-full">
                 <p className="md:text-[18px] text-[35px] titleCard" title={title}>{title}</p>

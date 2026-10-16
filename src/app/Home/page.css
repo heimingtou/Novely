@@ -11,12 +11,17 @@
 }
 
 .cardContain {
-    display: flex;
-    flex-direction: column; /* Xếp từ trên xuống dưới */
-    gap: 1rem;
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 2.5rem;
 }
-
+@media (max-width:825px) {
+  .cardContain{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 0.5fr));
+    gap: 2.5rem;
+  }
+}
 /* 2. TỪ MÀN HÌNH TABLET / PC TRỞ LÊN (min-width: 768px): Chuyển về dạng lưới (Grid) */
 
 .catContaint {

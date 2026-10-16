@@ -4,7 +4,7 @@ import './page.css';
 import { useState, useEffect } from "react";
 import { faker } from "@faker-js/faker";
 import CardStory from "@/components/cardStory/cardStory";
-
+import cardImg from '../../../public/CardStory.jpg'
 export default function SearchPage() {
     const [textInput, setTextInput] = useState('');
     const [allData, setAllData] = useState([]); // Lưu mảng gốc đầy đủ
@@ -15,7 +15,7 @@ export default function SearchPage() {
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: ' Truyện Hay/fanfic',
-            coverImage: faker.image.url(),
+            coverImage: cardImg,
         }));
     // Dùng useEffect để sinh dữ liệu Faker 1 lần duy nhất khi component mount trên Client
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function SearchPage() {
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: ' Truyện Hay/fanfic',
-            coverImage: faker.image.url(),
+            coverImage: cardImg,
         }));
         setAllData(fakerData);
         setData(fakerData);
