@@ -1,7 +1,8 @@
 import CardStory from "@/components/cardStory/cardStory";
 import { faker } from '@faker-js/faker';
 import './page.css'
-
+import cardImg from '../../../../public/CardStory.jpg'
+import ListStory from "@/components/ListStory/ListStory";
 export default async function NovelDetailPage({ params }) {
   const { id } = await params;
 
@@ -37,7 +38,7 @@ export default async function NovelDetailPage({ params }) {
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: cat + ' / Truyện Hay/fanfic',
-            coverImage: faker.image.url(),
+            coverImage: cardImg,
         }))
     }));
   
@@ -50,27 +51,8 @@ export default async function NovelDetailPage({ params }) {
   // 2. Lấy ra mảng các truyện thuộc thể loại đó (nếu tìm thấy thì trả về mảng novels, ngược lại trả về mảng rỗng [])
   const novelsInCategory = matchedCategory ? matchedCategory.novels: [];
   return (
-    
-    <div className="">
-      <div className="ContaintGenre">
-        <h1 className="Genre">{decodedId}</h1>
-      <div className="gridContain">
-        {
-        novelsInCategory&&(
-          novelsInCategory.map((novel)=>(
-             <CardStory key={novel.id} title={novel.title}
-          like={novel.likes}
-          genres={novel.genres}
-          coverImage={novel.coverImage}
-          />
-          ))
-         
-        )
-       }
-      </div>
-      </div>
-      
-       
+    <div className="Containt">
+      <ListStory title={decodedId} DataStory={novelsInCategory} />
     </div>
   );
 }

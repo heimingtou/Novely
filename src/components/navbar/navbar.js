@@ -52,21 +52,21 @@ export default function Navbar() {
   },[]);
   return (
     <nav className="flex flex-row items-center text-xl text-foreground bg-card border-b border-border  justify-around w-full">
-      <div className='imgContain '>
+      <div className='imgContain w-26 md:w-36 '>
         <Link href="/">
           <Image src={logoLight} alt="logo" className="block dark:hidden " />
           <Image src={logoDark} alt="logo" className="hidden dark:block" />
         </Link>
       </div>
       <div className='flex flex-row justify-between gap-5 items-center w-[85%] mt-3 mb-3'>
-        <div className='flex flex-row justify-between items-center gap-[3rem]'>
+        <div className=' navText flex flex-row justify-between items-center gap-[1rem] md:gap-[3rem]'>
           <div className='relative'>
             <button className='flex flex-row items-center ' onClick={()=>setOpenGen(!openGen)}>
-            <span className='navText'>Điều hướng</span><span><ChevronDown/></span>   
+            <span >Điều hướng</span><span><ChevronDown/></span>   
             </button>
             {
               openGen&&
-              <div className='listGenre absolute left-5 top-20 w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
+              <div className='listGenre  absolute left-5 top-20 w-[22rem] md:w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
               {
                 
                 genres.map((genre)=>(
@@ -80,19 +80,19 @@ export default function Navbar() {
             } 
           </div>
           <div>
-            <Link href="/novel/1" ><span className='navText'>Thư viện</span></Link>
+            <Link href="/novel/1" ><span >Thư viện</span></Link>
           </div>  
           
         </div>
-        <div className='flex flex-row justify-around items-center w-[30%]'>
-          <Link href="/search" >
-            <button className='btn_search'>
+        <div className='btn_Containt flex flex-row justify-around items-center w-[50%] gap-12'>
+          <Link href="/search" className='btn_search' >
+            
               <TextSearch/>
-            </button>
-          
+           
           </Link>
-          <Link href="/novel/2" > <BellIcon/>  </Link> 
-          <div>
+          
+          <div className='max-md:hidden flex flex-row gap-[3rem] items-center  ml-2 mr-2'>
+            <Link href="/novel/2"  > <BellIcon/>  </Link> 
             {!login?<button className='btn_nav ' onClick={() =>setLogin(true)}>
             Đăng nhập
             </button>:<button className='btn_nav'>
@@ -100,22 +100,29 @@ export default function Navbar() {
           </div>
           <div className='avatar relative'>
             <button className='flex flex-row gap-1.5 items-center' onClick={()=>setOpen(!open)}>
-            <div ref={avartaRef} className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
+            <div  className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
               <Image src={avatar} alt='avatar'/> 
             </div>
             <ChevronDown/>
             </button>
             {open&&
-            <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white'>
+            <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white' ref={avartaRef}>
             {login&&
              ( <>
               <button> profile</button>
               <hr className='w-full'/>
               <button>writer</button>
+              <button className='block md:hidden'>thông báo</button>
+               <hr className='w-full'/>
              </> ) 
             }
-            <hr className='w-full'/>
+           
             <button>setting</button>
+            
+            {!login?<button className='block md:hidden'  onClick={() =>setLogin(true)}>
+            Đăng nhập
+            </button>:<button className='block md:hidden' >
+            Mua gói Vip</button>}
             {login&&<button>logout</button> }
             </div>} 
           </div>
