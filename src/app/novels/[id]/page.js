@@ -1,5 +1,6 @@
 
 import ChapterList from "@/components/novel-detail/ChapterList";
+import NovelActions from "@/components/novel-detail/NovelActions";
 
 // Dữ liệu mẫu của truyện
 const novel = {
@@ -92,6 +93,12 @@ export default async function NovelDetailPage({ params }) {
           </div>
         </div>
       </section>
+
+      {/* Danh sách chương */}
+      <ChapterList chapters={chapters} />
+
+      {/* Library và Share */}
+      <NovelActions novelTitle={novel.title} />
 
       {/* Danh sách chương */}
       <ChapterList chapters={chapters} />
