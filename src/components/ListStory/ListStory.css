@@ -2,7 +2,7 @@
    
 }
 .cat{
-    font-size: clamp(24px,2vw,32px);
+    font-size: clamp(24px,4vw,40px);
     margin-top: 1px;
     margin-bottom: 2px
 }
@@ -16,7 +16,7 @@
     margin-left: auto;
     margin-right: auto;
     max-width: 90rem; /* Giới hạn độ rộng tối đa cho khung chứa */
-    padding:1rem 5.5rem;
+    padding:3rem 5.5rem;
 }
 @media (max-width:825px) {
   .cardContain{
@@ -25,9 +25,8 @@
     gap: 2rem;
   }
   .Contain{
-    padding:1rem 0.1rem;
+    padding:1rem 1rem;
   }
 }
 /* 2. TỪ MÀN HÌNH TABLET / PC TRỞ LÊN (min-width: 768px): Chuyển về dạng lưới (Grid) */
-
 

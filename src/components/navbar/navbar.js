@@ -1,5 +1,5 @@
 'use client';
-import { BellCheckIcon, BellIcon, ChevronDown, SearchAlertIcon, SearchIcon, TextSearch } from 'lucide-react';
+import { BellCheckIcon, BellIcon, ChevronDown, LogIn, LogOut, PencilSparkles, SearchAlertIcon, SearchIcon, Settings, ShoppingBagIcon, ShoppingCartPlus, TextSearch, UserPen } from 'lucide-react';
 
 import Link from 'next/link';
 import logoLight from '../../../public/logo.png'
@@ -66,7 +66,7 @@ export default function Navbar() {
             </button>
             {
               openGen&&
-              <div className='listGenre  absolute left-5 top-20 w-[22rem] md:w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
+              <div className='listGenre  absolute left-0 top-20 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
               {
                 
                 genres.map((genre)=>(
@@ -106,24 +106,24 @@ export default function Navbar() {
             <ChevronDown/>
             </button>
             {open&&
-            <div className='absolute right-0 top-full mt-2 w-[9rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white' ref={avartaRef}>
+            <div className='absolute right-0 top-full mt-2 w-[11rem] p-3.5 text-[18px] gap-3 pl-3.5 bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col items-start text-white' ref={avartaRef}>
             {login&&
              ( <>
-              <button> profile</button>
+              <button className='btn-avt'> <span><UserPen/> </span>  <span>profile</span></button>
               <hr className='w-full'/>
-              <button>writer</button>
-              <button className='block md:hidden'>thông báo</button>
+              <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
+              <button className='btn-avt block md:hidden'> <span><BellIcon/></span><span>thông báo</span></button>
                <hr className='w-full'/>
              </> ) 
             }
            
-            <button>setting</button>
+            <button className='btn-avt'><span><Settings/></span><span>setting</span></button>
             
-            {!login?<button className='block md:hidden'  onClick={() =>setLogin(true)}>
-            Đăng nhập
-            </button>:<button className='block md:hidden' >
-            Mua gói Vip</button>}
-            {login&&<button>logout</button> }
+            {!login?<button className='block md:hidden btn-avt'  onClick={() =>setLogin(true)}><span><LogIn/> </span><span>Đăng nhập</span>
+            
+            </button>:<button className='btn-avt block md:hidden'><span><ShoppingCartPlus/></span><span>Mua gói Vip</span>
+            </button>}
+            {login&&<button className='btn-avt' onClick={() =>setLogin(false)}><span><LogOut/> </span><span>logout</span></button> }
             </div>} 
           </div>
         </div>  
