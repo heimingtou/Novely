@@ -3,8 +3,10 @@
 
 import { useState } from "react";
 import { ArrowDownUp, BookOpen } from "lucide-react";
+import Link from "next/link";
+import { chapterHref } from "@/data/novels.mjs";
 
-export default function ChapterList({ chapters }) {
+export default function ChapterList({ chapters, novelId }) {
   const [newestFirst, setNewestFirst] = useState(false);
 
   // Sắp xếp chương theo thứ tự
@@ -46,9 +48,10 @@ export default function ChapterList({ chapters }) {
       {/* Danh sách chương */}
       <div className="divide-y divide-border">
         {sortedChapters.map((chapter) => (
-          <div
+          <Link
             key={chapter.number}
-            className="flex items-center justify-between gap-4 py-4"
+            href={chapterHref(novelId, chapter.number)}
+            className="flex items-center justify-between gap-4 rounded-lg px-2 py-4 transition hover:bg-secondary-bg focus-visible:outline-2 focus-visible:outline-primary"
           >
             <div className="flex items-center gap-3">
               <BookOpen
@@ -72,7 +75,7 @@ export default function ChapterList({ chapters }) {
                 Mới
               </span>
             )}
-          </div>
+          </Link>
         ))}
       </div>
     </section>
