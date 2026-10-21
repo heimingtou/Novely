@@ -94,9 +94,6 @@ export default async function NovelDetailPage({ params }) {
         </div>
       </section>
 
-      {/* Danh sách chương */}
-      <ChapterList chapters={chapters} />
-
       {/* Library và Share */}
       <NovelActions novelTitle={novel.title} />
 
