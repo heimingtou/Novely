@@ -12,7 +12,6 @@ import {
 
 // Các tab của User Profile
 const tabs = [
-  { id: "reading", label: "Reading", icon: BookOpen },
   { id: "stories", label: "Stories", icon: PenLine },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "posts", label: "Posts", icon: MessageCircle },
@@ -108,38 +107,6 @@ export default function ProfileTabs({ userName }) {
         })}
       </div>
 
-      {/* TAB READING */}
-      {activeTab === "reading" && (
-        <div className="mt-6">
-          <h2 className="mb-4 text-xl font-bold">
-            Currently Reading
-          </h2>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {readingList.map((book) => (
-              <div
-                key={book.id}
-                className="rounded-xl border border-gray-200 p-4 dark:border-gray-700"
-              >
-                <h3 className="font-semibold">
-                  {book.title}
-                </h3>
-
-                <p className="mt-2 text-sm text-gray-500">
-                  Tiến độ: {book.progress}
-                </p>
-
-                {book.isFavourite && (
-                  <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs text-red-600">
-                    <Heart size={14} fill="currentColor" />
-                    Favourite
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* TAB STORIES */}
       {activeTab === "stories" && (

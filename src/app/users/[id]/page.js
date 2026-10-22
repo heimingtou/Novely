@@ -1,17 +1,23 @@
 
 import { notFound } from "next/navigation";
 import ProfileContent from "@/components/user-profile/ProfileContent";
-import ProfileTabs from "@/components/user-profile/ProfileTabs";
 // Dữ liệu mẫu
+
 const user = {
   id: "minh-tho-ha",
   name: "Minh Thơ Hà",
   username: "minhthoha",
   bio: "Một người yêu sách và thích kể những câu chuyện kỳ ảo.",
+  avatar: "",
+  birthday: "",
+  gender: "",
+  phone: "",
+  email: "",
   followers: 128,
   following: 64,
   storiesCount: 2,
 };
+
 
 // Giả lập người đang đăng nhập
 const currentUserId = "minh-tho-ha";
@@ -36,7 +42,6 @@ export default async function UserProfilePage({ params }) {
         isOwnProfile={isOwnProfile}
       />
 
-      <ProfileTabs userName={user.name} />
     </main>
   );
 }
