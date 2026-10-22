@@ -68,12 +68,10 @@ export default function Navbar() {
               openGen&&
               <div className='listGenre  absolute left-0 top-20 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!' ref={genreRef}>
               {
-                
                 genres.map((genre)=>(
                   <Link key={genre} href={`/novel/${genre}`} >
                     <button onClick={()=>setOpenGen(false)} >{genre}</button>
-                  </Link>
-                
+                  </Link>    
                 ))
               }
               </div>
@@ -112,17 +110,22 @@ export default function Navbar() {
               <button className='btn-avt'> <span><UserPen/> </span>  <span>profile</span></button>
               <hr className='w-full'/>
               <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
-              <button className='btn-avt block md:hidden'> <span><BellIcon/></span><span>thông báo</span></button>
+              <div className='block md:hidden'>
+                <button className='btn-avt '> <span><BellIcon/></span><span>thông báo</span></button>
+              </div>
+              
                <hr className='w-full'/>
              </> ) 
             }
            
             <button className='btn-avt'><span><Settings/></span><span>setting</span></button>
+            <div className='block md:hidden'>
+              {!login?<button className='btn-avt'  onClick={() =>setLogin(true)}><span><LogIn/> </span><span>Đăng nhập</span>
             
-            {!login?<button className='block md:hidden btn-avt'  onClick={() =>setLogin(true)}><span><LogIn/> </span><span>Đăng nhập</span>
-            
-            </button>:<button className='btn-avt block md:hidden'><span><ShoppingCartPlus/></span><span>Mua gói Vip</span>
+            </button>:<button className='btn-avt'><span><ShoppingCartPlus/></span><span>Mua gói Vip</span>
             </button>}
+            </div>
+            
             {login&&<button className='btn-avt' onClick={() =>setLogin(false)}><span><LogOut/> </span><span>logout</span></button> }
             </div>} 
           </div>

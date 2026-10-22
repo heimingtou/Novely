@@ -54,6 +54,11 @@ button{
   width: clamp(75%,2vw,20%);
   justify-content: end;
 }
+.btn-avt{
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
 /* Responsive cho màn hình từ small (sm) trở lên */
 @media (min-width: 640px) {
   .btn_nav {
@@ -70,9 +75,4 @@ button{
     font-size: 1rem; /* Tương ứng md:text-base */
   }
  
-}
-.btn-avt{
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
 }
