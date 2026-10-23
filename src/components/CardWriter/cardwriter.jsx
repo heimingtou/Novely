@@ -1,8 +1,9 @@
 
-import { Eye, EyeDashedIcon, MessageCircle, StarIcon } from "lucide-react";
+import { ChartNoAxesCombined, Eye, EyeDashedIcon, MessageCircle, StarIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import './cardWriter.css'
-export default function CardWriter({title, img, date, view, like, comment,current_chap}){
+export default function CardWriter({id, title, img, date, view, like, comment,current_chap}){
 const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     year: "numeric",
     month: "long",
@@ -29,9 +30,11 @@ return(
             </div>
         </div>
        
-        <div className="mr-3">
-            <button className="btn-card"><span>Tiếp tục viết</span>
-            </button>
+        <div className="writer-card-actions mr-3">
+            <button className="btn-card"><span>Tiếp tục viết</span></button>
+            <Link className="btn-card btn-card--stats" href={`/Writer/statistics/${id}`}>
+                <ChartNoAxesCombined/>
+            </Link>
         </div>
     </div>
 )

@@ -1,0 +1,212 @@
+.writer-statistics {
+    width: min(100% - 2rem, 72rem);
+    margin: 1.5rem auto 3rem;
+}
+
+.statistics-back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.statistics-header {
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-card);
+}
+
+.statistics-header h1 {
+    overflow-wrap: anywhere;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 700;
+}
+
+.statistics-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+    
+}
+
+.statistics-summary > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--background);
+}
+
+.statistics-summary span {
+    color: var(--text-nav);
+    font-size: 0.875rem;
+}
+
+.statistics-summary strong {
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
+}
+
+.statistics-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.statistics-tabs button {
+    flex: 0 0 auto;
+    padding: 0.75rem 1rem;
+    border-bottom: 3px solid transparent;
+    color: var(--text-nav);
+    font-weight: 600;
+}
+
+.statistics-tabs button[aria-selected="true"] {
+    border-bottom-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.statistics-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.statistics-chart-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-card);
+}
+
+.statistics-chart-card h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.statistics-chart-scroll {
+    overflow-x: auto;
+}
+
+.statistics-line-chart {
+    display: block;
+    width: 100%;
+    min-width: 28rem;
+    height: auto;
+}
+
+.statistics-bar-chart {
+    display: block;
+    width: 100%;
+    min-width: 20rem;
+    height: auto;
+}
+
+.statistics-gridline {
+    stroke: var(--color-border);
+    stroke-width: 1;
+}
+
+.statistics-axis-label {
+    fill: var(--foreground);
+    font-size: 10px;
+}
+
+.statistics-line {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.statistics-point {
+    fill: var(--color-primary);
+    stroke: var(--color-card);
+    stroke-width: 2;
+}
+
+.statistics-bar {
+    fill: var(--color-primary);
+}
+
+.statistics-demographics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statistics-pie-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.statistics-pie-content > svg {
+    width: min(55%, 12rem);
+    flex: 0 1 12rem;
+}
+
+.statistics-legend {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.statistics-legend li {
+    display: grid;
+    grid-template-columns: 0.75rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.statistics-legend li > span:first-child {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+}
+
+@media (max-width: 700px) {
+    .statistics-chart-grid,
+    .statistics-demographics {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .writer-statistics {
+        width: calc(100% - 1.5rem);
+        margin-top: 1rem;
+    }
+
+    .statistics-summary {
+        gap: 0.5rem;
+    }
+
+    .statistics-summary > div {
+        padding: 0.65rem 0.5rem;
+    }
+
+    .statistics-summary span {
+        font-size: 0.75rem;
+    }
+
+    .statistics-pie-content {
+        flex-direction: column;
+    }
+
+    .statistics-pie-content > svg {
+        width: min(70%, 12rem);
+    }
+}

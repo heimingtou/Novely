@@ -122,6 +122,7 @@ export default function WriterPage(){
                         selectedNovelData.novels.map((novelData) => (
                             <CardWriter
                                 key={novelData.id}
+                                id={novelData.id}
                                 title={novelData.title}
                                 img={novelData.img}
                                 date={novelData.publish_date}
