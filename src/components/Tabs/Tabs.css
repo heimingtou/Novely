@@ -1,0 +1,31 @@
+.writer-tabs {
+    position: relative;
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.writer-tabs__tab {
+    flex: 1;
+    padding: 0.5rem 0.75rem 0.75rem;
+    color: var(--text-nav);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+.writer-tabs__tab[aria-selected="true"] {
+    color: #c2410c;
+}
+
+.writer-tabs__indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 3px;
+    border-radius: 9999px;
+    background-color: #f97316;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+}

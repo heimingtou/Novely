@@ -1,0 +1,42 @@
+.imgCard{
+
+}
+.icontext{
+    display: flex;
+    flex-direction: row;
+    gap:5px;
+    color:var(--color-foreground);
+}
+.ContaintCard{
+    padding: 15px 5px 15px 10px;
+    background-color: var(--color-card);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 16px 32px -12px rgba(15, 23, 42, 0.3);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.ContaintCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 14px rgba(15, 23, 42, 0.12), 0 22px 38px -12px rgba(15, 23, 42, 0.36);
+}
+.btn-card{
+    background-color: var(--color-primary);
+    padding:15px;
+    border-radius: 15px;
+}
+.title h1{
+    color:var(--color-foreground);
+    font-size:clamp(18px,3vw,24px);
+    font-weight: bold;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
+}
+.title{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
