@@ -1,7 +1,7 @@
 
-import ImgCart from '../../public/CardStory.jpg'
 const createStatistics = ({
     title,
+    img,
     readers,
     views,
     chapters,
@@ -15,6 +15,7 @@ const createStatistics = ({
     genderDistribution,
 }) => ({
     title,
+    img,
     readers,
     views,
     chapters,
@@ -39,7 +40,7 @@ const createStatistics = ({
 export const novelStatistics = {
     1: createStatistics({
         title: 'Hệ Thống Đọc Sách Nhận Thưởng',    
-        img:ImgCart,
+        img: '/CardStory.jpg',
         readers: 12580,
         views: 15420,
         chapters: 120,
@@ -63,7 +64,7 @@ export const novelStatistics = {
     }),
     2: createStatistics({
         title: 'Ta Cùng Nàng Phiêu Lưu Giữa Thế Giới Ảo',
-        img:ImgCart,
+        img: '/CardStory.jpg',
         readers: 7340,
         views: 8900,
         chapters: 45,
@@ -87,7 +88,7 @@ export const novelStatistics = {
     }),
     3: createStatistics({
         title: 'Điểm Mù: Cuộc Săn Đêm',
-        img:ImgCart,
+        img: '/CardStory.jpg',
         readers:20840,
         views: 25100,
         chapters: 210,

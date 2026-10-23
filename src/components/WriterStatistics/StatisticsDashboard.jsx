@@ -173,15 +173,29 @@ export default function StatisticsDashboard({ statistics }) {
         <main className="writer-statistics">
             <Link className="statistics-back-link" href="/Writer">← Trở về danh sách truyện</Link>
             <header className="statistics-header">
-                <div className="imgCards w-25 h-full relative ">
-                    <Image src={statistics.img} className="object-cover rounded" alt="img" />
+                <div className="imgCart flex flex-row gap-2.5">
+                    <div className="imgCart__image">
+                        <Image
+                            src={statistics.img}
+                            className="object-cover rounded"
+                            alt={`Bìa truyện ${statistics.title}`}
+                            fill
+                            sizes="(max-width: 480px) 4rem, 5rem"
+                        />
+                    </div>
+                    <div>
+                        <h1>{statistics.title}</h1>
+                        <div className="statistics-summary">
+                        
+                            <div><span>Số độc giả</span><strong>{formatNumber(statistics.readers)}</strong></div>
+                            <div><span>Lượt đọc</span><strong>{formatNumber(statistics.views)}</strong></div>
+                            <div><span>Số chương</span><strong>{formatNumber(statistics.chapters)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                
                 </div>
-                <h1>{statistics.title}</h1>
-                <div className="statistics-summary">
-                    <div><span>Số độc giả</span><strong>{formatNumber(statistics.readers)}</strong></div>
-                    <div><span>Lượt đọc</span><strong>{formatNumber(statistics.views)}</strong></div>
-                    <div><span>Số chương</span><strong>{formatNumber(statistics.chapters)}</strong></div>
-                </div>
+                
             </header>
 
             <nav className="statistics-tabs" role="tablist" aria-label="Thống kê truyện">
