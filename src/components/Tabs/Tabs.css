@@ -7,12 +7,21 @@
 
 .writer-tabs__tab {
     flex: 1;
+    min-width: 0;
     padding: 0.5rem 0.75rem 0.75rem;
     color: var(--text-nav);
-    font-size: clamp(14px,2vw,1.5rem);
+    font-size: clamp(20px,2vw,1.5rem);
     font-weight: 700;
     text-align: center;
     cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .writer-tabs__tab {
+        padding: 0.5rem 0.25rem 0.75rem;
+        font-size: clamp(0.75rem, 3.5vw, 0.875rem);
+        white-space: nowrap;
+    }
 }
 
 .writer-tabs__tab[aria-selected="true"] {

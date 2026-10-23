@@ -14,14 +14,14 @@ const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
 return(
     <div className=" ContaintCard bg-amber-50 flex flex-row justify-between h-fit gap-3.5  ">
         <div className="flex flex-row gap-4 mr-3">
-             <div className="imgCard w-25 h-full relative ">
+             <div className="imgCards w-25 h-full relative ">
                 <Image src={img} className="object-cover rounded" alt="img" />
             </div>
             <div className="title">
                 <h1>{title}</h1>
                 <p className="text-green-300">Số chương đã đăng: {current_chap}</p>
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
-                <div className="flex flex-row justify-around gap-5">
+                <div className="flex flex-row gap-5">
                     <p className=" icontext"><span><Eye/> </span><span>{view}</span></p>
                     <p className="icontext"><span><StarIcon/></span><span>{like}</span></p>
                     <p className="icontext"><span><MessageCircle/></span><span>{comment}</span></p>
@@ -30,7 +30,8 @@ return(
         </div>
        
         <div className="mr-3">
-            <button className="btn-card"><span>Viết tiếp</span></button>
+            <button className="btn-card"><span>Tiếp tục viết</span>
+            </button>
         </div>
     </div>
 )

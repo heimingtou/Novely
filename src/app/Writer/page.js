@@ -5,6 +5,7 @@ import CardWriter from "@/components/CardWriter/cardwriter"
 import Tabs from "@/components/Tabs/Tabs"
 import cardImg from '../../../public/CardStory.jpg'
 import './page.css'
+import { Plus, PlusCircle } from 'lucide-react'
 const NovelDatas={
   "novels": [
     {
@@ -109,11 +110,12 @@ export default function WriterPage(){
     const selectedNovelData = novelDataByTab[activeTab]
 
     return(
-        <div className="ContaintPage">
-            <div className="titlePage">
+        <div className="ContaintPage writer-page">
+            <div className="titlePage flex flex-row justify-between items-center">
                 <h1>Truyện đã viết</h1>
+                <button className='btn'> <span><Plus/> </span> <span>Đăng truyện mới</span> </button>
             </div>
-            <div className="Containt w-fit" >
+            <div className="writer-content">
                 <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
                 <div className="content flex flex-col gap-3">
                     {
