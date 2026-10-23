@@ -9,7 +9,7 @@
     flex: 1;
     padding: 0.5rem 0.75rem 0.75rem;
     color: var(--text-nav);
-    font-size: 1.5rem;
+    font-size: clamp(14px,2vw,1.5rem);
     font-weight: 700;
     text-align: center;
     cursor: pointer;
