@@ -18,6 +18,7 @@
   --card-bg: #ffffff;
   --text-muted: #dfd6d6;
   --border-color: #e5e7eb;
+  --text-nav:#302c2b;
 
   /* === BIẾN MÀU CHO INPUT (Light Mode) === */
   --input-bg: #ffffff;
@@ -68,10 +69,10 @@ h1{
     --secondary-hover: #475569;
     --secondary-foreground: #f8fafc;
 
-    --card-bg: #1e293b; /* Màu nền cho thẻ truyện (card) ở chế độ tối */
+    --card-bg: #111720; /* Màu nền cho thẻ truyện (card) ở chế độ tối */
     --text-muted: #ced9e9;
     --border-color: #334155;
-
+    --text-nav:#ffefeb;
     /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
     --input-bg: #1e293b;        /* Nền tối cho input */
     --input-border: #475569;    /* Viền xám tối */
