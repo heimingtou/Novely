@@ -7,6 +7,7 @@ import { ArrowRight, Bookmark, BookOpen, Eye, Heart, MessageCircle, Pencil, Shie
 import { getNovel } from "@/data/novels.mjs";
 import { categoryById, forumHref, getPostStats, LOCAL_AUTHOR } from "@/lib/forum-model.mjs";
 import { ForumAvatar } from "./ForumIcons";
+import { useDemoSession } from "@/lib/useDemoSession";
 
 export function ForumSpoiler({ children, label = "Bài viết có spoiler" }) {
   const { t, locale } = useI18n();
@@ -21,6 +22,7 @@ export function ForumSpoiler({ children, label = "Bài viết có spoiler" }) {
 
 export default function ForumPost({ post, state, ready, detail = false, onLike, onSave, onEdit, onDelete }) {
   const { t, locale } = useI18n();
+  const { account } = useDemoSession();
   const stats = getPostStats(state, post);
   const category = categoryById(post.category);
   const novel = getNovel(post.novelId);
@@ -42,7 +44,7 @@ export default function ForumPost({ post, state, ready, detail = false, onLike, 
           <span className="forum-action forum-view-count" title={t("Lượt xem minh họa + một lượt mở trên trình duyệt này")} aria-label={t("{0} lượt xem", [stats.views])}><Eye size={18} /><span>{stats.views}</span></span>
           <button type="button" className={`forum-action forum-save ${state.saved.includes(post.id) ? "is-saved" : ""}`} disabled={!ready} aria-label={state.saved.includes(post.id) ? t("Bỏ lưu bài viết") : t("Lưu bài viết")} aria-pressed={state.saved.includes(post.id)} onClick={() => onSave(post.id)}><Bookmark size={18} fill={state.saved.includes(post.id) ? "currentColor" : "none"} /></button>
         </div>
-        {post.authorId === LOCAL_AUTHOR && <div className="forum-own-actions"><button type="button" onClick={() => onEdit(post)}><Pencil size={14} /> {t("Chỉnh sửa")}</button><button type="button" onClick={() => onDelete(post.id)}><Trash2 size={14} /> {t("Xóa bài viết")}</button></div>}
+        {account && post.authorId === LOCAL_AUTHOR && <div className="forum-own-actions"><button type="button" onClick={() => onEdit(post)}><Pencil size={14} /> {t("Chỉnh sửa")}</button><button type="button" onClick={() => onDelete(post.id)}><Trash2 size={14} /> {t("Xóa bài viết")}</button></div>}
       </div>
     </article>
   );

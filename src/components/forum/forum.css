@@ -141,6 +141,10 @@
 .forum-form-footer, .forum-comment-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .forum-form-footer { margin-top: 8px; border-top: 1px solid var(--f-line); padding-top: 20px; }
 .forum-muted { font-size: 11px; color: var(--f-muted); }
+.forum-account { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--f-muted); }
+.forum-account > svg { flex-shrink: 0; }
+.forum-account strong { color: var(--f-text); overflow-wrap: anywhere; }
+.forum-sign-in { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-block: 18px; }
 .forum-comment { display: flex; gap: 10px; border-bottom: 1px solid var(--f-line); padding: 20px 0; }
 .forum-comment:last-child { border: none; padding-bottom: 0; }
 .forum-comment-main { flex: 1; min-width: 0; }

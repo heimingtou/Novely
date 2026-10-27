@@ -80,7 +80,7 @@ export function filterForumPosts(state, filters) {
 
 export function validatePostInput(input) {
   const errors = {};
-  if (!clean(input.authorName, 40)) errors.authorName = "Nhập tên hiển thị của bạn.";
+  if (!clean(input.authorName, 40)) errors.account = "Vui lòng đăng nhập để đăng bài.";
   if (!categoryById(input.category)) errors.category = "Chọn một chủ đề hợp lệ.";
   if (!clean(input.title, 150)) errors.title = "Nhập tiêu đề bài viết.";
   if (!clean(input.body, 5000)) errors.body = "Nhập nội dung bài viết.";

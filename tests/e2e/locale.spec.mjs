@@ -60,6 +60,9 @@ test("Forum chuyển chủ đề và thao tác, không dịch bài viết hoặc
   await page.locator(".avatar > button").click();
   await page.locator(".forum-page-heading").getByRole("button", { name: "Create post", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Create post" });
+  await dialog.getByRole("button", { name: "Sign in to post", exact: true }).click();
+  await expect(dialog.getByLabel("Display name", { exact: true })).toHaveCount(0);
+  await expect(dialog.locator(".forum-account")).toContainText("Bạn đọc Novely");
   await dialog.getByLabel("Title", { exact: true }).fill("My story: tiếng Việt 🌙");
   await dialog.getByLabel("Content", { exact: true }).fill("Giữ nguyên nội dung tự viết.");
   await dialog.getByLabel("Topic", { exact: true }).selectOption("theory");

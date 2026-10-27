@@ -35,14 +35,14 @@ Các đường dẫn:
 | Reaction | Thích/bỏ thích, cập nhật số liệu và lưu lựa chọn |
 | Bình luận | Thêm/xóa bình luận tự tạo, tách theo bài, giữ lại sau tải trang |
 | Viewers / lượt xem | Số liệu mẫu cộng một lần mở chi tiết trên trình duyệt hiện tại; không cộng lặp khi reload hoặc tương tác |
-| Luồng tạo bài | Tên hiển thị, chủ đề, truyện tùy chọn, tiêu đề, nội dung, cờ spoiler; sửa/xóa bài tự tạo |
+| Luồng tạo bài | Lấy tên tài khoản đang đăng nhập; chọn chủ đề, truyện tùy chọn, nhập tiêu đề, nội dung và cờ spoiler; sửa/xóa bài tự tạo |
 | Tìm kiếm và bài đã lưu | Tìm theo nội dung/tên/tác giả/truyện, hỗ trợ tiếng Việt không dấu; bookmark và danh sách đã lưu |
 | Spoiler | Người đăng tự đánh dấu; che cả tiêu đề và nội dung bài hoặc nội dung bình luận cho đến khi chủ động mở |
 | Responsive | Sidebar trên desktop; thanh chủ đề cuộn ngang trên điện thoại; hỗ trợ chế độ tối của hệ thống |
 
 ## Dữ liệu và giới hạn
 
-- Đây là **bản frontend demo**. Chưa có backend, xác thực thật, phân quyền server, đồng bộ tài khoản hoặc chia sẻ bài giữa nhiều người dùng. Tên hiển thị là tên tự nhập, không phải tài khoản đã xác thực.
+- Đây là **bản frontend demo**. Forum dùng chung `useDemoSession` với Navbar và Trang đọc: đăng nhập để tạo bài hoặc bình luận, tự lấy tên tài khoản và không có ô nhập tên riêng. Phiên hiện tại vẫn là mô phỏng; cần backend để xác thực thật, phân quyền server và chia sẻ bài giữa nhiều người dùng.
 - Các nhân vật, bài viết, bình luận và số liệu mẫu trong `src/data/forum.mjs` được tự soạn. Không hiển thị số người đang online hoặc tạo cảm giác có dữ liệu thời gian thực.
 - Bài và tương tác mới lưu trong `localStorage` tại khóa `novely:v1:forum`, theo origin hiện tại. Thay đổi đồng bộ giữa các tab cùng origin. Khác cổng/hostname hoặc trình duyệt sẽ là kho dữ liệu khác.
 - Khi không ghi được localStorage, dùng bộ nhớ phiên và hiện thông báo; dữ liệu mới mất khi tải lại. Dữ liệu sai cấu trúc được loại bỏ an toàn.

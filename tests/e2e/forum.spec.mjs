@@ -9,7 +9,10 @@ async function openForum(page, url = "/forum") {
 async function createPost(page, { title = "Cuộc trò chuyện thử nghiệm", body = "Một đoạn nội dung tiếng Việt cho bài thử nghiệm.", spoiler = false } = {}) {
   await page.locator(".forum-page-heading").getByRole("button", { name: "Tạo bài viết", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Tạo bài viết" });
-  await dialog.getByLabel("Tên hiển thị", { exact: true }).fill("Độc giả thử nghiệm");
+  if (await dialog.getByRole("button", { name: "Đăng nhập để đăng bài", exact: true }).isVisible()) await dialog.getByRole("button", { name: "Đăng nhập để đăng bài", exact: true }).click();
+  await expect(dialog.getByLabel("Tên hiển thị", { exact: true })).toHaveCount(0);
+  await expect(dialog.locator('input[name="name"]')).toHaveCount(0);
+  await expect(dialog.locator(".forum-account")).toContainText("Bạn đọc Novely");
   await dialog.getByLabel("Chủ đề", { exact: true }).selectOption("writer-corner");
   await dialog.getByLabel(/Truyện liên quan/).selectOption("demo");
   await dialog.getByLabel("Tiêu đề", { exact: true }).fill(title);
@@ -84,10 +87,12 @@ test("đăng, tải lại, sửa và xóa bài của mình", async ({ page }) =>
   const url = await createPost(page, { title: "Một bài viết của tôi", body: "Nội dung có <script>alert('xss')</script> nhưng không thực thi." });
   await expect(page.getByRole("heading", { name: "Một bài viết của tôi", exact: true })).toBeVisible();
   await expect(page.locator(".forum-post-body")).toContainText("<script>");
+  await expect(page.locator(".forum-post-detail .forum-post-author > strong")).toHaveText("Bạn đọc Novely");
   await page.reload();
   await expect(page.getByRole("heading", { name: "Một bài viết của tôi", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Chỉnh sửa", exact: true }).click();
   const editor = page.getByRole("dialog", { name: "Chỉnh sửa bài viết" });
+  await expect(editor.getByLabel("Tên hiển thị", { exact: true })).toHaveCount(0);
   await editor.getByLabel("Tiêu đề", { exact: true }).fill("Bài viết đã chỉnh sửa");
   await editor.getByRole("button", { name: "Lưu thay đổi" }).click();
   await expect(page.getByRole("heading", { name: "Bài viết đã chỉnh sửa", exact: true })).toBeVisible();
@@ -101,6 +106,7 @@ test("bài viết toàn khoảng trắng không được lưu", async ({ page })
   await openForum(page);
   await page.locator(".forum-page-heading").getByRole("button", { name: "Tạo bài viết", exact: true }).click();
   const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Đăng nhập để đăng bài", exact: true }).click();
   await dialog.getByLabel("Tiêu đề", { exact: true }).fill("   ");
   await dialog.getByLabel("Nội dung", { exact: true }).fill("   ");
   await dialog.getByRole("button", { name: "Đăng bài", exact: true }).click();
@@ -123,13 +129,17 @@ test("bình luận lưu theo bài, spoiler riêng và xóa được bình luận
   await openForum(page, path);
   const section = page.getByRole("region", { name: "Bình luận", exact: true });
   await expect(section.locator(".forum-comment")).toHaveCount(2);
-  await section.getByLabel("Tên hiển thị", { exact: true }).fill("An");
+  await expect(section.getByRole("button", { name: "Gửi bình luận", exact: true })).toHaveCount(0);
+  await section.getByRole("button", { name: "Đăng nhập để bình luận", exact: true }).click();
+  await expect(section.getByLabel("Tên hiển thị", { exact: true })).toHaveCount(0);
+  await expect(section.locator(".forum-account")).toContainText("Bạn đọc Novely");
   await section.getByLabel("Bình luận của bạn", { exact: true }).fill("Một nhận xét cần che spoiler");
   await section.getByRole("checkbox", { name: "Bình luận tiết lộ tình tiết" }).check();
   await section.getByRole("button", { name: "Gửi bình luận", exact: true }).click();
   await expect(section.locator(".forum-comment")).toHaveCount(3);
   await page.reload();
   const comment = section.locator(".forum-comment").last();
+  await expect(comment.locator(".forum-comment-author > strong")).toHaveText("Bạn đọc Novely");
   await expect(comment.getByText("Một nhận xét cần che spoiler", { exact: true })).toHaveCount(0);
   await comment.getByRole("button", { name: /Bình luận tiết lộ tình tiết/ }).click();
   await expect(comment.getByText("Một nhận xét cần che spoiler", { exact: true })).toBeVisible();
@@ -137,6 +147,24 @@ test("bình luận lưu theo bài, spoiler riêng và xóa được bình luận
   await expect(section.locator(".forum-comment")).toHaveCount(2);
   await openForum(page, "/forum/tim-truyen-hieu-sach");
   await expect(page.locator(".forum-comment")).toHaveCount(0);
+});
+
+test("đăng xuất đồng bộ chặn gửi bài và bình luận đang mở", async ({ page, context }) => {
+  await openForum(page, path);
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).first().click();
+  const other = await context.newPage();
+  await openForum(other, path);
+  await page.locator(".forum-page-heading").getByRole("button", { name: "Tạo bài viết", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Tạo bài viết" });
+  await dialog.getByLabel("Tiêu đề", { exact: true }).fill("Bản nháp khi đăng xuất");
+  await other.getByRole("button", { name: "Menu tài khoản", exact: true }).click();
+  await other.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+  await expect(dialog.getByRole("button", { name: "Đăng bài", exact: true })).toHaveCount(0);
+  await expect(dialog.getByRole("button", { name: "Đăng nhập để đăng bài", exact: true })).toBeVisible();
+  await expect(other.locator(".forum-comment-form")).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Đăng nhập để đăng bài", exact: true }).click();
+  await expect(dialog.getByLabel("Tiêu đề", { exact: true })).toHaveValue("Bản nháp khi đăng xuất");
+  await expect(other.locator(".forum-comment-form")).toBeVisible();
 });
 
 test("dữ liệu lưu bị hỏng vẫn hiện bài mẫu và tương tác được", async ({ page }) => {

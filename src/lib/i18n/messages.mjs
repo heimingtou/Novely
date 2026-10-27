@@ -1,5 +1,6 @@
 // Khóa là nhãn gốc để giữ bản dịch và quy tắc biên tập trong một nơi.
 export const english = {
+  "Tài khoản": "Account", "Đăng nhập để đăng bài và bình luận.": "Sign in to create posts and comments.", "Đăng nhập để đăng bài": "Sign in to post", "Vui lòng đăng nhập để đăng bài.": "Please sign in to post.",
   "profile": "Profile", "writer": "Writer hub", "setting": "Settings", "thông báo": "Notifications", "Mua gói Vip": "Upgrade to VIP",
   "Điều hướng": "Genres", "Thư viện": "Library", "Cộng đồng": "Community", "Cộng đồng Novely": "Novely community", "Menu tài khoản": "Account menu", "Đăng nhập": "Sign in", "Đăng xuất": "Sign out", "Chế độ tối": "Dark mode",
   "Trending": "Trending", "Latest": "Latest", "For you": "For you", "Top rated": "Top rated", "Most Followed": "Most followed", "Mood Discovery": "Discover by mood", "Newly updated": "Recently updated", "Surprise": "Surprise me",

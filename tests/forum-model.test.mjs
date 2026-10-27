@@ -30,7 +30,7 @@ test("dữ liệu lưu hỏng, trùng hoặc mạo danh bài mẫu được bỏ
 
 test("không cho đăng nội dung trống, quá dài, sai chủ đề hay sai truyện", () => {
   assert.deepEqual(validatePostInput(input), {});
-  for (const changes of [{ title: "   " }, { body: "\n " }, { title: "x".repeat(151) }, { body: "x".repeat(5001) }, { category: "unknown" }, { novelId: "missing" }]) {
+  for (const changes of [{ authorName: "" }, { title: "   " }, { body: "\n " }, { title: "x".repeat(151) }, { body: "x".repeat(5001) }, { category: "unknown" }, { novelId: "missing" }]) {
     assert.ok(Object.keys(validatePostInput({ ...input, ...changes })).length);
     const state = empty();
     assert.equal(addForumPost(state, { ...input, ...changes }, "post-test", now), state);
