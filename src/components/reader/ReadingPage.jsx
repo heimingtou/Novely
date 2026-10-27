@@ -1,10 +1,11 @@
 "use client";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 import Link from "next/link";
 import localFont from "next/font/local";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Bookmark, BookmarkCheck, BookOpen, Check, ChevronDown, Highlighter, Settings2, X } from "lucide-react";
-import { chapterHref } from "@/data/novels.mjs";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSiteTheme } from "@/components/theme/SiteTheme";
+import { ArrowLeft, Bookmark, BookmarkCheck, BookOpen, Check, Highlighter, Settings2, X } from "lucide-react";
 import { DEFAULT_SETTINGS, READER_FONTS, normalizeAnnotations, normalizeBookmarks, normalizePosition, normalizeSettings, readingPercent, textSegments } from "@/lib/reader-model.mjs";
 import { useReaderStorage } from "./useReaderStorage";
 import ChapterNavigation from "./ChapterNavigation";
@@ -44,13 +45,16 @@ function readingAnchor() {
 }
 
 export default function ReadingPage({ novel, chapter }) {
+  const { t, locale } = useI18n();
+  const { theme: siteTheme } = useSiteTheme();
+  const settingsFallback = useMemo(() => ({ ...DEFAULT_SETTINGS, theme: siteTheme === "dark" ? "dark" : "sepia" }), [siteTheme]);
   const chapterIndex = novel.chapters.findIndex((item) => item.number === chapter.number);
   const prefix = `novely:v1:${novel.id}`;
   const chapterKey = `${prefix}:chapter:${chapter.number}`;
   const validatePosition = useCallback((value) => normalizePosition(value, novel.chapters), [novel.chapters]);
   const validateBookmarks = useCallback((value) => normalizeBookmarks(value, chapter.paragraphs), [chapter.paragraphs]);
   const validateAnnotations = useCallback((value) => normalizeAnnotations(value, chapter.paragraphs), [chapter.paragraphs]);
-  const [settings, setSettings, ready, storageFailed] = useReaderStorage("novely:v1:settings", DEFAULT_SETTINGS, normalizeSettings);
+  const [settings, setSettings, ready, storageFailed] = useReaderStorage("novely:v1:settings", settingsFallback, normalizeSettings);
   const [savedPosition, savePosition] = useReaderStorage(`${chapterKey}:position`, null, validatePosition);
   const [, saveLastPosition] = useReaderStorage(`${prefix}:last-position`, null, validatePosition);
   const [bookmarks, setBookmarks] = useReaderStorage(`${chapterKey}:bookmarks`, EMPTY, validateBookmarks);
@@ -164,7 +168,7 @@ export default function ReadingPage({ novel, chapter }) {
 
   function toggleBookmark(id) {
     setBookmarks((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-    setNotice(bookmarks.includes(id) ? "Đã bỏ đánh dấu đoạn văn." : "Đã đánh dấu đoạn văn trong sổ tay.");
+    setNotice(bookmarks.includes(id) ? t("Đã bỏ đánh dấu đoạn văn.") : t("Đã đánh dấu đoạn văn trong sổ tay."));
   }
 
   const captureSelection = useCallback(() => {
@@ -176,7 +180,7 @@ export default function ReadingPage({ novel, chapter }) {
     const endParagraph = getParagraph(range.endContainer);
     if (!startParagraph || startParagraph !== endParagraph || !articleRef.current.contains(startParagraph)) {
       setSelection(null);
-      setNotice("Hãy chọn văn bản trong một đoạn để tô sáng hoặc ghi chú.");
+      setNotice(t("Hãy chọn văn bản trong một đoạn để tô sáng hoặc ghi chú."));
       return;
     }
     const prefixRange = range.cloneRange();
@@ -188,7 +192,7 @@ export default function ReadingPage({ novel, chapter }) {
     setSelection({ paragraphId: startParagraph.dataset.readerParagraph, start, end: start + text.length, quote: text });
     setNote("");
     setNotice("");
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let timer;
@@ -210,76 +214,75 @@ export default function ReadingPage({ novel, chapter }) {
   function addAnnotation(withNote) {
     if (!selection) return;
     if (annotations.some((item) => item.paragraphId === selection.paragraphId && item.start < selection.end && selection.start < item.end)) {
-      setNotice("Vùng này đã có highlight. Bạn có thể sửa ghi chú trong My Clipping hoặc chọn phần văn bản khác.");
+      setNotice(t("Vùng này đã có highlight. Bạn có thể sửa ghi chú trong My Clipping hoặc chọn phần văn bản khác."));
       return;
     }
     setAnnotations((current) => [...current, { ...selection, id: crypto.randomUUID(), note: withNote ? note.trim() : "" }]);
     setSelection(null);
     setNote("");
     window.getSelection()?.removeAllRanges();
-    setNotice(withNote ? "Đã lưu highlight và ghi chú vào My Clipping." : "Đã highlight và tự động lưu vào My Clipping.");
+    setNotice(withNote ? t("Đã lưu highlight và ghi chú vào My Clipping.") : t("Đã highlight và tự động lưu vào My Clipping."));
   }
 
   return (
-    <div className={`novely-reader ${readerSerif.variable} ${readerVietnam.variable} ${readerMontserrat.variable}`} data-theme={settings.theme} style={{ "--reader-width": `${settings.width}px`, "--reader-font": FONTS[settings.font], "--reader-size": `${settings.fontSize}px`, "--reader-leading": settings.lineHeight }} lang="vi" onKeyDown={(event) => {
+    <div className={`novely-reader ${readerSerif.variable} ${readerVietnam.variable} ${readerMontserrat.variable}`} data-theme={settings.theme} style={{ "--reader-width": `${settings.width}px`, "--reader-font": FONTS[settings.font], "--reader-size": `${settings.fontSize}px`, "--reader-leading": settings.lineHeight }} lang={locale} onKeyDown={(event) => {
       if (event.target.closest("dialog")) return;
       if (event.key === "Escape") { setSelection(null); setSettingsOpen(false); settingsButton.current?.focus(); }
     }}>
       <div className="reader-toolbar">
-        <Link href={`/novels/${novel.id}`} className="reader-back"><ArrowLeft size={18} /><span>{novel.title}</span></Link>
+        <Link href={`/novels/${novel.id}`} className="reader-back"><ArrowLeft size={18} /><span className="reader-back-label"><span>{novel.title}</span><small>{t("Chương")} {chapter.number}</small></span></Link>
         <div className="reader-toolbar-actions">
-          <button type="button" className="reader-button" aria-label="My Clipping" onClick={() => { setSelection(null); setSettingsOpen(false); setClippingsOpen(true); }}><Highlighter size={18} /><span>My Clipping</span></button>
-          <button type="button" disabled={!ready} className="reader-icon-button" aria-label="Đánh dấu đoạn đang đọc" aria-pressed={bookmarks.includes(chapter.paragraphs[location.index].id)} onClick={() => toggleBookmark(chapter.paragraphs[location.index].id)}><Bookmark size={19} /></button>
-          <button ref={settingsButton} type="button" disabled={!ready} className={`reader-button ${settingsOpen ? "is-selected" : ""}`} aria-label="Cài đặt đọc" aria-expanded={settingsOpen} aria-controls="reader-settings" onClick={() => setSettingsOpen(!settingsOpen)}><Settings2 size={18} /><span>Cài đặt đọc</span></button>
+          <button type="button" disabled={!ready} className="reader-icon-button" aria-label={t("Đánh dấu đoạn đang đọc")} aria-pressed={bookmarks.includes(chapter.paragraphs[location.index].id)} onClick={() => toggleBookmark(chapter.paragraphs[location.index].id)}><Bookmark size={19} /></button>
+          <button type="button" className="reader-button" aria-label={t("My Clipping")} onClick={() => { setSelection(null); setSettingsOpen(false); setClippingsOpen(true); }}><Highlighter size={18} /><span>{t("My Clipping")}</span></button>
+          <button ref={settingsButton} type="button" disabled={!ready} className={`reader-button ${settingsOpen ? "is-selected" : ""}`} aria-label={t("Cài đặt đọc")} aria-expanded={settingsOpen} aria-controls="reader-settings" onClick={() => setSettingsOpen(!settingsOpen)}><Settings2 size={18} /><span>{t("Cài đặt đọc")}</span></button>
         </div>
         {settingsOpen && <ReaderSettings settings={settings} onChange={(next) => { reflowPosition.current = latestPosition.current; setSettings(next); }} onClose={() => { setSettingsOpen(false); settingsButton.current?.focus(); }} />}
       </div>
 
       <div className="reader-shell">
-        {storageFailed && <p className="reader-warning" role="alert">Trình duyệt không cho phép lưu dữ liệu hoặc đã hết dung lượng. Thay đổi mới chỉ được giữ trong phiên này.</p>}
+        {storageFailed && <p className="reader-warning" role="alert">{t("Trình duyệt không cho phép lưu dữ liệu hoặc đã hết dung lượng. Thay đổi mới chỉ được giữ trong phiên này.")}</p>}
         <header className="reader-heading">
-          <span className="reader-eyebrow"><BookOpen size={15} /> THƯ VIỆN CỦA NHỮNG CÂU CHUYỆN</span>
+          <span className="reader-eyebrow"><BookOpen size={15} /> {t("THƯ VIỆN CỦA NHỮNG CÂU CHUYỆN")}</span>
           <Link className="reader-novel-title" href={`/novels/${novel.id}`}>{novel.title}</Link>
-          <h1><span>Chương {chapter.number}</span>{chapter.title}</h1>
-          <p className="reader-meta">{novel.author}<span aria-hidden="true">·</span>{chapter.date}<span aria-hidden="true">·</span>Khoảng {Math.max(1, Math.ceil(words / 200))} phút đọc</p>
-          <details className="reader-chapter-picker"><summary>Chọn chương <ChevronDown size={15} /></summary><nav aria-label="Chọn chương">{novel.chapters.map((item) => <Link key={item.number} href={chapterHref(novel.id, item.number)} aria-current={item.number === chapter.number ? "page" : undefined}>Chương {item.number}: {item.title}</Link>)}</nav></details>
+          <h1><span>{t("Chương")} {chapter.number}</span>{chapter.title}</h1>
+          <p className="reader-meta">{novel.author}<span aria-hidden="true">·</span>{chapter.date}<span aria-hidden="true">·</span>{t("Khoảng")} {Math.max(1, Math.ceil(words / 200))} {t("phút đọc")}</p>
         </header>
 
-        <ChapterNavigation novelId={novel.id} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label="Điều hướng đầu chương" />
+        <ChapterNavigation novelId={novel.id} chapters={novel.chapters} currentChapter={chapter.number} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label={t("Điều hướng đầu chương")} />
         <ReaderSpeech paragraphs={chapter.paragraphs} startIndex={location.index} onParagraph={onSpokenParagraph} />
-        <div className="reader-status"><span><Check size={14} /> {storageFailed ? "Vị trí đang được giữ trong phiên này" : ready ? "Tự lưu vị trí đọc trên trình duyệt" : "Đang tải thiết lập đọc…"}</span><button type="button" className="reader-text-button" onClick={() => setClippingsOpen(true)}>Mở My Clipping</button></div>
-        <p className="reader-caption reader-selection-tip">Chọn văn bản → Highlight để tự động lưu vào My Clipping. Dùng bookmark bên lề để giữ lại một đoạn.</p>
+        <div className="reader-status"><span><Check size={14} /> {storageFailed ? t("Vị trí đang được giữ trong phiên này") : ready ? t("Tự lưu vị trí đọc trên trình duyệt") : t("Đang tải thiết lập đọc…")}</span></div>
+        <p className="reader-caption reader-selection-tip">{t("Chọn văn bản → Highlight để tự động lưu vào My Clipping. Dùng bookmark bên lề để giữ lại một đoạn.")}</p>
 
-        <article ref={articleRef} className="reader-prose" aria-label={`Nội dung chương ${chapter.number}`} style={{ filter: `brightness(${settings.brightness}%)` }} onPointerUp={captureSelection} onKeyUp={captureSelection}>
+        <article lang="vi" ref={articleRef} className="reader-prose" aria-label={t("Nội dung chương {0}", [chapter.number])} style={{ filter: `brightness(${settings.brightness}%)` }} onPointerUp={captureSelection} onKeyUp={captureSelection}>
           {chapter.paragraphs.map((paragraph, index) => <div key={paragraph.id} className="reader-paragraph-row">
             <p id={`paragraph-${paragraph.id}`} data-reader-paragraph={paragraph.id} tabIndex={-1}>
               {textSegments(paragraph.text, annotations.filter((item) => item.paragraphId === paragraph.id)).map((segment, segmentIndex) => segment.annotation
-                ? <mark key={segment.annotation.id} title={segment.annotation.note || "Highlight cá nhân"}>{segment.text}</mark>
+                ? <mark key={segment.annotation.id} title={segment.annotation.note || t("Highlight cá nhân")}>{segment.text}</mark>
                 : <span key={`text-${segmentIndex}`}>{segment.text}</span>)}
             </p>
-            <button type="button" disabled={!ready} className={`reader-paragraph-bookmark reader-icon-button ${bookmarks.includes(paragraph.id) ? "is-selected" : ""}`} aria-label={`Đánh dấu đoạn ${index + 1}`} aria-pressed={bookmarks.includes(paragraph.id)} onClick={() => toggleBookmark(paragraph.id)}>{bookmarks.includes(paragraph.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button>
+            <button type="button" disabled={!ready} className={`reader-paragraph-bookmark reader-icon-button ${bookmarks.includes(paragraph.id) ? "is-selected" : ""}`} aria-label={t("Đánh dấu đoạn {0}", [index + 1])} aria-pressed={bookmarks.includes(paragraph.id)} onClick={() => toggleBookmark(paragraph.id)}>{bookmarks.includes(paragraph.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button>
           </div>)}
-          <div className="reader-end" aria-label="Hết chương"><span />✦<span /></div>
+          <div className="reader-end" aria-label={t("Hết chương")}><span />✦<span /></div>
         </article>
 
-        <p className="reader-notice" role="status">{notice}</p>
-        <ChapterNavigation novelId={novel.id} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label="Điều hướng cuối chương" />
-        {chapterIndex === novel.chapters.length - 1 && <p className="reader-last-chapter">Bạn đã đến chương mới nhất. Hẹn gặp lại ở câu chuyện tiếp theo.</p>}
+        <p className="reader-notice" role="status">{t(notice)}</p>
+        <ChapterNavigation novelId={novel.id} chapters={novel.chapters} currentChapter={chapter.number} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label={t("Điều hướng cuối chương")} />
+        {chapterIndex === novel.chapters.length - 1 && <p className="reader-last-chapter">{t("Bạn đã đến chương mới nhất. Hẹn gặp lại ở câu chuyện tiếp theo.")}</p>}
         <div id="reader-notebook"><ReaderNotebook paragraphs={chapter.paragraphs} bookmarks={bookmarks} annotations={annotations} onJump={jumpToParagraph} onBookmark={toggleBookmark} onAnnotations={setAnnotations} /></div>
-        <ReaderDiscussion key={chapterKey} storageKey={chapterKey} chapterNumber={chapter.number} />
+        <ReaderDiscussion key={chapterKey} storageKey={chapterKey} />
       </div>
 
       {settings.showProgress && <ReaderProgress percent={location.percent} />}
       {clippingsOpen && <ReaderClippings novel={novel} currentChapter={chapter.number} onJump={jumpToParagraph} onClose={() => setClippingsOpen(false)} />}
 
-      {selection && <section className="reader-selection-panel reader-panel" aria-label="Tô sáng và ghi chú văn bản đã chọn">
-        <div className="reader-section-heading"><strong><Highlighter size={17} /> Highlight đoạn văn</strong><button type="button" className="reader-icon-button" aria-label="Đóng văn bản đã chọn" onClick={() => setSelection(null)}><X size={18} /></button></div>
+      {selection && <section className="reader-selection-panel reader-panel" aria-label={t("Tô sáng và ghi chú văn bản đã chọn")}>
+        <div className="reader-section-heading"><strong><Highlighter size={17} /> {t("Highlight đoạn văn")}</strong><button type="button" className="reader-icon-button" aria-label={t("Đóng văn bản đã chọn")} onClick={() => setSelection(null)}><X size={18} /></button></div>
         <blockquote>{selection.quote}</blockquote>
-        <p className="reader-caption">Highlight sẽ tự động được thêm vào My Clipping.</p>
+        <p className="reader-caption">{t("Highlight sẽ tự động được thêm vào My Clipping.")}</p>
         <form onSubmit={(event) => { event.preventDefault(); if (note.trim()) addAnnotation(true); }}>
-          <label className="reader-sr-only" htmlFor="selection-note">Ghi chú cho văn bản đã chọn</label><textarea id="selection-note" rows={2} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Thêm ghi chú cá nhân (không bắt buộc)…" />
-          <div className="reader-selection-actions"><button type="button" className="reader-button" aria-label="Tô sáng" onClick={() => addAnnotation(false)}><Highlighter size={16} /> Highlight</button><button type="submit" className="reader-button reader-button-primary" disabled={!note.trim()}>Lưu ghi chú</button></div>
-          {notice && <p className="reader-caption" role="status">{notice}</p>}
+          <label className="reader-sr-only" htmlFor="selection-note">{t("Ghi chú cho văn bản đã chọn")}</label><textarea id="selection-note" rows={2} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("Thêm ghi chú cá nhân (không bắt buộc)…")} />
+          <div className="reader-selection-actions"><button type="button" className="reader-button" aria-label={t("Tô sáng")} onClick={() => addAnnotation(false)}><Highlighter size={16} /> {t("Highlight")}</button><button type="submit" className="reader-button reader-button-primary" disabled={!note.trim()}>{t("Lưu ghi chú")}</button></div>
+          {notice && <p className="reader-caption" role="status">{t(notice)}</p>}
         </form>
       </section>}
     </div>

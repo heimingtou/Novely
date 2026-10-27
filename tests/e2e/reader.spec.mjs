@@ -127,25 +127,83 @@ test("highlight và ghi chú giữ đúng nội dung sau tải lại, có thể 
   await firstNote.getByLabel("Ghi chú cá nhân").fill("Đã sửa ghi chú");
   await firstNote.getByRole("button", { name: "Lưu ghi chú" }).click();
   expect((await readStored(page, `${prefix}:annotations`))[0].note).toBe("Đã sửa ghi chú");
-  await firstNote.getByRole("button", { name: "Xóa highlight và ghi chú" }).click();
+  await firstNote.getByRole("button", { name: "Xóa phần tô sáng và ghi chú" }).click();
   await expect(paragraph.locator("mark")).toHaveCount(1);
 });
 
 test("bình luận, reaction lưu riêng từng chương và có thể xóa", async ({ page }) => {
   await openReader(page);
+  await expect(page.getByRole("heading", { name: "Bình luận", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Tên hiển thị")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Gửi bình luận" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).first().click();
+  await expect(page.locator(".reader-comment-account")).toContainText("Bạn đọc Novely");
   await page.getByRole("button", { name: "Yêu thích", exact: true }).click();
-  await page.getByLabel("Tên hiển thị").fill("An");
   await page.getByLabel("Cảm nghĩ của bạn").fill("Một khởi đầu rất hay <script>alert(1)</script>");
   await page.getByRole("button", { name: "Gửi bình luận" }).click();
   await page.reload();
   await expect(page.getByRole("button", { name: "Yêu thích", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".reader-comment > p")).toContainText("<script>alert(1)</script>");
+  await expect(page.locator(".reader-comment strong")).toHaveText("Bạn đọc Novely");
   await openReader(page, "/novels/demo/chapters/2");
   await expect(page.locator(".reader-comment")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Yêu thích", exact: true })).toHaveAttribute("aria-pressed", "false");
   await openReader(page);
-  await page.getByRole("button", { name: "Xóa bình luận của An" }).click();
+  await page.getByRole("button", { name: "Xóa bình luận của Bạn đọc Novely" }).click();
   await expect(page.locator(".reader-comment")).toHaveCount(0);
+  await page.locator(".avatar > button").click();
+  await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Đăng nhập để bình luận", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Cảm nghĩ của bạn")).toHaveCount(0);
+});
+
+test("danh sách chương xổ trong trang, không còn nút trùng chức năng", async ({ page }) => {
+  await openReader(page, "/novels/demo/chapters/2");
+  await expect(page.getByRole("button", { name: "Chọn chương", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Mở My Clipping", exact: true })).toHaveCount(0);
+  await expect(page.locator(".reader-toolbar-actions > button")).toHaveCount(3);
+  await expect(page.locator(".reader-toolbar-actions > button").nth(1)).toHaveAccessibleName("Trích đoạn của tôi");
+  await expect(page.locator(".reader-toolbar-actions > button").nth(2)).toHaveAccessibleName("Cài đặt đọc");
+  for (const label of ["Điều hướng đầu chương", "Điều hướng cuối chương"]) {
+    const navigation = page.getByRole("navigation", { name: label, exact: true });
+    const trigger = navigation.getByRole("button", { name: "Danh sách chương", exact: true });
+    await trigger.click();
+    await expect(page).toHaveURL(/\/chapters\/2$/);
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(navigation.locator('a[aria-current="page"]')).toContainText("Chương 2");
+    const buttonBox = await trigger.boundingBox();
+    const listBox = await navigation.locator(".reader-chapter-options").boundingBox();
+    expect(listBox.y).toBeGreaterThanOrEqual(buttonBox.y + buttonBox.height);
+    if (label === "Điều hướng đầu chương") {
+      await trigger.click();
+      await expect(navigation.locator(".reader-chapter-options")).toHaveCount(0);
+    } else {
+      await navigation.getByRole("link", { name: /Chương 3:/ }).click();
+      await expect(page).toHaveURL(/\/chapters\/3$/);
+      await expect(page.locator(".reader-back-label small")).toHaveText("Chương 3");
+      const titleBox = await page.locator(".reader-back-label > span").boundingBox();
+      const chapterBox = await page.locator(".reader-back-label small").boundingBox();
+      expect(chapterBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height);
+    }
+  }
+});
+
+test("thanh công cụ sát hai bên và danh sách chương không tràn trên các cỡ màn hình", async ({ page }) => {
+  for (const width of [320, 390, 768, 1280, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openReader(page);
+    const back = await page.locator(".reader-back").boundingBox();
+    const actions = await page.locator(".reader-toolbar-actions").boundingBox();
+    expect(back.x).toBeLessThanOrEqual(24);
+    expect(width - actions.x - actions.width).toBeLessThanOrEqual(24);
+    expect(back.x + back.width).toBeLessThanOrEqual(actions.x);
+    const navigation = page.getByRole("navigation", { name: "Điều hướng đầu chương" });
+    await navigation.getByRole("button", { name: "Danh sách chương" }).click();
+    const list = await navigation.locator(".reader-chapter-options").boundingBox();
+    expect(list.x).toBeGreaterThanOrEqual(0);
+    expect(list.x + list.width).toBeLessThanOrEqual(width);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
 });
 
 test("dữ liệu trình duyệt bị hỏng không làm trang đọc bị lỗi", async ({ page }) => {
@@ -295,30 +353,45 @@ test("Highlight tự thêm vào My Clipping của cả truyện, mở lại và 
   await selectText(page, 0, 28);
   await expect(page.getByRole("region", { name: "Tô sáng và ghi chú văn bản đã chọn" })).toBeVisible();
   await page.getByRole("button", { name: "Tô sáng", exact: true }).click();
-  await page.getByRole("button", { name: "My Clipping", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "My Clipping", exact: true });
+  await page.getByRole("button", { name: "Trích đoạn của tôi", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Trích đoạn của tôi", exact: true });
   await expect(dialog.locator(".reader-note")).toHaveCount(1);
   await expect(dialog.locator(".reader-note").first()).toContainText(quoteOne);
   await dialog.getByLabel("Ghi chú cá nhân").fill("Ghi chú trong My Clipping");
   await dialog.getByRole("button", { name: "Lưu ghi chú" }).click();
-  await dialog.getByRole("button", { name: "Đóng My Clipping" }).click();
+  await dialog.getByRole("button", { name: "Đóng trích đoạn của tôi" }).click();
 
   await openReader(page, "/novels/demo/chapters/2");
   await paragraph.scrollIntoViewIfNeeded();
   await selectText(page, 0, 25);
   await page.getByRole("button", { name: "Tô sáng", exact: true }).click();
   await page.reload();
-  await page.getByRole("button", { name: "My Clipping", exact: true }).click();
+  await page.getByRole("button", { name: "Trích đoạn của tôi", exact: true }).click();
   await expect(dialog.locator(".reader-note")).toHaveCount(2);
   await expect(dialog.locator(".reader-clipping-chapter").first().getByLabel("Ghi chú cá nhân")).toHaveValue("Ghi chú trong My Clipping");
   await page.screenshot({ path: "test-results/reader-my-clipping.png" });
   await dialog.locator(".reader-clipping-chapter").first().getByRole("link").click();
   await expect(page).toHaveURL(/\/chapters\/1(?:#.*)?$/);
   await expect(paragraph.locator("mark")).toHaveText(quoteOne);
-  await page.getByRole("button", { name: "My Clipping", exact: true }).click();
-  await dialog.locator(".reader-clipping-chapter").first().getByRole("button", { name: "Xóa clipping" }).click();
+  await page.getByRole("button", { name: "Trích đoạn của tôi", exact: true }).click();
+  await dialog.locator(".reader-clipping-chapter").first().getByRole("button", { name: "Xóa trích đoạn" }).click();
   await expect(dialog.locator(".reader-note")).toHaveCount(1);
-  await dialog.getByRole("button", { name: "Đóng My Clipping" }).click();
+  await dialog.getByRole("button", { name: "Đóng trích đoạn của tôi" }).click();
+  await expect(paragraph.locator("mark")).toHaveCount(0);
+  await paragraph.scrollIntoViewIfNeeded();
+  await selectText(page, 0, 28);
+  await page.getByRole("button", { name: "Tô sáng", exact: true }).click();
+  await page.getByRole("button", { name: "Đánh dấu đoạn 1", exact: true }).click();
+  await page.getByRole("button", { name: "Trích đoạn của tôi", exact: true }).click();
+  await expect(dialog.locator(".reader-note")).toHaveCount(2);
+  await dialog.getByRole("button", { name: "Xóa tất cả", exact: true }).click();
+  await expect(dialog.locator(".reader-note")).toHaveCount(0);
+  expect(await readStored(page, `${prefix}:annotations`)).toEqual([]);
+  expect(await readStored(page, "novely:v1:demo:chapter:2:annotations")).toEqual([]);
+  await dialog.getByRole("button", { name: "Đóng trích đoạn của tôi" }).click();
+  await expect(paragraph.locator("mark")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Đánh dấu đoạn 1", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
   await expect(paragraph.locator("mark")).toHaveCount(0);
 });
 

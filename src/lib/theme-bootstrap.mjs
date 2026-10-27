@@ -1,0 +1,2 @@
+// Chạy trước khi vẽ trang để dùng đúng màu từ lần tải đầu, kể cả khi storage bị chặn.
+export const themeBootstrap = `(function(){var theme;try{theme=JSON.parse(localStorage.getItem('novely:v1:theme'))}catch(e){}if(theme!=='dark'&&theme!=='light'){theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.dataset.theme=theme})()`;

@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronDown, Headphones, Pause, Play, Square } from "lucide-react";
@@ -8,6 +9,7 @@ const supported = () => typeof window.speechSynthesis !== "undefined" && typeof 
 const unsupported = () => false;
 
 export default function ReaderSpeech({ paragraphs, startIndex, onParagraph }) {
+  const { t } = useI18n();
   const available = useSyncExternalStore(subscribe, supported, unsupported);
   const [status, setStatus] = useState("idle");
   const [rate, setRate] = useState(1);
@@ -33,7 +35,7 @@ export default function ReaderSpeech({ paragraphs, startIndex, onParagraph }) {
     const speech = window.speechSynthesis;
     speech.cancel();
     const voice = speech.getVoices().find((item) => item.lang.toLowerCase().startsWith("vi"));
-    setMessage(voice ? "" : "Thiết bị chưa cung cấp giọng Việt; trình duyệt sẽ chọn giọng mặc định.");
+    setMessage(voice ? "" : t("Thiết bị chưa cung cấp giọng Việt; trình duyệt sẽ chọn giọng mặc định."));
     setStatus("speaking");
     function speakParagraph(index) {
       if (generation.current !== token) return;
@@ -48,7 +50,7 @@ export default function ReaderSpeech({ paragraphs, startIndex, onParagraph }) {
       utterance.onerror = (event) => {
         if (generation.current !== token) return;
         setStatus("idle");
-        if (event.error !== "canceled" && event.error !== "interrupted") setMessage("Không thể phát giọng đọc. Hãy kiểm tra giọng đọc trên thiết bị rồi thử lại.");
+        if (event.error !== "canceled" && event.error !== "interrupted") setMessage(t("Không thể phát giọng đọc. Hãy kiểm tra giọng đọc trên thiết bị rồi thử lại."));
       };
       speech.speak(utterance);
     }
@@ -57,22 +59,21 @@ export default function ReaderSpeech({ paragraphs, startIndex, onParagraph }) {
 
   return (
     <details className="reader-speech" data-playing={status !== "idle"}>
-      <summary><span><Headphones size={18} /> Nghe truyện</span><span className="reader-caption">{status === "speaking" ? "Đang nghe" : status === "paused" ? "Đã tạm dừng" : "Giọng đọc thiết bị"}<ChevronDown size={15} /></span></summary>
-      <div className="reader-speech-body" role="region" aria-label="Nghe chương">
+      <summary><span><Headphones size={18} /> {t("Nghe truyện")}</span><span className="reader-caption">{status === "speaking" ? t("Đang nghe") : status === "paused" ? t("Đã tạm dừng") : t("Giọng đọc thiết bị")}<ChevronDown size={15} /></span></summary>
+      <div className="reader-speech-body" role="region" aria-label={t("Nghe chương")}>
       <div className="reader-speech-controls">
         <button type="button" className="reader-button" disabled={!available} onClick={() => {
           if (status === "speaking") { window.speechSynthesis.pause(); setStatus("paused"); }
           else if (status === "paused") { window.speechSynthesis.resume(); setStatus("speaking"); }
           else start();
-        }}>{status === "speaking" ? <Pause size={16} /> : <Play size={16} />}{status === "speaking" ? "Tạm dừng" : status === "paused" ? "Tiếp tục nghe" : "Nghe từ đoạn hiện tại"}</button>
-        <button type="button" className="reader-icon-button" disabled={status === "idle"} onClick={stop} aria-label="Dừng nghe"><Square size={16} /></button>
-        <label className="reader-rate">Tốc độ
-          <select value={rate} disabled={status !== "idle"} onChange={(event) => setRate(Number(event.target.value))}>
+        }}>{status === "speaking" ? <Pause size={16} /> : <Play size={16} />}{status === "speaking" ? t("Tạm dừng") : status === "paused" ? t("Tiếp tục nghe") : t("Nghe từ đoạn hiện tại")}</button>
+        <button type="button" className="reader-icon-button" disabled={status === "idle"} onClick={stop} aria-label={t("Dừng nghe")}><Square size={16} /></button>
+        <label className="reader-rate">{t("Tốc độ")} <select value={rate} disabled={status !== "idle"} onChange={(event) => setRate(Number(event.target.value))}>
             {[0.75, 1, 1.25, 1.5].map((value) => <option key={value} value={value}>{value}×</option>)}
           </select>
         </label>
       </div>
-      <p className="reader-caption" role="status">{!available ? "Trình duyệt này chưa hỗ trợ nghe văn bản." : message || (status === "speaking" ? "Đang đọc · Giọng đọc do thiết bị cung cấp" : status === "paused" ? "Đã tạm dừng" : "Nghe bằng giọng đọc của thiết bị, bắt đầu tại vị trí đang đọc.")}</p>
+      <p className="reader-caption" role="status">{!available ? t("Trình duyệt này chưa hỗ trợ nghe văn bản.") : message || (status === "speaking" ? t("Đang đọc · Giọng đọc do thiết bị cung cấp") : status === "paused" ? t("Đã tạm dừng") : t("Nghe bằng giọng đọc của thiết bị, bắt đầu tại vị trí đang đọc."))}</p>
       </div>
     </details>
   );

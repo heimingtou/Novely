@@ -1,5 +1,7 @@
 # Trang đọc Novely
 
+Tên tính năng đã được chuẩn hóa: **My Clipping** hiển thị là **Trích đoạn của tôi** trong tiếng Việt và **My clippings** trong tiếng Anh. Chuyển ngôn ngữ tại menu ảnh đại diện; xem [quy ước ngôn ngữ](languages.md). Nội dung truyện, ghi chú và dữ liệu đọc được giữ nguyên.
+
 Nguồn yêu cầu: [Trang đọc](https://app.notion.com/p/3e75f52fcbb9807a9243f739fceb33bb), [Comment theo chương](https://app.notion.com/p/3e75f52fcbb980dd8091ec26dd166585).
 
 ## Chạy thử
@@ -17,13 +19,13 @@ URL đọc: `/novels/demo/chapters/1` (các chương hiện có: 1, 2, 3).
 
 | Yêu cầu | Cách sử dụng |
 | --- | --- |
-| Chương trước/sau, danh sách chương | Đầu và cuối chương, vô hiệu hóa tại hai đầu danh sách |
+| Chương trước/sau, danh sách chương | Đầu và cuối chương, vô hiệu hóa tại hai đầu danh sách; danh sách xổ xuống tại chỗ và đánh dấu chương đang đọc |
 | Bookmark vị trí | Nút bên lề từng đoạn hoặc nút trên thanh công cụ; xem lại/xóa trong sổ tay |
 | Tự lưu và đọc tiếp | Lưu chương, mã đoạn và vị trí tương đối trong đoạn; khôi phục sau tải lại, có nút Đọc tiếp ở chi tiết |
 | Đổi font, cỡ chữ, độ rộng, giãn dòng | Bảng Cài đặt đọc, giữ đoạn đang đọc khi thay đổi bố cục |
 | Dark mode, Sepia, độ sáng | Ba nền Sáng/Giấy ấm/Tối; độ sáng chỉ tác động vùng nội dung |
 | Ẩn/hiện phần trăm đọc | Cài đặt đọc; phần trăm ước lượng theo đoạn và vị trí trong đoạn của chương hiện tại |
-| Reaction và bình luận theo chương | Cuối chương, chọn/bỏ cảm xúc; thêm và xóa bình luận trên thiết bị |
+| Reaction và bình luận theo chương | Cuối chương, chọn/bỏ cảm xúc; đăng nhập mô phỏng để bình luận, tự lấy tên tài khoản, không nhập tên riêng |
 | Text-to-Speech | Nghe từ đoạn hiện tại, tốc độ, tạm dừng/tiếp tục/dừng; hủy khi chuyển trang |
 | Highlight và ghi chú | Chọn chữ trong một đoạn; tô sáng hoặc nhập ghi chú; sửa/xóa trong sổ tay |
 
@@ -31,6 +33,7 @@ URL đọc: `/novels/demo/chapters/1` (các chương hiện có: 1, 2, 3).
 
 - Chọn văn bản để mở bảng Highlight. Bấm **Highlight** hoặc lưu ghi chú sẽ tự động thêm trích đoạn vào **My Clipping**, không cần bấm lưu lần nữa.
 - Nút **My Clipping** trên thanh công cụ mở bộ sưu tập của cả truyện, chia theo chương. Có thể mở lại đúng đoạn, sửa ghi chú hoặc xóa clipping (đồng thời bỏ highlight). Dữ liệu highlight cũ được dùng trực tiếp, không tạo bản sao.
+- **My Clipping** nằm cạnh **Cài đặt đọc**. Nút **Xóa tất cả** trong bộ sưu tập xóa highlight và ghi chú ở mọi chương của truyện đang mở; bookmark và tiến độ được giữ. Danh sách chương chỉ mở từ cụm điều hướng đầu/cuối chương.
 - Cài đặt có ô nhập số bên cạnh thanh trượt cho cỡ chữ, giãn dòng, độ rộng và độ sáng. Enter hoặc rời ô sẽ áp dụng/giới hạn giá trị theo phạm vi và bước của thanh trượt; bỏ trống sẽ giữ giá trị hợp lệ gần nhất.
 - Font gồm Noto Serif, Palatino, Bookerly, Be Vietnam Pro, Montserrat, Arial và Times New Roman. Be Vietnam Pro và Montserrat được đóng gói cùng dự án. Bookerly dùng bản đã có trên thiết bị, nếu thiếu sẽ dùng Noto Serif.
 - Vòng tròn nổi ở góc dưới hiển thị phần trăm của chương đang đọc; viền vòng tròn tăng theo tiến độ. Cài đặt **Hiện phần trăm đã đọc** bật/tắt vòng tròn này. Tiến độ tự lưu và khôi phục sau khi tải lại.
@@ -40,6 +43,7 @@ Inline comment (bình luận công khai theo đoạn) đang để ngỏ trong No
 ## Dữ liệu và giới hạn
 
 - Chưa có backend, đăng nhập thật hoặc API: mọi dữ liệu cá nhân, bình luận và reaction của Trang đọc được lưu trên **trình duyệt hiện tại**, chưa đồng bộ tài khoản hay chia sẻ giữa người dùng. Giao diện bình luận có ghi rõ phạm vi này.
+- Navbar và bình luận dùng chung `useDemoSession`: nút **Đăng nhập** hoặc **Đăng nhập để bình luận** dùng tài khoản mẫu **Bạn đọc Novely**, giữ trạng thái khi tải lại/đổi chương và đồng bộ khi đăng xuất. Đây chỉ là mô phỏng giao diện, cần thay hook bằng phiên đăng nhập thật và xác thực quyền ở API khi có backend.
 - Các khóa có tiền tố `novely:v1:`. Thiết lập dùng chung; tiến độ, bookmark, annotation và bình luận tách theo truyện/chương. Tiến độ gần nhất theo truyện dùng cho nút Đọc tiếp. Thay đổi đồng bộ giữa các tab cùng origin.
 - localStorage bị chặn/hết dung lượng: tiếp tục hoạt động bằng bộ nhớ phiên và hiện thông báo. Dữ liệu này mất khi tải lại. JSON sai hoặc tham chiếu đoạn đã bị xóa được bỏ qua.
 - Ba chương do dự án tự soạn ở `src/data/novels.mjs`. Giữ nguyên mã đoạn khi sửa nội dung; annotation có trích dẫn không còn khớp sẽ bị bỏ qua để tránh tô nhầm câu.

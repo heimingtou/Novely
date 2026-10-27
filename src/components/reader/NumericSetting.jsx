@@ -1,8 +1,10 @@
 "use client";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 import { useState } from "react";
 
 export default function NumericSetting({ id, label, value, min, max, step, unit, onChange }) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   function normalize(number) {
@@ -18,7 +20,7 @@ export default function NumericSetting({ id, label, value, min, max, step, unit,
         <label htmlFor={id}>{label}</label>
         <div className="reader-number-field">
           <input
-            type="number" aria-label={`Nhập ${label.toLowerCase()}`} title={`${min}–${max}${unit}`}
+            type="number" aria-label={t("Nhập {0}", [label.toLowerCase()])} title={`${min}–${max}${unit}`}
             min={min} max={max} step={step} inputMode={step < 1 ? "decimal" : "numeric"}
             value={editing ? draft : value}
             onFocus={() => { setDraft(String(value)); setEditing(true); }}

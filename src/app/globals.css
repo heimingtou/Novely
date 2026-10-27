@@ -1,6 +1,8 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  color-scheme: light;
   --background: #f7f8fa; /* Nền sáng nhẹ đặc trưng phong cách MangaToon */
   --foreground: #1a1a1a; /* Chữ chính đậm dễ đọc */
   
@@ -16,7 +18,8 @@
 
   /* Màu phụ trợ */
   --card-bg: #ffffff;
-  --text-muted: #dfd6d6;
+  --text-muted: #64748b;
+  --muted: var(--text-muted);
   --border-color: #e5e7eb;
 
   /* === BIẾN MÀU CHO INPUT (Light Mode) === */
@@ -54,8 +57,8 @@ h1{
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root.dark {
+    color-scheme: dark;
     --background: #0f172a; /* Nền tối sâu sang trọng cho trang đọc truyện */
     --foreground: #f8fafc;
     
@@ -76,7 +79,6 @@ h1{
     --input-bg: #1e293b;        /* Nền tối cho input */
     --input-border: #475569;    /* Viền xám tối */
     --input-focus: #ff5722;     /* Vẫn giữ màu cam chủ đạo khi focus */
-  }
 }
 
 body {
