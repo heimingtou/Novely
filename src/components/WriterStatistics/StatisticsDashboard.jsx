@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import './statistics.css'
 import Image from "next/image";
+import { ArrowBigLeftDashIcon, ArrowLeft } from 'lucide-react';
 const dashboardTabs = [
     { id: 'overview', label: 'Tổng quan' },
     { id: 'engagement', label: 'Mức độ tương tác' },
@@ -171,7 +172,7 @@ export default function StatisticsDashboard({ statistics }) {
 
     return (
         <main className="writer-statistics">
-            <Link className="statistics-back-link" href="/Writer">← Trở về danh sách truyện</Link>
+            <Link className="statistics-back-link flex flex-row gap-1" href="/Writer"> <span><ArrowLeft/></span><span> Trở về danh sách truyện</span></Link>
             <header className="statistics-header">
                 <div className="imgCart flex flex-row gap-2.5">
                     <div className="imgCart__image">
@@ -197,6 +198,7 @@ export default function StatisticsDashboard({ statistics }) {
                 </div>
                 
             </header>
+            <hr/>
 
             <nav className="statistics-tabs" role="tablist" aria-label="Thống kê truyện">
                 {dashboardTabs.map((tab) => (

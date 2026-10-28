@@ -109,7 +109,10 @@ export default function Navbar() {
              ( <>
               <button className='btn-avt'> <span><UserPen/> </span>  <span>profile</span></button>
               <hr className='w-full'/>
-              <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
+              <Link href="/Writer">
+                  <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
+              </Link>
+            
               <div className='block md:hidden'>
                 <button className='btn-avt '> <span><BellIcon/></span><span>thông báo</span></button>
               </div>
