@@ -1,6 +1,25 @@
 .imgContain{
     margin-right: auto;
 }
+.site-navbar { position: relative; z-index: 40; }
+.account-menu { width: 250px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 90px); overflow-y: auto; background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-color); font: 400 18px/1.5 var(--font-sans); }
+.account-menu hr { border-color: var(--border-color); }
+.account-menu .btn-avt { align-items: center; font: inherit; }
+.site-theme-toggle { display: flex; align-items: center; gap: 15px; width: 100%; min-height: 44px; padding: 6px 0; font: inherit; text-align: left; cursor: pointer; }
+.site-theme-toggle > svg { width: 24px; height: 24px; flex-shrink: 0; }
+.site-theme-switch { margin-left: auto; width: 38px; height: 22px; padding: 3px; flex-shrink: 0; background: var(--secondary-bg); border-radius: 20px; }
+.site-theme-switch > span { display: block; width: 16px; height: 16px; border-radius: 50%; background: var(--foreground); transition: transform .15s; }
+.site-theme-toggle[aria-checked="true"] .site-theme-switch { background: var(--primary); }
+.site-theme-toggle[aria-checked="true"] .site-theme-switch > span { transform: translateX(16px); background: #fff; }
+.site-theme-toggle:focus-visible, .account-menu button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.site-language-control { width: 100%; border-block: 1px solid var(--border-color); padding: 12px 0; }
+.site-language-control > span { display: flex; align-items: center; gap: 15px; font: inherit; }
+.site-language-control > span > svg { width: 24px; height: 24px; flex-shrink: 0; }
+.site-language-options { display: flex; gap: 6px; margin-top: 10px; }
+.site-language-options button { flex: 1; min-height: 36px; padding: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; cursor: pointer; }
+.site-language-options button[aria-pressed="true"] { border-color: var(--primary); color: var(--primary); background: var(--secondary-bg); font-weight: 600; }
+.site-footer { padding: 24px 16px; border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .site-theme-switch > span { transition: none; } }
 .avatar{
     width: 5rem;
     border-radius: 5rem;
@@ -75,4 +94,49 @@ button{
     font-size: 1rem; /* Tương ứng md:text-base */
   }
  
+}
+.btn-avt{
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.forum-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 38px;
+  min-height: 38px;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+.forum-nav-link:hover { background: var(--secondary-bg); }
+.forum-nav-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+@media (min-width: 768px) {
+  .navText { flex-shrink: 0; white-space: nowrap; }
+  .btn_Containt { min-width: 0; }
+}
+
+@media (max-width: 380px) {
+  .site-navbar .btn_Containt { gap: 6px; }
+  .site-navbar .avatar { width: 40px; flex-shrink: 0; }
+  .site-navbar .avatar > button > svg { display: none; }
+}
+
+@media (max-width: 767px) {
+  .site-navbar { padding: 8px; gap: 8px; }
+  .site-navbar .imgContain { width: clamp(52px, 16vw, 70px); flex-shrink: 0; margin-right: 0; }
+  .site-navbar > div:nth-child(2) { width: auto; flex: 1; min-width: 0; gap: 8px; margin-block: 0; }
+  .site-navbar .navText { font-size: 12px; gap: 8px; flex-shrink: 0; white-space: nowrap; }
+  .site-navbar .navText button, .site-navbar .navText a { display: flex; align-items: center; min-height: 36px; }
+  .site-navbar .navText button svg { width: 16px; }
+  .site-navbar .btn_Containt { width: auto; flex: 1; gap: 4px; }
+  .site-navbar .forum-nav-link { min-width: 32px; min-height: 32px; }
+  .site-navbar .btn_search { padding: 6px; }
+  .site-navbar .avatar { width: 32px; flex-shrink: 0; }
+  .site-navbar .avatar > button > div { width: 32px; height: 32px; }
+  .site-navbar .avatar > button > svg { display: none; }
 }

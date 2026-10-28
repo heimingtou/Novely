@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/reader-model.test.mjs tests/forum-model.test.mjs tests/i18n.test.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
@@ -16,6 +18,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
