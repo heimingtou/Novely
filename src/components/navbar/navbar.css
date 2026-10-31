@@ -70,7 +70,7 @@ button{
     border-radius: 10px;
 }
 .btn_Containt{
-  width: clamp(75%,2vw,20%);
+  width: clamp(25%,50%,60%);
   justify-content: end;
 }
 .btn-avt{
@@ -116,8 +116,16 @@ button{
 .forum-nav-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
 @media (min-width: 768px) {
-  .navText { flex-shrink: 0; white-space: nowrap; }
-  .btn_Containt { min-width: 0; }
+  .site-navbar > div:nth-child(2) { width: auto; flex: 1; min-width: 0; }
+  .site-navbar .navText { flex-shrink: 0; white-space: nowrap; gap: clamp(12px, 3vw, 36px); }
+  .site-navbar .btn_Containt {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: clamp(8px, 1vw, 16px);
+  }
+  .site-navbar .btn_Containt > div { gap: clamp(8px, 1vw, 16px); margin-inline: 0; }
 }
 
 @media (max-width: 380px) {
@@ -133,7 +141,7 @@ button{
   .site-navbar .navText { font-size: 12px; gap: 8px; flex-shrink: 0; white-space: nowrap; }
   .site-navbar .navText button, .site-navbar .navText a { display: flex; align-items: center; min-height: 36px; }
   .site-navbar .navText button svg { width: 16px; }
-  .site-navbar .btn_Containt { width: auto; flex: 1; gap: 4px; }
+  .site-navbar .btn_Containt { width: auto; flex: 1; min-width: 0; gap: 4px; }
   .site-navbar .forum-nav-link { min-width: 32px; min-height: 32px; }
   .site-navbar .btn_search { padding: 6px; }
   .site-navbar .avatar { width: 32px; flex-shrink: 0; }

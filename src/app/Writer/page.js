@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import CardWriter from "@/components/CardWriter/cardwriter"
 import Tabs from "@/components/Tabs/Tabs"
+import { useWriterStore } from "@/components/Writer/useWriterStore"
 import cardImg from '../../../public/CardStory.jpg'
 import './page.css'
-import { Plus, PlusCircle } from 'lucide-react'
+import { Plus } from 'lucide-react'
 const NovelDatas={
   "novels": [
     {
@@ -107,19 +109,32 @@ const novelDataByTab = {
 
 export default function WriterPage(){
     const [activeTab, setActiveTab] = useState('published')
+    const [writerState, , writerReady] = useWriterStore()
     const selectedNovelData = novelDataByTab[activeTab]
+    const writerNovels = writerReady && activeTab !== 'series'
+        ? writerState.novels.map((novel) => ({
+            id: novel.id,
+            img: novel.coverImage,
+            title: novel.title,
+            publish_date: novel.updatedAt,
+            views: 0,
+            likes: 0,
+            comments: 0,
+            current_chapters: novel.chapters.length,
+        }))
+        : []
 
     return(
         <div className="ContaintPage writer-page">
             <div className="titlePage flex flex-row justify-between items-center">
                 <h1>Truyện đã viết</h1>
-                <button className='btn'> <span><Plus/> </span> <span>Đăng truyện mới</span> </button>
+                <Link className='btn' href="/Writer/new"> <span><Plus/> </span> <span>Đăng truyện mới</span> </Link>
             </div>
             <div className="writer-content">
                 <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
                 <div className="content flex flex-col gap-3">
                     {
-                        selectedNovelData.novels.map((novelData) => (
+                        [...writerNovels, ...selectedNovelData.novels].map((novelData) => (
                             <CardWriter
                                 key={novelData.id}
                                 id={novelData.id}

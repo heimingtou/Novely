@@ -44,11 +44,11 @@ return(
     <div className=" ContaintCard bg-amber-50 flex flex-row justify-between h-fit gap-3.5  ">
         <div className="flex flex-row gap-4 mr-3">
              <div className="imgCards w-25 h-full relative ">
-                <Image src={img} className="object-cover rounded" alt="img" />
+                <Image src={img} width={100} height={140} unoptimized className="object-cover rounded" alt={title} />
             </div>
             <div className="title">
                 <h1>{title}</h1>
-                <p className="text-green-300">Số chương đã đăng: {current_chap}</p>
+                <p className="text-green-600">Số chương đã đăng: {current_chap}</p>
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
                 <div className="flex flex-row gap-5">
                     <p className=" icontext"><span><Eye/> </span><span>{view}</span></p>
@@ -59,12 +59,14 @@ return(
         </div>
        
         <div className="writer-card-actions mr-3">
-            <button className="btn-card"><span>Tiếp tục viết</span></button>
+            <Link className="btn-card" href={`/Writer/new?novelId=${encodeURIComponent(id)}`}>
+                <span>{t("Tiếp tục viết")}</span>
+            </Link>
             <div className="flex flex-row gap-2">
                 <Link className="btn-card btn-card--stats" href={`/Writer/statistics/${id}`}>
                     <ChartNoAxesCombined/>
                 </Link>
-                <button type="button" className="btn-card btn-card--stats" onClick={handleShare}>{t(<Share2/>) }</button>
+                <button type="button" className="btn-card btn-card--stats" onClick={handleShare}><Share2 size={18} />{t("Share")}</button>
                 {message && <p className="max-w-48 break-all text-sm text-green-600" role="status">{message}</p>}
             </div>
             

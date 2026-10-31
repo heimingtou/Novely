@@ -93,9 +93,7 @@ export default function Navbar() {
         <div className='btn_Containt flex flex-row justify-around items-center w-[50%] gap-3 md:gap-12'>
           <Link href="/forum" className="forum-nav-link" aria-label={t("Cộng đồng")} title={t("Cộng đồng Novely")}><MessageCircle size={20} /></Link>
           <Link href="/search" className='btn_search' aria-label={t("Tìm kiếm")}>
-            
               <TextSearch/>
-           
           </Link>
           
           <div className='max-md:hidden flex flex-row gap-[3rem] items-center  ml-2 mr-2'>
@@ -119,11 +117,11 @@ export default function Navbar() {
               <button className='btn-avt'> <span><UserPen/> </span>  <span>{t("profile")}</span></button>
               <hr className='w-full'/>
               <Link href="/Writer">
-                  <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
+                  <button className='btn-avt'> <span><PencilSparkles/></span><span>Writer</span></button>
               </Link>
             
               <div className='block md:hidden'>
-                <button className='btn-avt '> <span><BellIcon/></span><span>thông báo</span></button>
+                <button className='btn-avt '> <span><BellIcon/></span><span>Thông báo</span></button>
               </div>
               
                <hr className='w-full'/>
