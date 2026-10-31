@@ -132,8 +132,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
   return (
     <section className="writer-create">
       <header className="writer-create__header">
-        <h1>{t("Đăng truyện mới")}</h1>
-        <p>{t("Tạo câu chuyện của bạn và bắt đầu đăng chương đầu tiên.")}</p>
+        <h1>{t("Câu truyện của bạn")}</h1>
       </header>
 
       <div className="writer-create__tabs" role="tablist" aria-label={t("Các bước tạo truyện")}>
@@ -160,7 +159,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
       ) : activeStep === "novel" ? (
         <form className="writer-create__form" onSubmit={handleCreateNovel}>
           <label className="writer-create__field">
-            <span>{t("Tiêu đề truyện")} <b aria-hidden="true">*</b></span>
+            <span>{t("Tiêu đề truyện")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <input
               type="text"
               maxLength={120}
@@ -172,7 +171,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
           </label>
 
           <fieldset className="writer-create__genres">
-            <legend>{t("Thể loại")} <b aria-hidden="true">*</b></legend>
+            <legend>{t("Thể loại")} <b aria-hidden="true" className="text-red-500">*</b></legend>
             <p>{t("Có thể chọn nhiều thể loại.")}</p>
             <div className="writer-create__genre-grid">
               {WRITER_GENRES.map((genre) => (
@@ -194,7 +193,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
           </fieldset>
 
           <div className="writer-create__field">
-            <label htmlFor="novel-cover">{t("Ảnh bìa")} <b aria-hidden="true">*</b></label>
+            <label htmlFor="novel-cover">{t("Ảnh bìa")} <b aria-hidden="true" className="text-red-500">*</b></label>
             <p className="writer-create__hint">{t("Chọn ảnh PNG, JPG hoặc WebP, dung lượng tối đa 750 KB.")}</p>
             <div className="w-full h-14">
               <input id="novel-cover" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCoverChange} />
@@ -211,7 +210,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
           </div>
 
           <label className="writer-create__field">
-            <span>{t("Giới thiệu")} <b aria-hidden="true">*</b></span>
+            <span>{t("Giới thiệu")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <textarea
               rows={5}
               maxLength={3000}
@@ -227,9 +226,9 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
         </form>
       ) : (
         <form className="writer-create__form" onSubmit={handleAddChapter}>
-          <p className="writer-create__story-title">{existingNovel?.title || novelForm.title}</p>
+          <h1 className="writer-create__story-title">{existingNovel?.title || novelForm.title}</h1>
           <label className="writer-create__field">
-            <span>{t("Tên chap")} <b aria-hidden="true">*</b></span>
+            <span>{t("Tên chap")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <input
               type="text"
               maxLength={150}
@@ -240,7 +239,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
             />
           </label>
           <label className="writer-create__field">
-            <span>{t("Nội dung chapter")} <b aria-hidden="true">*</b></span>
+            <span>{t("Nội dung chapter")} <b aria-hidden="true" className="text-red-500" >*</b></span>
             <textarea
               rows={16}
               maxLength={50000}

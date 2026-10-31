@@ -124,6 +124,16 @@ export function updateWriterNovel(state, novelId, input, now) {
   });
 }
 
+export function deleteWriterNovel(state, novelId) {
+  const current = normalizeWriterState(state);
+  if (!current.novels.some((novel) => novel.id === novelId)) return state;
+
+  return {
+    ...current,
+    novels: current.novels.filter((novel) => novel.id !== novelId),
+  };
+}
+
 export function addWriterChapter(state, novelId, input, id, now) {
   if (Object.keys(validateChapterInput(input)).length || !validId(id) || !validDate(now)) return state;
   const current = normalizeWriterState(state);

@@ -122,6 +122,7 @@ export default function WriterPage(){
             comments: 0,
             current_chapters: novel.chapters.length,
             chapters: novel.chapters,
+            isWriterNovel: true,
         }))
         : []
 
@@ -147,6 +148,7 @@ export default function WriterPage(){
                                 comment={novelData.comments}
                                 current_chap={novelData.current_chapters}
                                 chapters={novelData.chapters || []}
+                                isWriterNovel={Boolean(novelData.isWriterNovel)}
                             />
                         ))
                     }

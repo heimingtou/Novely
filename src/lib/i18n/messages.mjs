@@ -1,5 +1,6 @@
 // Khóa là nhãn gốc để giữ bản dịch và quy tắc biên tập trong một nơi.
 export const english = {
+  "Xóa truyện": "Delete story", "Xóa truyện {0}": "Delete story {0}", "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.": "Are you sure you want to delete “{0}”? This action cannot be undone.",
   "Quản lý truyện": "Manage story", "Mục lục": "Table of contents", "Lưu thay đổi": "Save changes", "Đã cập nhật thông tin truyện.": "Story details updated.", "Đã xóa chương.": "Chapter deleted.",
   "Bạn": "You", "Số chương": "Chapter count", "Chưa có chương nào.": "There are no chapters yet.",
   "Tài khoản": "Account", "Đăng nhập để đăng bài và bình luận.": "Sign in to create posts and comments.", "Đăng nhập để đăng bài": "Sign in to post", "Vui lòng đăng nhập để đăng bài.": "Please sign in to post.",
@@ -28,6 +29,7 @@ export const english = {
 };
 
 export const vietnamese = {
+  "Xóa truyện": "Xóa truyện", "Xóa truyện {0}": "Xóa truyện {0}", "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.": "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.",
   "Quản lý truyện": "Quản lý truyện", "Mục lục": "Mục lục", "Lưu thay đổi": "Lưu thay đổi", "Đã cập nhật thông tin truyện.": "Đã cập nhật thông tin truyện.", "Đã xóa chương.": "Đã xóa chương.",
   "Bạn": "Bạn", "Số chương": "Số chương", "Chưa có chương nào.": "Chưa có chương nào.", "Chi tiết truyện": "Chi tiết truyện",
   "Tiếp tục viết": "Tiếp tục viết", "Quay lại danh sách truyện": "Quay lại danh sách truyện", "Không tìm thấy truyện cần thêm chapter trên trình duyệt này.": "Không tìm thấy truyện cần thêm chapter trên trình duyệt này.",

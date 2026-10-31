@@ -110,13 +110,19 @@
     align-items: center;
     justify-content: center;
     background-color: var(--color-primary);
-    padding:10px 25px;
+    padding:10px 15px;
     border-radius:5px;
     white-space: nowrap;
+}
+.btn-card:hover{
+    background-color: var(--color-primary-hover);
 }
 .btn-card--stats {
     background-color: var(--color-secondary-bg);
     color: var(--color-secondary-foreground);
+}
+.btn-card--stats:hover{
+    background-color: var(--color-secondary-hover);
 }
 .title h1{
     color:var(--color-foreground);

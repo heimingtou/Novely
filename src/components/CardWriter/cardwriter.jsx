@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import { useWriterDispatch } from "@/components/Writer/useWriterStore";
 import './cardWriter.css'
-export default function CardWriter({id, title, img, date, view, like, comment,current_chap, chapters = []}){
+export default function CardWriter({id, title, img, date, view, like, comment,current_chap, chapters = [], isWriterNovel = false}){
 const { t } = useI18n();
 const dispatch = useWriterDispatch();
 const [chaptersOpen, setChaptersOpen] = useState(false);
@@ -27,6 +27,11 @@ function handleDeleteChapter(chapterId) {
         chapterId,
         now: new Date().toISOString(),
     });
+}
+
+function handleDeleteNovel() {
+    if (!window.confirm(t("Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.", [title]))) return;
+    dispatch({ type: "DELETE_NOVEL", novelId: id });
 }
 
 async function handleShare() {
@@ -55,11 +60,11 @@ async function handleShare() {
 return(
     <div className=" ContaintCard bg-amber-50 flex flex-row justify-between h-fit gap-3.5  ">
         <div className="flex flex-row gap-4 mr-3">
-             <div className="imgCards w-25 h-full relative ">
+            <div className="imgCards w-25 h-full relative ">
                 <Image src={img} width={100} height={140} unoptimized className="object-cover rounded" alt={title} />
             </div>
             <div className="title">
-                <h1><Link href={`/novels/${encodeURIComponent(id)}`} className="hover:text-primary focus-visible:outline-2 focus-visible:outline-primary">{title}</Link></h1>
+                <h1><Link href={`/novels/${encodeURIComponent(id)}`} className=" focus-visible:outline-2 focus-visible:outline-primary">{title}</Link></h1>
                 <p className="text-green-600">Số chương đã đăng: {current_chap}</p>
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
                 <div className="flex flex-row gap-5">
@@ -123,11 +128,22 @@ return(
                     </ul>
                 )}
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-1">
                 <Link className="btn-card btn-card--stats" href={`/Writer/statistics/${id}`}>
                     <ChartNoAxesCombined/>{t("Thống kê")}
                 </Link>
                 <button type="button" className="btn-card btn-card--stats" onClick={handleShare}><Share2 size={18} />{t("Share")}</button>
+                {isWriterNovel && (
+                    <button
+                        type="button"
+                        className="btn-card btn-card--stats writer-card-menu__delete"
+                        onClick={handleDeleteNovel}
+                        aria-label={t("Xóa truyện {0}", [title])}
+                    >
+                        <Trash2 size={18} aria-hidden="true" />
+                        {t("Xóa ")}
+                    </button>
+                )}
                 {message && <p className="max-w-48 break-all text-sm text-green-600" role="status">{message}</p>}
             </div>
             

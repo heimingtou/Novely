@@ -4,6 +4,7 @@ import {
   addWriterChapter,
   createWriterNovel,
   deleteWriterChapter,
+  deleteWriterNovel,
   EMPTY_WRITER,
   normalizeWriterState,
   updateWriterChapter,
@@ -92,6 +93,15 @@ test("sửa thông tin truyện giữ nguyên bìa và chương, cập nhật th
   assert.equal(updated.novels[0].updatedAt, "2026-10-28T00:02:00.000Z");
   assert.strictEqual(updateWriterNovel(updated, "missing", novelInput, "2026-10-28T00:03:00.000Z"), updated);
   assert.strictEqual(updateWriterNovel(updated, "novel-1", { ...novelInput, genres: [] }, "2026-10-28T00:03:00.000Z"), updated);
+});
+
+test("xóa truyện tự tạo khỏi writer store và giữ nguyên các truyện khác", () => {
+  const first = createWriterNovel(EMPTY_WRITER, novelInput, "novel-1", "2026-10-28T00:00:00.000Z");
+  const second = createWriterNovel(first, { ...novelInput, title: "Truyện khác" }, "novel-2", "2026-10-28T00:01:00.000Z");
+  const deleted = deleteWriterNovel(second, "novel-1");
+
+  assert.deepEqual(deleted.novels.map((novel) => novel.id), ["novel-2"]);
+  assert.strictEqual(deleteWriterNovel(deleted, "missing"), deleted);
 });
 
 test("bỏ qua dữ liệu truyện và chương lưu trữ không hợp lệ", () => {

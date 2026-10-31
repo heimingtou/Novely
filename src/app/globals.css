@@ -64,12 +64,12 @@ h1{
     --foreground: #f8fafc;
     
     --primary: #ff5722;
-    --primary-hover: #ff7043;
+    --primary-hover: #f96639;
     --primary-foreground: #ffffff;
 
     /* Màu cho nút phụ / outline ở chế độ tối */
     --secondary-bg: #334155;
-    --secondary-hover: #475569;
+    --secondary-hover: #374457;
     --secondary-foreground: #f8fafc;
 
     --card-bg: #111720; /* Màu nền cho thẻ truyện (card) ở chế độ tối */

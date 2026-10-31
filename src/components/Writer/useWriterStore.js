@@ -6,6 +6,7 @@ import {
   addWriterChapter,
   createWriterNovel,
   deleteWriterChapter,
+  deleteWriterNovel,
   EMPTY_WRITER,
   normalizeWriterState,
   updateWriterChapter,
@@ -23,6 +24,8 @@ function writerReducer(state, action) {
       return createWriterNovel(state, action.novel, action.id, action.now);
     case "UPDATE_NOVEL":
       return updateWriterNovel(state, action.novelId, action.novel, action.now);
+    case "DELETE_NOVEL":
+      return deleteWriterNovel(state, action.novelId);
     case "ADD_CHAPTER":
       return addWriterChapter(state, action.novelId, action.chapter, action.id, action.now);
     case "UPDATE_CHAPTER":
