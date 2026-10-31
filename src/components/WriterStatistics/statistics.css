@@ -115,6 +115,10 @@
     font-weight: 700;
 }
 
+.statistics-empty {
+    color: var(--text-muted);
+}
+
 .statistics-chart-scroll {
     overflow-x: auto;
 }
@@ -122,8 +126,9 @@
 .statistics-line-chart {
     display: block;
     width: 100%;
-    min-width: 28rem;
+    min-width: 20rem;
     height: auto;
+    max-height: 18rem;
 }
 
 .statistics-bar-chart {
@@ -131,6 +136,7 @@
     width: 100%;
     min-width: 20rem;
     height: auto;
+    max-height: 18rem;
 }
 
 .statistics-gridline {
@@ -175,6 +181,7 @@
 .statistics-pie-content > svg {
     width: min(55%, 12rem);
     flex: 0 1 12rem;
+    max-height: 14rem;
 }
 
 .statistics-legend {

@@ -1,14 +1,17 @@
 
 "use client";
 
-import { ChartNoAxesCombined, Eye, EyeDashedIcon, MessageCircle, Share2, StarIcon } from "lucide-react";
+import { ChartNoAxesCombined, ChevronDown, Eye, MessageCircle, Pencil, Plus, Share2, StarIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
+import { useWriterDispatch } from "@/components/Writer/useWriterStore";
 import './cardWriter.css'
-export default function CardWriter({id, title, img, date, view, like, comment,current_chap}){
+export default function CardWriter({id, title, img, date, view, like, comment,current_chap, chapters = []}){
 const { t } = useI18n();
+const dispatch = useWriterDispatch();
+const [chaptersOpen, setChaptersOpen] = useState(false);
 const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     year: "numeric",
     month: "long",
@@ -17,6 +20,15 @@ const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     minute: "2-digit",
 });
  const [message, setMessage] = useState("");
+function handleDeleteChapter(chapterId) {
+    dispatch({
+        type: "DELETE_CHAPTER",
+        novelId: id,
+        chapterId,
+        now: new Date().toISOString(),
+    });
+}
+
 async function handleShare() {
     const url = new URL(`/novels/${encodeURIComponent(id)}`, window.location.origin).toString();
     setMessage("");
@@ -47,7 +59,7 @@ return(
                 <Image src={img} width={100} height={140} unoptimized className="object-cover rounded" alt={title} />
             </div>
             <div className="title">
-                <h1>{title}</h1>
+                <h1><Link href={`/novels/${encodeURIComponent(id)}`} className="hover:text-primary focus-visible:outline-2 focus-visible:outline-primary">{title}</Link></h1>
                 <p className="text-green-600">Số chương đã đăng: {current_chap}</p>
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
                 <div className="flex flex-row gap-5">
@@ -59,12 +71,61 @@ return(
         </div>
        
         <div className="writer-card-actions mr-3">
-            <Link className="btn-card" href={`/Writer/new?novelId=${encodeURIComponent(id)}`}>
-                <span>{t("Tiếp tục viết")}</span>
-            </Link>
+            <div className="writer-card-write">
+                <button
+                    type="button"
+                    className="btn-card"
+                    aria-expanded={chaptersOpen}
+                    aria-controls={`writer-chapters-${id}`}
+                    onClick={() => setChaptersOpen((open) => !open)}
+                >
+                    <span>{t("Tiếp tục viết")}</span>
+                    <ChevronDown aria-hidden="true" />
+                </button>
+                {chaptersOpen && (
+                    <ul className="writer-card-menu" id={`writer-chapters-${id}`} aria-label={t("Danh sách chương của {0}", [title])}>
+                        {chapters.map((chapter) => (
+                            <li className="writer-card-menu__chapter" key={chapter.id}>
+                                <span className="writer-card-menu__title">
+                                    {t("Chương {0}: {1}", [chapter.number, chapter.title])}
+                                </span>
+                                <div className="writer-card-menu__actions">
+                                    <Link
+                                        className="writer-card-menu__action"
+                                        href={`/Writer/new?novelId=${encodeURIComponent(id)}&chapterId=${encodeURIComponent(chapter.id)}`}
+                                        aria-label={t("Sửa chương {0}", [chapter.number])}
+                                        onClick={() => setChaptersOpen(false)}
+                                    >
+                                        <Pencil size={16} aria-hidden="true" />
+                                        <span>{t("Sửa")}</span>
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="writer-card-menu__action writer-card-menu__delete"
+                                        aria-label={t("Xóa chương {0}", [chapter.number])}
+                                        onClick={() => handleDeleteChapter(chapter.id)}
+                                    >
+                                        <Trash2 size={16} aria-hidden="true" />
+                                        <span>{t("Xóa")}</span>
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                        <li className="writer-card-menu__add">
+                            <Link
+                                href={`/Writer/new?novelId=${encodeURIComponent(id)}`}
+                                onClick={() => setChaptersOpen(false)}
+                            >
+                                <Plus size={16} aria-hidden="true" />
+                                <span>{t("Thêm chương")}</span>
+                            </Link>
+                        </li>
+                    </ul>
+                )}
+            </div>
             <div className="flex flex-row gap-2">
                 <Link className="btn-card btn-card--stats" href={`/Writer/statistics/${id}`}>
-                    <ChartNoAxesCombined/>
+                    <ChartNoAxesCombined/>{t("Thống kê")}
                 </Link>
                 <button type="button" className="btn-card btn-card--stats" onClick={handleShare}><Share2 size={18} />{t("Share")}</button>
                 {message && <p className="max-w-48 break-all text-sm text-green-600" role="status">{message}</p>}

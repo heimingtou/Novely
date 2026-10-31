@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
-import { addWriterChapter, createWriterNovel, validateChapterInput, validateNovelInput, WRITER_GENRES } from "@/lib/writer-model.mjs";
-import { useWriterStore } from "@/components/Writer/useWriterStore";
+import { validateChapterInput, validateNovelInput, WRITER_GENRES } from "@/lib/writer-model.mjs";
+import { useWriterDispatch, useWriterStore } from "@/components/Writer/useWriterStore";
 import "./create-novel.css";
+import { UploadCloudIcon } from "lucide-react";
 
 const MAX_COVER_BYTES = 750 * 1024;
 const initialNovel = { title: "", genres: [], coverImage: "", description: "" };
@@ -16,22 +17,39 @@ function createId() {
   return crypto.randomUUID();
 }
 
-export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
+export default function CreateNovelFlow({ novelId: existingNovelId = "", chapterId = "" }) {
   const { t } = useI18n();
   const router = useRouter();
-  const [writerState, setWriterState, ready, storageFailed] = useWriterStore();
+  const [writerState, , ready, storageFailed] = useWriterStore();
+  const dispatch = useWriterDispatch();
   const [step, setStep] = useState("novel");
   const [novelForm, setNovelForm] = useState(initialNovel);
   const [novelId, setNovelId] = useState("");
-  const [chapterTitle, setChapterTitle] = useState("");
-  const [chapterContent, setChapterContent] = useState("");
+  const [chapterDraftState, setChapterDraftState] = useState(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [coverError, setCoverError] = useState("");
   const existingNovel = existingNovelId
     ? writerState.novels.find((item) => item.id === existingNovelId)
     : null;
+  const existingChapter = existingNovel?.chapters.find((item) => item.id === chapterId);
   const activeStep = existingNovelId ? "chapter" : step;
+  const chapterDraft = chapterDraftState?.chapterId === chapterId ? chapterDraftState : null;
+  const chapterTitle = chapterDraft?.title ?? existingChapter?.title ?? "";
+  const chapterContent = chapterDraft?.content ?? existingChapter?.content ?? "";
+
+  function updateChapterDraft(field, value) {
+    setChapterDraftState((current) => {
+      const draft = current?.chapterId === chapterId
+        ? current
+        : {
+            chapterId,
+            title: existingChapter?.title || "",
+            content: existingChapter?.content || "",
+          };
+      return { ...draft, [field]: value };
+    });
+  }
 
   function handleCoverChange(event) {
     const file = event.target.files?.[0];
@@ -72,7 +90,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
     }
 
     const id = createId();
-    setWriterState((state) => createWriterNovel(state, novelForm, id, new Date().toISOString()));
+    dispatch({ type: "CREATE_NOVEL", novel: novelForm, id, now: new Date().toISOString() });
     setNovelId(id);
     setStep("chapter");
   }
@@ -89,10 +107,26 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
       return;
     }
 
-    setWriterState((state) => addWriterChapter(state, existingNovelId || novelId, input, createId(), new Date().toISOString()));
-    setChapterTitle("");
-    setChapterContent("");
-    setMessage(t("Đã lưu chương. Bạn có thể viết chương tiếp theo."));
+    if (chapterId) {
+      dispatch({
+        type: "UPDATE_CHAPTER",
+        novelId: existingNovelId,
+        chapterId,
+        chapter: input,
+        now: new Date().toISOString(),
+      });
+      setMessage(t("Đã cập nhật chương."));
+    } else {
+      dispatch({
+        type: "ADD_CHAPTER",
+        novelId: existingNovelId || novelId,
+        chapter: input,
+        id: createId(),
+        now: new Date().toISOString(),
+      });
+      setChapterDraftState({ chapterId, title: "", content: "" });
+      setMessage(t("Đã lưu chương. Bạn có thể viết chương tiếp theo."));
+    }
   }
 
   return (
@@ -116,6 +150,11 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
       ) : existingNovelId && !existingNovel ? (
         <div className="writer-create__form">
           <p className="writer-create__error" role="alert">{t("Không tìm thấy truyện cần thêm chapter trên trình duyệt này.")}</p>
+          <Link className="writer-create__secondary" href="/Writer">{t("Quay lại danh sách truyện")}</Link>
+        </div>
+      ) : chapterId && !existingChapter ? (
+        <div className="writer-create__form">
+          <p className="writer-create__error" role="alert">{t("Không tìm thấy chương cần sửa trên trình duyệt này.")}</p>
           <Link className="writer-create__secondary" href="/Writer">{t("Quay lại danh sách truyện")}</Link>
         </div>
       ) : activeStep === "novel" ? (
@@ -157,7 +196,14 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
           <div className="writer-create__field">
             <label htmlFor="novel-cover">{t("Ảnh bìa")} <b aria-hidden="true">*</b></label>
             <p className="writer-create__hint">{t("Chọn ảnh PNG, JPG hoặc WebP, dung lượng tối đa 750 KB.")}</p>
-            <input id="novel-cover" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleCoverChange} />
+            <div className="w-full h-14">
+              <input id="novel-cover" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCoverChange} />
+              <label htmlFor="novel-cover" 
+    className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white font-medium rounded-lg cursor-pointer hover:bg-primary-hover transition-all shadow-sm gap-2">
+                <UploadCloudIcon/>
+              </label>
+            </div>
+            
             {novelForm.coverImage && (
               <Image className="writer-create__cover-preview" src={novelForm.coverImage} alt={t("Ảnh bìa truyện")} width={120} height={160} unoptimized />
             )}
@@ -189,7 +235,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
               maxLength={150}
               required
               value={chapterTitle}
-              onChange={(event) => setChapterTitle(event.target.value)}
+              onChange={(event) => updateChapterDraft("title", event.target.value)}
               placeholder={t("Ví dụ: Chương 1 - Khởi đầu")}
             />
           </label>
@@ -200,7 +246,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
               maxLength={50000}
               required
               value={chapterContent}
-              onChange={(event) => setChapterContent(event.target.value)}
+              onChange={(event) => updateChapterDraft("content", event.target.value)}
               placeholder={t("Nhập nội dung chapter…")}
             />
             <small>{chapterContent.length.toLocaleString()} / 50.000</small>
@@ -208,14 +254,16 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "" }) {
           {error && <p className="writer-create__error" role="alert">{error}</p>}
           {message && <p className="writer-create__success" role="status">{message}</p>}
           <div className="writer-create__actions">
-            <button className="writer-create__primary" type="submit">{t("Lưu chapter")}</button>
+            <button className="writer-create__primary" type="submit">
+              {chapterId ? t("Cập nhật chương") : t("Lưu chapter")}
+            </button>
             <button
               className="writer-create__secondary"
               type="button"
               disabled={!(existingNovel || writerState.novels.find((novel) => novel.id === novelId))?.chapters.length}
-              onClick={() => router.push("/Writer")}
+              onClick={() => router.push(`/novels/${encodeURIComponent(existingNovelId || novelId)}`)}
             >
-              {t("Hoàn tất")}
+              {t("Xem trước")}
             </button>
           </div>
         </form>

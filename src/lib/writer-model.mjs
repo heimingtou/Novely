@@ -105,6 +105,25 @@ export function createWriterNovel(state, input, id, now) {
   });
 }
 
+export function updateWriterNovel(state, novelId, input, now) {
+  if (Object.keys(validateNovelInput(input)).length || !validDate(now)) return state;
+  const current = normalizeWriterState(state);
+  if (!current.novels.some((novel) => novel.id === novelId)) return state;
+
+  return normalizeWriterState({
+    ...current,
+    novels: current.novels.map((novel) => novel.id === novelId
+      ? {
+          ...novel,
+          title: input.title,
+          genres: input.genres,
+          description: input.description,
+          updatedAt: now,
+        }
+      : novel),
+  });
+}
+
 export function addWriterChapter(state, novelId, input, id, now) {
   if (Object.keys(validateChapterInput(input)).length || !validId(id) || !validDate(now)) return state;
   const current = normalizeWriterState(state);
@@ -119,6 +138,44 @@ export function addWriterChapter(state, novelId, input, id, now) {
           ...item,
           updatedAt: now,
           chapters: [...item.chapters, { id, title: input.title, content: input.content, createdAt: now }],
+        }
+      : item),
+  });
+}
+
+export function updateWriterChapter(state, novelId, chapterId, input, now) {
+  if (Object.keys(validateChapterInput(input)).length || !validDate(now)) return state;
+  const current = normalizeWriterState(state);
+  const novel = current.novels.find((item) => item.id === novelId);
+  if (!novel?.chapters.some((chapter) => chapter.id === chapterId)) return state;
+
+  return normalizeWriterState({
+    ...current,
+    novels: current.novels.map((item) => item.id === novelId
+      ? {
+          ...item,
+          updatedAt: now,
+          chapters: item.chapters.map((chapter) => chapter.id === chapterId
+            ? { ...chapter, title: input.title, content: input.content }
+            : chapter),
+        }
+      : item),
+  });
+}
+
+export function deleteWriterChapter(state, novelId, chapterId, now) {
+  if (!validDate(now)) return state;
+  const current = normalizeWriterState(state);
+  const novel = current.novels.find((item) => item.id === novelId);
+  if (!novel?.chapters.some((chapter) => chapter.id === chapterId)) return state;
+
+  return normalizeWriterState({
+    ...current,
+    novels: current.novels.map((item) => item.id === novelId
+      ? {
+          ...item,
+          updatedAt: now,
+          chapters: item.chapters.filter((chapter) => chapter.id !== chapterId),
         }
       : item),
   });

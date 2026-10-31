@@ -121,6 +121,7 @@ export default function WriterPage(){
             likes: 0,
             comments: 0,
             current_chapters: novel.chapters.length,
+            chapters: novel.chapters,
         }))
         : []
 
@@ -145,6 +146,7 @@ export default function WriterPage(){
                                 like={novelData.likes}
                                 comment={novelData.comments}
                                 current_chap={novelData.current_chapters}
+                                chapters={novelData.chapters || []}
                             />
                         ))
                     }

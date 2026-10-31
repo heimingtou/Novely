@@ -4,15 +4,15 @@ import { getServerI18n } from "@/lib/i18n/server";
 import ChapterList from "@/components/novel-detail/ChapterList";
 import NovelActions from "@/components/novel-detail/NovelActions";
 import ResumeReading from "@/components/novel-detail/ResumeReading";
+import WriterNovelDetail from "@/components/novel-detail/WriterNovelDetail";
 import { getNovel } from "@/data/novels.mjs";
-import { notFound } from "next/navigation";
 
 // Component chính của trang
 export default async function NovelDetailPage({ params }) {
   const { t, locale } = await getServerI18n();
   const { id } = await params;
   const novel = getNovel(id);
-  if (!novel) notFound();
+  if (!novel) return <WriterNovelDetail novelId={id} />;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10" lang={locale}>

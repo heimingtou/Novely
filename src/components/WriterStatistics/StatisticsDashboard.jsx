@@ -4,7 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import './statistics.css'
 import Image from "next/image";
-import { ArrowBigLeftDashIcon, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { useWriterStore } from "@/components/Writer/useWriterStore";
+import { createWriterStatistics } from "@/lib/writer-statistics.mjs";
 const dashboardTabs = [
     { id: 'overview', label: 'Tổng quan' },
     { id: 'engagement', label: 'Mức độ tương tác' },
@@ -117,6 +119,15 @@ function BarChart({ title, chapters, values }) {
 }
 
 function PieChart({ title, segments }) {
+    if (!segments.length) {
+        return (
+            <section className="statistics-chart-card">
+                <h2>{title}</h2>
+                <p className="statistics-empty">Chưa có dữ liệu độc giả.</p>
+            </section>
+        )
+    }
+
     const colors = ['#f97316', '#3b82f6', '#a855f7', '#14b8a6']
     const total = segments.reduce((sum, segment) => sum + segment.value, 0)
     const slices = segments.map((segment, index) => {
@@ -167,8 +178,27 @@ function PieChart({ title, segments }) {
     )
 }
 
-export default function StatisticsDashboard({ statistics }) {
+export default function StatisticsDashboard({ statistics: sampleStatistics, novelId }) {
     const [activeTab, setActiveTab] = useState(dashboardTabs[0].id)
+    const [writerState, , writerReady] = useWriterStore()
+    const writerNovel = writerReady
+        ? writerState.novels.find((novel) => novel.id === novelId)
+        : null
+    const statistics = sampleStatistics || (writerNovel ? createWriterStatistics(writerNovel) : null)
+
+    if (!statistics) {
+        return (
+            <main className="writer-statistics">
+                <Link className="statistics-back-link flex flex-row gap-1" href="/Writer">
+                    <ArrowLeft aria-hidden="true" />
+                    <span>Trở về danh sách truyện</span>
+                </Link>
+                <p role={writerReady ? "alert" : "status"}>
+                    {writerReady ? "Không tìm thấy truyện cần xem thống kê." : "Đang tải dữ liệu truyện…"}
+                </p>
+            </main>
+        )
+    }
 
     return (
         <main className="writer-statistics">
@@ -182,6 +212,7 @@ export default function StatisticsDashboard({ statistics }) {
                             alt={`Bìa truyện ${statistics.title}`}
                             fill
                             sizes="(max-width: 480px) 4rem, 5rem"
+                            unoptimized
                         />
                     </div>
                     <div>
