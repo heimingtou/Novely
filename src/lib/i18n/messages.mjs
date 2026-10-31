@@ -1,5 +1,6 @@
 // Khóa là nhãn gốc để giữ bản dịch và quy tắc biên tập trong một nơi.
 export const english = {
+  "Thống kê": "Statistics", "Xóa ": "Delete ", "Câu truyện của bạn": "Your story", "Xem trước": "Preview",
   "Xóa truyện": "Delete story", "Xóa truyện {0}": "Delete story {0}", "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.": "Are you sure you want to delete “{0}”? This action cannot be undone.",
   "Quản lý truyện": "Manage story", "Mục lục": "Table of contents", "Lưu thay đổi": "Save changes", "Đã cập nhật thông tin truyện.": "Story details updated.", "Đã xóa chương.": "Chapter deleted.",
   "Bạn": "You", "Số chương": "Chapter count", "Chưa có chương nào.": "There are no chapters yet.",
@@ -29,6 +30,7 @@ export const english = {
 };
 
 export const vietnamese = {
+  "Thống kê": "Thống kê", "Xóa ": "Xóa ", "Câu truyện của bạn": "Câu truyện của bạn", "Xem trước": "Xem trước",
   "Xóa truyện": "Xóa truyện", "Xóa truyện {0}": "Xóa truyện {0}", "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.": "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.",
   "Quản lý truyện": "Quản lý truyện", "Mục lục": "Mục lục", "Lưu thay đổi": "Lưu thay đổi", "Đã cập nhật thông tin truyện.": "Đã cập nhật thông tin truyện.", "Đã xóa chương.": "Đã xóa chương.",
   "Bạn": "Bạn", "Số chương": "Số chương", "Chưa có chương nào.": "Chưa có chương nào.", "Chi tiết truyện": "Chi tiết truyện",

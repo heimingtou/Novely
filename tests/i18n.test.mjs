@@ -23,3 +23,17 @@ test("mẫu động giữ nguyên nội dung chèn vào và thông báo có th�
   assert.equal(en(vi("Đã lưu ghi chú cá nhân.")), "Personal note saved.");
   assert.equal(vi(en("Đã lưu ghi chú cá nhân.")), "Đã lưu ghi chú cá nhân.");
 });
+
+test("nhãn khu vực tác giả có bản dịch cho cả hai ngôn ngữ", () => {
+  const en = createTranslator("en");
+  const vi = createTranslator("vi");
+
+  assert.equal(en("Thống kê"), "Statistics");
+  assert.equal(en("Xóa "), "Delete ");
+  assert.equal(en("Câu truyện của bạn"), "Your story");
+  assert.equal(en("Xem trước"), "Preview");
+  assert.equal(vi("Thống kê"), "Thống kê");
+  assert.equal(vi("Xóa "), "Xóa ");
+  assert.equal(vi("Câu truyện của bạn"), "Câu truyện của bạn");
+  assert.equal(vi("Xem trước"), "Xem trước");
+});
