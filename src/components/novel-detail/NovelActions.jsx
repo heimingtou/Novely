@@ -1,5 +1,6 @@
 
 "use client";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 import { useState } from "react";
 import {
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 export default function NovelActions({ novelTitle }) {
+  const { t } = useI18n();
   // Trạng thái lưu truyện
   const [isSaved, setIsSaved] = useState(false);
   const [message, setMessage] = useState("");
@@ -20,8 +22,8 @@ export default function NovelActions({ novelTitle }) {
 
     setMessage(
       nextValue
-        ? "Đã thêm truyện vào Library!"
-        : "Đã xóa truyện khỏi Library!"
+        ? t("Đã thêm truyện vào Library!")
+        : t("Đã xóa truyện khỏi Library!")
     );
   }
 
@@ -37,13 +39,13 @@ export default function NovelActions({ novelTitle }) {
         });
       } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
-        setMessage("Đã sao chép link truyện!");
+        setMessage(t("Đã sao chép link truyện!"));
       } else {
-        setMessage("Hãy sao chép URL trên thanh địa chỉ.");
+        setMessage(t("Hãy sao chép URL trên thanh địa chỉ."));
       }
     } catch (error) {
       if (error.name !== "AbortError") {
-        setMessage("Không thể chia sẻ. Vui lòng thử lại.");
+        setMessage(t("Không thể chia sẻ. Vui lòng thử lại."));
       }
     }
   }
@@ -65,23 +67,21 @@ export default function NovelActions({ novelTitle }) {
             <BookmarkPlus size={20} />
           )}
 
-          {isSaved ? "Đã thêm vào Library" : "Add to Library"}
+          {isSaved ? t("Đã thêm vào Library") : t("Add to Library")}
         </button>
 
         {/* Nút Share */}
         <button
           type="button"
           onClick={handleShare}
-          className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 px-5 py-3 font-semibold transition hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-5 py-3 font-semibold transition hover:bg-secondary-bg"
         >
-          <Share2 size={20} />
-          Share
-        </button>
+          <Share2 size={20} />{t("Share")} </button>
       </div>
 
       {message && (
         <p className="mt-3 text-sm text-green-600" role="status">
-          {message}
+          {t(message)}
         </p>
       )}
     </div>

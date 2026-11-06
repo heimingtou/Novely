@@ -1,9 +1,12 @@
+
+import { getServerI18n } from "@/lib/i18n/server";
 import CardStory from "@/components/cardStory/cardStory";
 import { faker } from '@faker-js/faker';
 import './page.css'
 import cardImg from '../../../../public/CardStory.jpg'
 import ListStory from "@/components/ListStory/ListStory";
 export default async function NovelDetailPage({ params }) {
+  const { t, locale } = await getServerI18n();
   const { id } = await params;
 
    const categories = [
@@ -37,7 +40,7 @@ export default async function NovelDetailPage({ params }) {
             id: faker.string.uuid(),
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
-            genres: cat + ' / Truyện Hay/fanfic',
+            genres: t(cat),
             coverImage: cardImg,
         }))
     }));
@@ -52,7 +55,7 @@ export default async function NovelDetailPage({ params }) {
   const novelsInCategory = matchedCategory ? matchedCategory.novels: [];
   return (
     <div className="Containt">
-      <ListStory title={decodedId} DataStory={novelsInCategory} />
+      <ListStory title={t(decodedId)} DataStory={novelsInCategory} />
     </div>
   );
 }
