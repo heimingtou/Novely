@@ -78,6 +78,9 @@ button{
   flex-direction: row;
   gap: 15px;
 }
+.btnGenre:hover{
+  text-decoration: underline;
+}
 /* Responsive cho màn hình từ small (sm) trở lên */
 @media (min-width: 640px) {
   .btn_nav {

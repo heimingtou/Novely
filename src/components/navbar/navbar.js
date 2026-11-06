@@ -77,7 +77,7 @@ export default function Navbar() {
               {
                 genres.map((genre)=>(
                   <Link key={genre} href={`/novel/${genre}`} >
-                    <button onClick={()=>setOpenGen(false)} >{genre}</button>
+                    <button onClick={()=>setOpenGen(false)} className="btnGenre"  >{genre}</button>
                   </Link>
                 
                 ))
