@@ -114,7 +114,10 @@ export default function Navbar() {
             {login&&
              ( <>
               <span className='text-sm'>{account.name}</span>
-              <button className='btn-avt'> <span><UserPen/> </span>  <span>{t("profile")}</span></button>
+              <Link href="/users/minh-tho-ha">
+                <button className='btn-avt'> <span><UserPen/> </span>  <span>{t("profile")}</span></button>
+              </Link>
+              
               <hr className='w-full'/>
               <Link href="/Writer">
                   <button className='btn-avt'> <span><PencilSparkles/></span><span>Writer</span></button>
@@ -128,7 +131,7 @@ export default function Navbar() {
              </> ) 
             }
            
-            <button className='btn-avt'><span><Settings/></span><span>{t("setting")}</span></button>
+            {/* <button className='btn-avt'><span><Settings/></span><span>{t("setting")}</span></button> */}
             <ThemeToggle />
             <LanguageSwitcher />
             <div className='block md:hidden'>
