@@ -6,13 +6,19 @@ import NovelActions from "@/components/novel-detail/NovelActions";
 import ResumeReading from "@/components/novel-detail/ResumeReading";
 import { getNovel } from "@/data/novels.mjs";
 import { notFound } from "next/navigation";
+import { getWriterStory } from "@/data/writer-stories.mjs";
+import WriterStoryPreview from "@/components/WriterStatistics/WriterStoryPreview";
 
 // Component chính của trang
 export default async function NovelDetailPage({ params }) {
   const { t, locale } = await getServerI18n();
   const { id } = await params;
   const novel = getNovel(id);
-  if (!novel) notFound();
+  if (!novel) {
+    const story = getWriterStory(id);
+    if (story) return <WriterStoryPreview story={story} />;
+    notFound();
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10" lang={locale}>

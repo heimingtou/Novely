@@ -13,7 +13,8 @@ test("nhãn tiếng Việt thống nhất, chuyển Anh áp dụng cả trang se
   await expect(page.getByRole("button", { name: "Thêm vào thư viện", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).first().click();
   await page.locator(".avatar > button").click();
-  for (const name of ["Hồ sơ", "Góc tác giả", "Cài đặt", "Đăng xuất"]) await expect(page.locator("#account-menu").getByRole("button", { name, exact: true })).toBeVisible();
+  for (const name of ["Hồ sơ", "Cài đặt", "Đăng xuất"]) await expect(page.locator("#account-menu").getByRole("button", { name, exact: true })).toBeVisible();
+  await expect(page.locator("#account-menu").getByRole("link", { name: "Góc tác giả", exact: true })).toHaveAttribute("href", "/Writer");
   await language(page, "English");
   await expect(page.getByRole("heading", { name: "Story details", exact: true })).toBeVisible();
   await expect(page.locator("#account-menu").getByRole("button", { name: "Profile", exact: true })).toBeVisible();
@@ -56,10 +57,12 @@ test("Forum chuyển chủ đề và thao tác, không dịch bài viết hoặc
   const original = await page.locator(".forum-post-title").first().textContent();
   await language(page, "English");
   await expect(page.getByRole("link", { name: "Latest", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create post", exact: true })).toHaveCount(1);
   await expect(page.locator(".forum-post-title").first()).toHaveText(original);
   await page.locator(".avatar > button").click();
   await page.locator(".forum-page-heading").getByRole("button", { name: "Create post", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Create post" });
+  await expect(dialog).toContainText("Share your thoughts, ask a question or introduce a story.");
   await dialog.getByRole("button", { name: "Sign in to post", exact: true }).click();
   await expect(dialog.getByLabel("Display name", { exact: true })).toHaveCount(0);
   await expect(dialog.locator(".forum-account")).toContainText("Bạn đọc Novely");

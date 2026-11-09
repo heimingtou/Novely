@@ -4,20 +4,22 @@ import { useState } from 'react'
 import Link from 'next/link'
 import './statistics.css'
 import Image from "next/image";
-import { ArrowBigLeftDashIcon, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { useI18n } from '@/components/i18n/LocaleProvider';
+import { handleTabKey } from '@/lib/tab-navigation';
 const dashboardTabs = [
     { id: 'overview', label: 'Tổng quan' },
     { id: 'engagement', label: 'Mức độ tương tác' },
     { id: 'audience', label: 'Đặc điểm độc giả' },
 ]
 
-const formatNumber = (value) => new Intl.NumberFormat('vi-VN').format(value)
-
 function LineChart({ title, dates, values }) {
+    const { locale } = useI18n();
+    const formatNumber = value => new Intl.NumberFormat(locale).format(value);
     const chart = { left: 42, right: 490, top: 18, bottom: 166 }
     const maxValue = Math.max(...values, 1)
     const points = values.map((value, index) => {
-        const x = chart.left + (index * (chart.right - chart.left)) / (values.length - 1)
+        const x = chart.left + (index * (chart.right - chart.left)) / Math.max(1, values.length - 1)
         const y = chart.bottom - (value / maxValue) * (chart.bottom - chart.top)
         return { x, y, value }
     })
@@ -31,7 +33,7 @@ function LineChart({ title, dates, values }) {
                     className="statistics-line-chart"
                     viewBox="0 0 510 215"
                     role="img"
-                    aria-label={`${title} theo ngày`}
+                    aria-label={title}
                 >
                     {[0, 0.5, 1].map((ratio) => {
                         const y = chart.bottom - ratio * (chart.bottom - chart.top)
@@ -68,6 +70,8 @@ function LineChart({ title, dates, values }) {
 }
 
 function BarChart({ title, chapters, values }) {
+    const { t, locale } = useI18n();
+    const formatNumber = value => new Intl.NumberFormat(locale).format(value);
     const maxValue = Math.max(...values, 1)
     const barWidth = 42
     const gap = 22
@@ -81,7 +85,7 @@ function BarChart({ title, chapters, values }) {
                     className="statistics-bar-chart"
                     viewBox={`0 0 ${chartWidth} 210`}
                     role="img"
-                    aria-label={`${title} theo chương`}
+                    aria-label={title}
                 >
                     <line x1="12" x2={chartWidth - 8} y1="166" y2="166" className="statistics-gridline" />
                     {values.map((value, index) => {
@@ -105,7 +109,7 @@ function BarChart({ title, chapters, values }) {
                                     textAnchor="middle"
                                     className="statistics-axis-label"
                                 >
-                                    {chapters[index].replace('Chương ', 'Ch.')}
+                                    {t("Chương {0}", [index + 1])}
                                 </text>
                             </g>
                         )
@@ -117,8 +121,9 @@ function BarChart({ title, chapters, values }) {
 }
 
 function PieChart({ title, segments }) {
+    const { t } = useI18n();
     const colors = ['#f97316', '#3b82f6', '#a855f7', '#14b8a6']
-    const total = segments.reduce((sum, segment) => sum + segment.value, 0)
+    const total = segments.reduce((sum, segment) => sum + segment.value, 0) || 1
     const slices = segments.map((segment, index) => {
         const startAngle = segments
             .slice(0, index)
@@ -149,7 +154,7 @@ function PieChart({ title, segments }) {
                 <svg viewBox="0 0 200 200" role="img" aria-label={title}>
                     {slices.map((slice) => (
                         <path key={slice.label} d={slice.path} fill={slice.color}>
-                            <title>{`${slice.label}: ${slice.value}%`}</title>
+                            <title>{`${t(slice.label)}: ${slice.value}%`}</title>
                         </path>
                     ))}
                 </svg>
@@ -157,7 +162,7 @@ function PieChart({ title, segments }) {
                     {slices.map((slice) => (
                         <li key={slice.label}>
                             <span style={{ backgroundColor: slice.color }} aria-hidden="true" />
-                            <span>{slice.label}</span>
+                            <span>{t(slice.label)}</span>
                             <strong>{slice.value}%</strong>
                         </li>
                     ))}
@@ -168,11 +173,13 @@ function PieChart({ title, segments }) {
 }
 
 export default function StatisticsDashboard({ statistics }) {
+    const { t, locale } = useI18n();
+    const formatNumber = value => new Intl.NumberFormat(locale).format(value);
     const [activeTab, setActiveTab] = useState(dashboardTabs[0].id)
 
     return (
         <main className="writer-statistics">
-            <Link className="statistics-back-link flex flex-row gap-1" href="/Writer"> <span><ArrowLeft/></span><span> Trở về danh sách truyện</span></Link>
+            <Link className="statistics-back-link flex flex-row gap-1" href="/Writer"> <span><ArrowLeft/></span><span>{t("Trở về danh sách truyện")}</span></Link>
             <header className="statistics-header">
                 <div className="imgCart flex flex-row gap-2.5">
                     <div className="imgCart__image">
@@ -188,9 +195,9 @@ export default function StatisticsDashboard({ statistics }) {
                         <h1>{statistics.title}</h1>
                         <div className="statistics-summary">
                         
-                            <div><span>Số độc giả</span><strong>{formatNumber(statistics.readers)}</strong></div>
-                            <div><span>Lượt đọc</span><strong>{formatNumber(statistics.views)}</strong></div>
-                            <div><span>Số chương</span><strong>{formatNumber(statistics.chapters)}</strong>
+                            <div><span>{t("Số độc giả")}</span><strong>{formatNumber(statistics.readers)}</strong></div>
+                            <div><span>{t("Lượt đọc")}</span><strong>{formatNumber(statistics.views)}</strong></div>
+                            <div><span>{t("Số chương")}</span><strong>{formatNumber(statistics.chapters)}</strong>
                             </div>
                         </div>
                     </div>
@@ -200,40 +207,46 @@ export default function StatisticsDashboard({ statistics }) {
             </header>
             <hr/>
 
-            <nav className="statistics-tabs" role="tablist" aria-label="Thống kê truyện">
+            <p className="writer-caption">{t("Số liệu thống kê minh họa, không phải dữ liệu trực tiếp.")}</p>
+            <nav className="statistics-tabs" role="tablist" aria-label={t("Thống kê truyện")} onKeyDown={handleTabKey}>
                 {dashboardTabs.map((tab) => (
                     <button
                         key={tab.id}
                         type="button"
                         role="tab"
                         aria-selected={activeTab === tab.id}
+                        tabIndex={activeTab === tab.id ? 0 : -1}
+                        id={`statistics-tab-${tab.id}`}
+                        aria-controls="statistics-panel"
                         onClick={() => setActiveTab(tab.id)}
                     >
-                        {tab.label}
+                        {t(tab.label)}
                     </button>
                 ))}
             </nav>
 
+            <div id="statistics-panel" role="tabpanel" aria-labelledby={`statistics-tab-${activeTab}`}>
             {activeTab === 'overview' && (
                 <div className="statistics-chart-grid">
-                    <LineChart title="Số độc giả theo ngày" dates={statistics.daily.dates} values={statistics.daily.readers} />
-                    <LineChart title="Lượt bình chọn theo ngày" dates={statistics.daily.dates} values={statistics.daily.votes} />
-                    <LineChart title="Bình luận theo ngày" dates={statistics.daily.dates} values={statistics.daily.comments} />
+                    <LineChart title={t("Số độc giả theo ngày")} dates={statistics.daily.dates} values={statistics.daily.readers} />
+                    <LineChart title={t("Lượt bình chọn theo ngày")} dates={statistics.daily.dates} values={statistics.daily.votes} />
+                    <LineChart title={t("Bình luận theo ngày")} dates={statistics.daily.dates} values={statistics.daily.comments} />
                 </div>
             )}
             {activeTab === 'engagement' && (
                 <div className="statistics-chart-grid">
-                    <BarChart title="Lượt đọc theo chương" chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.reads} />
-                    <BarChart title="Lượt bình chọn theo chương" chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.votes} />
-                    <BarChart title="Bình luận theo chương" chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.comments} />
+                    <BarChart title={t("Lượt đọc theo chương")} chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.reads} />
+                    <BarChart title={t("Lượt bình chọn theo chương")} chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.votes} />
+                    <BarChart title={t("Bình luận theo chương")} chapters={statistics.chapterEngagement.chapters} values={statistics.chapterEngagement.comments} />
                 </div>
             )}
             {activeTab === 'audience' && (
                 <div className="statistics-chart-grid statistics-demographics">
-                    <PieChart title="Độc giả theo độ tuổi" segments={statistics.demographics.age} />
-                    <PieChart title="Độc giả theo giới tính" segments={statistics.demographics.gender} />
+                    <PieChart title={t("Độc giả theo độ tuổi")} segments={statistics.demographics.age} />
+                    <PieChart title={t("Độc giả theo giới tính")} segments={statistics.demographics.gender} />
                 </div>
             )}
+            </div>
         </main>
     )
 }

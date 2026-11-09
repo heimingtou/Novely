@@ -118,12 +118,10 @@ export default function Navbar() {
               <span className='text-sm'>{account.name}</span>
               <button className='btn-avt'> <span><UserPen/> </span>  <span>{t("profile")}</span></button>
               <hr className='w-full'/>
-              <Link href="/Writer">
-                  <button className='btn-avt'> <span><PencilSparkles/></span><span>writer</span></button>
-              </Link>
+              <Link href="/Writer" className='btn-avt' onClick={() => setOpen(false)}><PencilSparkles/><span>{t("writer")}</span></Link>
             
               <div className='block md:hidden'>
-                <button className='btn-avt '> <span><BellIcon/></span><span>thông báo</span></button>
+                <button className='btn-avt '> <span><BellIcon/></span><span>{t("thông báo")}</span></button>
               </div>
               
                <hr className='w-full'/>

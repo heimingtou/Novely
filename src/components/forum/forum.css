@@ -39,9 +39,6 @@
 .forum-sidebar-note { display: flex; gap: 9px; color: var(--f-muted); padding: 20px 10px; margin-top: 14px; border-top: 1px solid var(--f-line); font-size: 11px; }
 .forum-sidebar-note svg { flex-shrink: 0; margin-top: 3px; }
 .forum-center { min-width: 0; }
-.forum-compose-card { display: flex; align-items: center; gap: 12px; background: var(--f-surface); padding: 18px 20px; border: 1px solid var(--f-line); border-radius: 14px; margin-bottom: 18px; }
-.forum-compose-card > button:not(.forum-icon-button) { min-width: 0; flex: 1; text-align: left; color: var(--f-muted); font-size: 12px; padding: 8px 0; }
-.forum-compose-card .forum-icon-button { color: var(--f-accent); background: var(--f-tint); }
 .forum-avatar { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; font-size: 11px; font-weight: 650; background: #f6e5d3; color: #8b503c; }
 .forum-avatar-1 { background: #e6e5f6; color: #67618e; }
 .forum-avatar-2 { background: #e0ede6; color: #49705e; }
@@ -183,8 +180,6 @@
   .forum-category-nav > a svg { width: 15px; height: 15px; }
   .forum-category-nav > a small { display: none; }
   .forum-center { width: 100%; }
-  .forum-compose-card { padding: 14px; gap: 10px; border-radius: 12px; }
-  .forum-compose-card > button:not(.forum-icon-button) { font-size: 11px; }
   .forum-feed-card, .forum-detail-card { border-radius: 12px; }
   .forum-feed-tabs { padding-inline: 16px; }
   .forum-feed-tabs nav { gap: 22px; }

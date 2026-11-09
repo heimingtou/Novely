@@ -4,7 +4,7 @@ import StatisticsDashboard from '@/components/WriterStatistics/StatisticsDashboa
 
 export default async function NovelStatisticsPage({ params }) {
     const { id } = await params
-    const statistics = novelStatistics[id]
+    const statistics = Object.hasOwn(novelStatistics, id) ? novelStatistics[id] : null
 
     if (!statistics) {
         notFound()

@@ -1,141 +1,35 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import CardWriter from "@/components/CardWriter/cardwriter"
-import Tabs from "@/components/Tabs/Tabs"
-import cardImg from '../../../public/CardStory.jpg'
-import './page.css'
-import { Plus, PlusCircle } from 'lucide-react'
-const NovelDatas={
-  "novels": [
-    {
-      "id": 1,
-      "img":cardImg,
-      "title": "Hệ Thống Đọc Sách Nhận Thưởng",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 15420,
-      "likes": 1230,
-      "comments": 450,
-      "current_chapters": 120
-    },
-    {
-      "id": 2,
-      "img":cardImg,
-      "title": "Ta Cùng Nàng Phiêu Lưu Giữa Thế Giới Ảo",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 8900,
-      "likes": 750,
-      "comments": 180,
-      "current_chapters": 45
-    },
-    {
-      "id": 3,
-      "img":cardImg,
-      "title": "Điểm Mù: Cuộc Săn Đêm",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 25100,
-      "likes": 3400,
-      "comments": 920,
-      "current_chapters": 210
-    }
-  ]
-}
-const AllNovelDatas={
-  "novels": [
-    {
-      "id": 1,
-      "img":cardImg,
-      "title": "Hệ Thống Đọc Sách Nhận Thưởng",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 15420,
-      "likes": 1230,
-      "comments": 450,
-      "current_chapters": 120
-    },
-    {
-      "id": 2,
-      "img":cardImg,
-      "title": "Ta Cùng Nàng Phiêu Lưu Giữa Thế Giới Ảo",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 8900,
-      "likes": 750,
-      "comments": 180,
-      "current_chapters": 45
-    },
-  ] 
-}
-const SeriesDatas={
-  "novels": [
-    {
-      "id": 1,
-      "img":cardImg,
-      "title": "Hệ Thống Đọc Sách Nhận Thưởng",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 15420,
-      "likes": 1230,
-      "comments": 450,
-      "current_chapters": 120
-    },
-    {
-      "id": 2,
-      "img":cardImg,
-      "title": "Ta Cùng Nàng Phiêu Lưu Giữa Thế Giới Ảo",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 8900,
-      "likes": 750,
-      "comments": 180,
-      "current_chapters": 45
-    },
-    {
-      "id": 3,
-      "img":cardImg,
-      "title": "Điểm Mù: Cuộc Săn Đêm",
-      "publish_date": "2026-03-15T10:30:00Z",
-      "views": 25100,
-      "likes": 3400,
-      "comments": 920,
-      "current_chapters": 210
-    }
-  ]
-}
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import CardWriter from "@/components/CardWriter/cardwriter";
+import Tabs from "@/components/Tabs/Tabs";
+import WriterEditor from "@/components/WriterStatistics/WriterEditor";
+import { writerStories } from "@/data/writer-stories.mjs";
+import { useLocalStorageState } from "@/lib/useLocalStorageState";
+import { normalizeDrafts, WRITER_STORAGE_KEY } from "@/lib/writer-model.mjs";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import "./page.css";
 
-const novelDataByTab = {
-    published: NovelDatas,
-    all: AllNovelDatas,
-    series: SeriesDatas,
-}
-
-export default function WriterPage(){
-    const [activeTab, setActiveTab] = useState('published')
-    const selectedNovelData = novelDataByTab[activeTab]
-
-    return(
-        <div className="ContaintPage writer-page">
-            <div className="titlePage flex flex-row justify-between items-center">
-                <h1>Truyện đã viết</h1>
-                <button className='btn'> <span><Plus/> </span> <span>Đăng truyện mới</span> </button>
-            </div>
-            <div className="writer-content">
-                <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
-                <div className="content flex flex-col gap-3">
-                    {
-                        selectedNovelData.novels.map((novelData) => (
-                            <CardWriter
-                                key={novelData.id}
-                                id={novelData.id}
-                                title={novelData.title}
-                                img={novelData.img}
-                                date={novelData.publish_date}
-                                view={novelData.views}
-                                like={novelData.likes}
-                                comment={novelData.comments}
-                                current_chap={novelData.current_chapters}
-                            />
-                        ))
-                    }
-                    
-                </div>
-            </div>
-        </div>
-    )
+const EMPTY = [];
+export default function WriterPage() {
+  const { t } = useI18n();
+  const [activeTab, setActiveTab] = useState("published");
+  const [drafts, setDrafts, ready, failed] = useLocalStorageState(WRITER_STORAGE_KEY, EMPTY, normalizeDrafts);
+  const [editor, setEditor] = useState(null);
+  const [notice, setNotice] = useState("");
+  const stories = [...writerStories, ...drafts.filter(draft => !writerStories.some(story => story.id === draft.id)).map(draft => ({ ...draft, img: "/CardStory.jpg", view: 0, like: 0, comment: 0, current_chap: 0, draft: true }))];
+  const filtered = stories.filter(story => activeTab === "published" ? !story.draft : activeTab === "series" ? story.series : true);
+  return <div className="ContaintPage writer-page">
+    <div className="titlePage"><h1>{t("Truyện đã viết")}</h1><button type="button" className="btn" disabled={!ready || drafts.length >= 100} onClick={() => setEditor({})}><Plus /><span>{t("Đăng truyện mới")}</span></button></div>
+    <p className="writer-caption">{t("Số liệu minh họa. Bản nháp được lưu riêng trên trình duyệt này.")}</p>
+    {failed && <p role="alert">{t("Không thể lưu trên trình duyệt. Thay đổi mới chỉ được giữ trong phiên này và sẽ mất khi tải lại.")}</p>}
+    <p role="status">{t(notice)}</p>
+    <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
+    <div className="writer-content" id="writer-story-list">{filtered.map(story => <CardWriter key={story.id} {...story} onWrite={() => setEditor({ story: drafts.find(draft => draft.id === story.id) || story })} />)}</div>
+    {editor && <WriterEditor story={editor.story} onClose={() => setEditor(null)} onSave={draft => {
+      setDrafts(current => [draft, ...current.filter(item => item.id !== draft.id)]);
+      setEditor(null); setActiveTab("all"); setNotice("Đã lưu bản nháp.");
+    }} />}
+  </div>;
 }
