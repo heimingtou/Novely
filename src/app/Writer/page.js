@@ -7,7 +7,7 @@ import Tabs from "@/components/Tabs/Tabs";
 import WriterEditor from "@/components/WriterStatistics/WriterEditor";
 import { writerStories } from "@/data/writer-stories.mjs";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
-import { normalizeDrafts, WRITER_STORAGE_KEY } from "@/lib/writer-model.mjs";
+import { normalizeDrafts, WRITER_DRAFT_STORAGE_KEY } from "@/lib/writer-model.mjs";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import "./page.css";
 
@@ -15,7 +15,7 @@ const EMPTY = [];
 export default function WriterPage() {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState("published");
-  const [drafts, setDrafts, ready, failed] = useLocalStorageState(WRITER_STORAGE_KEY, EMPTY, normalizeDrafts);
+  const [drafts, setDrafts, ready, failed] = useLocalStorageState(WRITER_DRAFT_STORAGE_KEY, EMPTY, normalizeDrafts);
   const [editor, setEditor] = useState(null);
   const [notice, setNotice] = useState("");
   const stories = [...writerStories, ...drafts.filter(draft => !writerStories.some(story => story.id === draft.id)).map(draft => ({ ...draft, img: "/CardStory.jpg", view: 0, like: 0, comment: 0, current_chap: 0, draft: true }))];
