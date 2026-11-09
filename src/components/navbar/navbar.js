@@ -86,8 +86,8 @@ export default function Navbar() {
             }
           </div>
           <div>
-            <Link href="/novel/1" ><span >{t("Thư viện")}</span></Link>
-          </div>  
+            <Link href="/library"><span>{t("Thư viện")}</span></Link>
+          </div>
           
         </div>
         <div className='btn_Containt flex flex-row justify-around items-center w-[50%] gap-3 md:gap-12'>
@@ -98,7 +98,13 @@ export default function Navbar() {
 
           <div className='max-md:hidden flex flex-row gap-[3rem] items-center  ml-2 mr-2'>
             <Link href="/novel/2" aria-label={t("thông báo")}> <BellIcon/>  </Link>
-            {!login?<button className='btn_nav ' disabled={!sessionReady} onClick={signIn}>{t("Đăng nhập")} </button>:<button className='btn_nav'>{t("Mua gói Vip")}</button>}
+            {!login ? (
+              <Link href="/auth" className='btn_nav'>
+                {t("Đăng nhập")}
+              </Link>
+            ) : (
+              <button className='btn_nav'>{t("Mua gói Vip")}</button>
+            )}
           </div>
           <div className='avatar relative' ref={avartaRef} onKeyDown={event => {
             if (event.key === 'Escape') { setOpen(false); event.currentTarget.querySelector('button')?.focus(); }
@@ -135,10 +141,21 @@ export default function Navbar() {
             <ThemeToggle />
             <LanguageSwitcher />
             <div className='block md:hidden'>
-                {!login?<button className='block md:hidden btn-avt' disabled={!sessionReady} onClick={() => { signIn(); setOp(false); }}><span><LogIn/> </span><span>{t("Đăng nhập")}</span>
-            
-              </button>:<button className='btn-avt block md:hidden'><span><ShoppingCartPlus/></span><span>{t("Mua gói Vip")}</span>
-              </button>}
+                {!login ? (
+                  <Link 
+                    href="/auth" 
+                    className='btn-avt flex items-center' 
+                    onClick={() => setOpen(false)}
+                  >
+                    <span><LogIn/></span>
+                    <span>{t("Đăng nhập")}</span>
+                  </Link>
+              ) : (
+                  <button className='btn-avt block md:hidden'>
+                    <span><ShoppingCartPlus/></span>
+                    <span>{t("Mua gói Vip")}</span>
+                  </button>
+              )}
             </div>
           
             {login&&<button className='btn-avt' onClick={() => { signOut(); setOpen(false); }}><span><LogOut/> </span><span>{t("Đăng xuất")}</span></button> }
