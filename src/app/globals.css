@@ -3,86 +3,69 @@
 
 :root {
   color-scheme: light;
-  --background: #f7f8fa; /* Nền sáng nhẹ đặc trưng phong cách MangaToon */
-  --foreground: #1a1a1a; /* Chữ chính đậm dễ đọc */
-  
-  /* Màu nhận diện thương hiệu (MangaToon Style) */
+  --background: #f7f8fa;
+  --foreground: #1a1a1a;
   --primary: #FF5454;
   --primary-hover: #e44646;
-  --primary-foreground: #ffffff; /* Màu chữ trên nút chính */
-
-  /* Màu cho nút phụ / outline ở chế độ sáng */
+  --primary-foreground: #ffffff;
   --secondary-bg: #e2e8f0;
   --secondary-hover: #cbd5e1;
   --secondary-foreground: #1e293b;
-
-  /* Màu phụ trợ */
   --card-bg: #ffffff;
   --text-muted: #64748b;
   --muted: var(--text-muted);
   --border-color: #e5e7eb;
-  --text-nav:#302c2b;
-
-  /* === BIẾN MÀU CHO INPUT (Light Mode) === */
+  --text-nav: #302c2b;
   --input-bg: #ffffff;
-  --input-border: #d1d5db; /* Viền xám nhạt */
+  --input-border: #d1d5db;
   --input-focus: var(--primary);
 }
-h1{
-    font-size: clamp(24px,2vw,32px);
-    margin-top: 1px;
-    margin-bottom: 2px
+
+h1 {
+  font-size: clamp(24px, 2vw, 32px);
+  margin-top: 1px;
+  margin-bottom: 2px;
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
-
   --color-secondary-bg: var(--secondary-bg);
   --color-secondary-hover: var(--secondary-hover);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-card: var(--card-bg);
   --color-muted: var(--text-muted);
   --color-border: var(--border-color);
-
-  /* === ĐĂNG KÝ MÀU INPUT VỚI TAILWIND === */
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
   --color-input-focus: var(--input-focus);
-  
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 :root.dark {
-    color-scheme: dark;
-    --background: #0f172a; /* Nền tối sâu sang trọng cho trang đọc truyện */
-    --foreground: #f8fafc;
-    
-    --primary: #FF5454;
-    --primary-hover: #e44646;
-    --primary-foreground: #ffffff;
-
-    /* Màu cho nút phụ / outline ở chế độ tối */
-    --secondary-bg: #334155;
-    --secondary-hover: #374457;
-    --secondary-foreground: #f8fafc;
-
-    --card-bg: #111720; /* Màu nền cho thẻ truyện (card) ở chế độ tối */
-    --text-muted: #ced9e9;
-    --border-color: #334155;
-    --text-nav:#ffefeb;
-    /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
-    --input-bg: #1e293b;        /* Nền tối cho input */
-    --input-border: #475569;    /* Viền xám tối */
-    --input-focus: var(--primary);
+  color-scheme: dark;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --primary: #FF5454;
+  --primary-hover: #e44646;
+  --primary-foreground: #ffffff;
+  --secondary-bg: #334155;
+  --secondary-hover: #374457;
+  --secondary-foreground: #f8fafc;
+  --card-bg: #111720;
+  --text-muted: #ced9e9;
+  --border-color: #334155;
+  --text-nav: #ffefeb;
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-focus: var(--primary);
 }
 
-/* One scrollbar size for pages, dialogs and nested scrolling regions. */
+/* Keep scrollbars consistent across pages, dialogs and nested scrolling regions. */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--primary) transparent;

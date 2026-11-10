@@ -148,6 +148,6 @@ button{
   .site-navbar .forum-nav-link { min-width: 32px; min-height: 32px; }
   .site-navbar .btn_search { padding: 6px; }
   .site-navbar .avatar { width: 32px; flex-shrink: 0; }
-  .site-navbar .avatar > button > div { width: 32px; height: 32px; }
+  .site-navbar .avatar > button > span { width: 32px; height: 32px; }
   .site-navbar .avatar > button > svg { display: none; }
 }

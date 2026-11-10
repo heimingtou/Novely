@@ -14,8 +14,15 @@ export default function ResumeReading({ novel }) {
   const [position] = useReaderStorage(`novely:v1:${novel.id}:last-position`, null, validate);
   return (
     <div className="mt-6 flex flex-wrap gap-3">
-      <Link className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white hover:opacity-90" href={`${chapterHref(novel.id, novel.chapters[0].number)}#paragraph-${novel.chapters[0].paragraphs[0].id}`}><BookOpen size={18} /> {t("Đọc từ đầu")}</Link>
-      {position && <Link className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 font-semibold hover:bg-secondary-bg" href={chapterHref(novel.id, position.chapterNumber)}><History size={18} /> {t("Đọc tiếp chương")} {position.chapterNumber}</Link>}
-    </div>
+      <Link className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FF5454] px-4 font-semibold text-white transition hover:opacity-90 sm:w-60" href={`${chapterHref(novel.id, novel.chapters[0].number)}#paragraph-${novel.chapters[0].paragraphs[0].id}`}><BookOpen size={18} /> {t("Đọc từ đầu")}</Link>
+      {position && (
+        <Link
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FF5454] px-4 font-semibold text-white transition hover:opacity-90 sm:w-60"
+          href={chapterHref(novel.id, position.chapterNumber)}
+        >
+          <History size={20} />
+          {t("Đọc tiếp chương")} {position.chapterNumber}
+        </Link>
+      )}   </div>
   );
 }
