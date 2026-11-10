@@ -188,7 +188,7 @@ test("danh sách chương xổ trong trang, không còn nút trùng chức năng
   }
 });
 
-test("thanh công cụ sát hai bên và danh sách chương không tràn trên các cỡ màn hình", async ({ page }) => {
+test("thanh công cụ sát hai bên, điều hướng ghim khi cuộn và danh sách không tràn màn hình", async ({ page }) => {
   for (const width of [320, 390, 768, 1280, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await openReader(page);
@@ -202,6 +202,15 @@ test("thanh công cụ sát hai bên và danh sách chương không tràn trên 
     const list = await navigation.locator(".reader-chapter-options").boundingBox();
     expect(list.x).toBeGreaterThanOrEqual(0);
     expect(list.x + list.width).toBeLessThanOrEqual(width);
+    await page.evaluate(() => window.scrollTo(0, 1200));
+    await expect.poll(() => navigation.evaluate((nav) => {
+      const toolbar = document.querySelector(".reader-toolbar").getBoundingClientRect();
+      return Math.abs(nav.getBoundingClientRect().top - toolbar.bottom);
+    })).toBeLessThanOrEqual(1);
+    const pinnedList = await navigation.locator(".reader-chapter-options").boundingBox();
+    expect(pinnedList.y + pinnedList.height).toBeLessThanOrEqual(900);
+    await navigation.getByRole("button", { name: "Danh sách chương" }).click();
+    await expect(navigation.getByRole("link", { name: "Chương sau", exact: true })).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
 });

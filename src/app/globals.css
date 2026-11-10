@@ -8,7 +8,7 @@
   
   /* Màu nhận diện thương hiệu (MangaToon Style) */
   --primary: #FF5454;
-  --primary-hover: #f4511e;
+  --primary-hover: #e44646;
   --primary-foreground: #ffffff; /* Màu chữ trên nút chính */
 
   /* Màu cho nút phụ / outline ở chế độ sáng */
@@ -26,7 +26,7 @@
   /* === BIẾN MÀU CHO INPUT (Light Mode) === */
   --input-bg: #ffffff;
   --input-border: #d1d5db; /* Viền xám nhạt */
-  --input-focus: #ff5722;  /* Viền cam MangaToon khi bấm vào */
+  --input-focus: var(--primary);
 }
 h1{
     font-size: clamp(24px,2vw,32px);
@@ -63,8 +63,8 @@ h1{
     --background: #0f172a; /* Nền tối sâu sang trọng cho trang đọc truyện */
     --foreground: #f8fafc;
     
-    --primary: #ff5722;
-    --primary-hover: #f96639;
+    --primary: #FF5454;
+    --primary-hover: #e44646;
     --primary-foreground: #ffffff;
 
     /* Màu cho nút phụ / outline ở chế độ tối */
@@ -79,8 +79,30 @@ h1{
     /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
     --input-bg: #1e293b;        /* Nền tối cho input */
     --input-border: #475569;    /* Viền xám tối */
-    --input-focus: #ff5722;     /* Vẫn giữ màu cam chủ đạo khi focus */
+    --input-focus: var(--primary);
 }
+
+/* One scrollbar size for pages, dialogs and nested scrolling regions. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  * { scrollbar-width: auto; scrollbar-color: auto; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--primary-hover); }
+  ::-webkit-scrollbar-corner { background: transparent; }
+}
+
+input[type="range"], input[type="checkbox"], progress { accent-color: var(--primary); }
 
 body {
   background: var(--background);

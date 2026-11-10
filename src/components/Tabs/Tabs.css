@@ -25,7 +25,7 @@
 }
 
 .writer-tabs__tab[aria-selected="true"] {
-    color: #c2410c;
+    color: var(--primary);
 }
 
 .writer-tabs__indicator {
@@ -34,7 +34,7 @@
     left: 0;
     height: 3px;
     border-radius: 9999px;
-    background-color: #f97316;
+    background-color: var(--primary);
     transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
 }

@@ -1,6 +1,6 @@
 .novely-forum {
   --f-bg: var(--background); --f-surface: var(--card-bg); --f-text: var(--foreground);
-  --f-line: var(--border-color); --f-muted: #687383; --f-accent: #dc4c43; --f-tint: #fff0ed;
+  --f-line: var(--border-color); --f-muted: #687383; --f-accent: var(--primary); --f-tint: #fff0ed;
   background: var(--f-bg); color: var(--f-text); font: 14px/1.7 var(--forum-font), Arial, sans-serif;
   min-height: 100vh; padding: 36px max(24px, calc((100% - 1250px) / 2)) 60px;
 }
@@ -18,7 +18,7 @@
 .forum-button, .forum-icon-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; background: var(--f-surface); color: var(--f-text); border: 1px solid var(--f-line); border-radius: 10px; padding: 9px 15px; font-size: 12px; font-weight: 600; transition: background .15s; }
 .forum-button:hover { background: var(--f-tint); }
 .forum-primary { background: var(--f-accent); border-color: var(--f-accent); color: #fff; }
-.forum-primary:not(:disabled):hover { background: #c54139; color: #fff; }
+.forum-primary:not(:disabled):hover { background: var(--primary-hover); color: #fff; }
 .forum-icon-button { width: 40px; height: 40px; min-height: 40px; padding: 8px; flex-shrink: 0; background: transparent; border-color: transparent; }
 .forum-icon-button:hover { background: var(--f-tint); }
 .forum-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr) 248px; gap: 24px; align-items: start; }
@@ -33,7 +33,7 @@
 .forum-category-nav > a span { flex: 1; }
 .forum-category-nav > a small { font-size: 10px; color: var(--f-muted); font-variant-numeric: tabular-nums; }
 .forum-category-nav > a:hover { background: var(--f-surface); color: var(--f-text); }
-.forum-category-nav > a.is-active { background: var(--f-tint); border-color: #f5c9c4; color: var(--f-accent); font-weight: 650; }
+.forum-category-nav > a.is-active { background: var(--f-tint); border-color: var(--f-accent); color: var(--f-accent); font-weight: 650; }
 .forum-category-nav > a:last-child { margin-top: 12px; border-top: 1px solid var(--f-line); border-radius: 0 0 9px 9px; }
 .forum-nav-caption { color: var(--f-muted); font-size: 9px; letter-spacing: 1.3px; margin: 16px 10px 6px; }
 .forum-sidebar-note { display: flex; gap: 9px; color: var(--f-muted); padding: 20px 10px; margin-top: 14px; border-top: 1px solid var(--f-line); font-size: 11px; }
@@ -174,7 +174,7 @@
   .forum-layout { display: flex; flex-direction: column; gap: 18px; }
   .forum-sidebar { position: static; width: 100%; }
   .forum-sidebar-title, .forum-nav-caption, .forum-sidebar-note { display: none; }
-  .forum-category-nav { flex-direction: row; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+  .forum-category-nav { flex-direction: row; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; }
   .forum-category-nav > a { flex-shrink: 0; gap: 6px; padding: 8px 10px; background: var(--f-surface); border-color: var(--f-line); font-size: 10px; min-height: 36px; }
   .forum-category-nav > a:last-child { margin-top: 0; border: 1px solid var(--f-line); border-radius: 9px; }
   .forum-category-nav > a svg { width: 15px; height: 15px; }
@@ -203,9 +203,7 @@
   .forum-comment-controls .forum-button { padding: 8px 10px; font-size: 11px; }
   .forum-comment-controls .forum-checkbox { font-size: 10px; margin-top: 10px; }
 }
-:root.dark .novely-forum { --f-muted: #a5afbd; --f-accent: #ff9c87; --f-tint: #342c31; }
-:root.dark .forum-category-nav > a.is-active { border-color: #785046; }
-:root.dark .forum-primary { background: #d25146; border-color: #d25146; color: #fff; }
+:root.dark .novely-forum { --f-muted: #a5afbd; --f-tint: #342c31; }
 :root.dark .forum-reading-card { background: #252936; border-color: var(--f-line); }
 :root.dark .forum-reading-card > a { border-color: var(--f-line); }
 :root.dark .forum-book-art { box-shadow: 6px 6px 0 #333b4c; }

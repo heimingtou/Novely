@@ -41,7 +41,8 @@ const FONTS = Object.fromEntries(READER_FONTS.map((font) => [font.value, font.fa
 function readingAnchor() {
   const speech = document.querySelector('.reader-speech[data-playing="true"]');
   const toolbarHeight = document.querySelector(".reader-toolbar")?.offsetHeight || 68;
-  return Math.min(window.innerHeight * 0.45, Math.max(Math.min(160, window.innerHeight * 0.25), speech ? toolbarHeight + speech.offsetHeight + 16 : 0));
+  const navigationHeight = document.querySelector('.reader-chapter-nav[data-sticky="true"]')?.offsetHeight || 0;
+  return Math.max(Math.min(160, window.innerHeight * 0.25), toolbarHeight + navigationHeight + (speech ? speech.offsetHeight : 0) + 16);
 }
 
 export default function ReadingPage({ novel, chapter }) {
@@ -66,11 +67,27 @@ export default function ReadingPage({ novel, chapter }) {
   const [note, setNote] = useState("");
   const [notice, setNotice] = useState("");
   const articleRef = useRef(null);
+  const readerRef = useRef(null);
   const restored = useRef(false);
   const latestPosition = useRef(null);
   const reflowPosition = useRef(null);
   const settingsButton = useRef(null);
   const words = chapter.paragraphs.reduce((total, paragraph) => total + paragraph.text.split(/\s+/).length, 0);
+
+  useEffect(() => {
+    const reader = readerRef.current;
+    const toolbar = reader.querySelector(".reader-toolbar");
+    const navigation = reader.querySelector('.reader-chapter-nav[data-sticky="true"]');
+    const measure = () => {
+      reader.style.setProperty("--reader-toolbar-height", `${toolbar.offsetHeight}px`);
+      reader.style.setProperty("--reader-navigation-height", `${navigation.offsetHeight}px`);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(toolbar);
+    observer.observe(navigation);
+    measure();
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToPosition = useCallback((position) => {
     const element = document.getElementById(`paragraph-${position.paragraphId}`);
@@ -225,7 +242,7 @@ export default function ReadingPage({ novel, chapter }) {
   }
 
   return (
-    <div className={`novely-reader ${readerSerif.variable} ${readerVietnam.variable} ${readerMontserrat.variable}`} data-theme={settings.theme} style={{ "--reader-width": `${settings.width}px`, "--reader-font": FONTS[settings.font], "--reader-size": `${settings.fontSize}px`, "--reader-leading": settings.lineHeight }} lang={locale} onKeyDown={(event) => {
+    <div ref={readerRef} className={`novely-reader ${readerSerif.variable} ${readerVietnam.variable} ${readerMontserrat.variable}`} data-theme={settings.theme} style={{ "--reader-width": `${settings.width}px`, "--reader-font": FONTS[settings.font], "--reader-size": `${settings.fontSize}px`, "--reader-leading": settings.lineHeight }} lang={locale} onKeyDown={(event) => {
       if (event.target.closest("dialog")) return;
       if (event.key === "Escape") { setSelection(null); setSettingsOpen(false); settingsButton.current?.focus(); }
     }}>
@@ -248,7 +265,7 @@ export default function ReadingPage({ novel, chapter }) {
           <p className="reader-meta">{novel.author}<span aria-hidden="true">·</span>{chapter.date}<span aria-hidden="true">·</span>{t("Khoảng")} {Math.max(1, Math.ceil(words / 200))} {t("phút đọc")}</p>
         </header>
 
-        <ChapterNavigation novelId={novel.id} chapters={novel.chapters} currentChapter={chapter.number} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label={t("Điều hướng đầu chương")} />
+        <ChapterNavigation sticky novelId={novel.id} chapters={novel.chapters} currentChapter={chapter.number} previous={novel.chapters[chapterIndex - 1]} next={novel.chapters[chapterIndex + 1]} label={t("Điều hướng đầu chương")} />
         <ReaderSpeech paragraphs={chapter.paragraphs} startIndex={location.index} onParagraph={onSpokenParagraph} />
         <div className="reader-status"><span><Check size={14} /> {storageFailed ? t("Vị trí đang được giữ trong phiên này") : ready ? t("Tự lưu vị trí đọc trên trình duyệt") : t("Đang tải thiết lập đọc…")}</span></div>
         <p className="reader-caption reader-selection-tip">{t("Chọn văn bản → Highlight để tự động lưu vào My Clipping. Dùng bookmark bên lề để giữ lại một đoạn.")}</p>
