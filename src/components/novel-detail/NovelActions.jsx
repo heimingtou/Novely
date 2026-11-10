@@ -59,7 +59,7 @@ export default function NovelActions({ novelTitle }) {
           type="button"
           aria-pressed={isSaved}
           onClick={handleLibrary}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FF5454] px-5 py-3 font-semibold text-white transition hover:opacity-90"
+          className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FF5454] px-5 font-semibold text-white transition hover:opacity-90 sm:w-60"
         >
           {isSaved ? (
             <BookmarkCheck size={20} />
@@ -74,7 +74,7 @@ export default function NovelActions({ novelTitle }) {
         <button
           type="button"
           onClick={handleShare}
-          className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-5 py-3 font-semibold transition hover:bg-secondary-bg"
+          className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border px-5 font-semibold transition hover:bg-secondary-bg sm:w-60"
         >
           <Share2 size={20} />{t("Share")} </button>
       </div>
