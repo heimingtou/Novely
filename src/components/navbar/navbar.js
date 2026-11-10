@@ -86,9 +86,9 @@ export default function Navbar() {
             }
           </div>
           <div>
-            <Link href="/novel/1" ><span >{t("Thư viện")}</span></Link>
+            <Link href="/library"><span>{t("Thư viện")}</span></Link>
           </div>
-
+          
         </div>
         <div className='btn_Containt flex flex-row justify-around items-center w-[50%] gap-3 md:gap-12'>
           <Link href="/forum" className="forum-nav-link" aria-label={t("Cộng đồng")} title={t("Cộng đồng Novely")}><MessageCircle size={20} /></Link>
@@ -198,6 +198,34 @@ export default function Navbar() {
                 </div>
               )
             }
+           
+            {/* <button className='btn-avt'><span><Settings/></span><span>{t("setting")}</span></button> */}
+            <ThemeToggle />
+            <LanguageSwitcher />
+            <div className='block md:hidden'>
+                {!login ? (
+                  <Link 
+                    href="/auth" 
+                    className='btn-avt flex items-center' 
+                    onClick={() => setOpen(false)}
+                  >
+                    <span><LogIn/></span>
+                    <span>{t("Đăng nhập")}</span>
+                  </Link>
+              ) : (
+                  <button className='btn-avt block md:hidden'>
+                    <span><ShoppingCartPlus/></span>
+                    <span>{t("Mua gói Vip")}</span>
+                  </button>
+              )}
+            </div>
+          
+            {login&&<button className='btn-avt' onClick={() => { signOut(); setOpen(false); }}><span><LogOut/> </span><span>{t("Đăng xuất")}</span></button> }
+            </div>} 
+          </div>
+        </div>
+      </div>
+    </nav>
           </div >
         </div >
       </div >
