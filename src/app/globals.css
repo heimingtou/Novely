@@ -3,13 +3,16 @@
 
 :root {
   color-scheme: light;
-  --background: #f7f8fa; /* Nền sáng nhẹ đặc trưng phong cách MangaToon */
-  --foreground: #1a1a1a; /* Chữ chính đậm dễ đọc */
-  
+  --background: #f7f8fa;
+  /* Nền sáng nhẹ đặc trưng phong cách MangaToon */
+  --foreground: #1a1a1a;
+  /* Chữ chính đậm dễ đọc */
+
   /* Màu nhận diện thương hiệu (MangaToon Style) */
   --primary: #FF5454;
   --primary-hover: #f4511e;
-  --primary-foreground: #ffffff; /* Màu chữ trên nút chính */
+  --primary-foreground: #ffffff;
+  /* Màu chữ trên nút chính */
 
   /* Màu cho nút phụ / outline ở chế độ sáng */
   --secondary-bg: #e2e8f0;
@@ -21,22 +24,26 @@
   --text-muted: #64748b;
   --muted: var(--text-muted);
   --border-color: #e5e7eb;
-  --text-nav:#302c2b;
+  --text-nav: #302c2b;
 
   /* === BIẾN MÀU CHO INPUT (Light Mode) === */
   --input-bg: #ffffff;
-  --input-border: #d1d5db; /* Viền xám nhạt */
-  --input-focus: #ff5722;  /* Viền cam MangaToon khi bấm vào */
+  --input-border: #d1d5db;
+  /* Viền xám nhạt */
+  --input-focus: #ff5722;
+  /* Viền cam MangaToon khi bấm vào */
 }
-h1{
-    font-size: clamp(24px,2vw,32px);
-    margin-top: 1px;
-    margin-bottom: 2px
+
+h1 {
+  font-size: clamp(24px, 2vw, 32px);
+  margin-top: 1px;
+  margin-bottom: 2px
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
@@ -53,33 +60,39 @@ h1{
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
   --color-input-focus: var(--input-focus);
-  
+
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 :root.dark {
-    color-scheme: dark;
-    --background: #0f172a; /* Nền tối sâu sang trọng cho trang đọc truyện */
-    --foreground: #f8fafc;
-    
-    --primary: #ff5722;
-    --primary-hover: #f96639;
-    --primary-foreground: #ffffff;
+  color-scheme: dark;
+  --background: #0f172a;
+  /* Nền tối sâu sang trọng cho trang đọc truyện */
+  --foreground: #f8fafc;
 
-    /* Màu cho nút phụ / outline ở chế độ tối */
-    --secondary-bg: #334155;
-    --secondary-hover: #374457;
-    --secondary-foreground: #f8fafc;
 
-    --card-bg: #111720; /* Màu nền cho thẻ truyện (card) ở chế độ tối */
-    --text-muted: #ced9e9;
-    --border-color: #334155;
-    --text-nav:#ffefeb;
-    /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
-    --input-bg: #1e293b;        /* Nền tối cho input */
-    --input-border: #475569;    /* Viền xám tối */
-    --input-focus: #ff5722;     /* Vẫn giữ màu cam chủ đạo khi focus */
+  --primary: #FF5454;
+  --primary-hover: #E64545;
+  --primary-foreground: #ffffff;
+
+  /* Màu cho nút phụ / outline ở chế độ tối */
+  --secondary-bg: #334155;
+  --secondary-hover: #374457;
+  --secondary-foreground: #f8fafc;
+
+  --card-bg: #111720;
+  /* Màu nền cho thẻ truyện (card) ở chế độ tối */
+  --text-muted: #ced9e9;
+  --border-color: #334155;
+  --text-nav: #ffefeb;
+  /* === BIẾN MÀU CHO INPUT (Dark Mode) === */
+  --input-bg: #1e293b;
+  /* Nền tối cho input */
+  --input-border: #475569;
+  /* Viền xám tối */
+  --input-focus: #FF5454;
+  /* Vẫn giữ màu cam chủ đạo khi focus */
 }
 
 body {
