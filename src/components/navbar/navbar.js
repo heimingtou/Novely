@@ -103,54 +103,104 @@ export default function Navbar() {
           <div className='avatar relative' ref={avartaRef} onKeyDown={event => {
             if (event.key === 'Escape') { setOpen(false); event.currentTarget.querySelector('button')?.focus(); }
           }}>
-            <button className='flex flex-row gap-1.5 items-center' aria-label={t("Menu tài khoản")} aria-expanded={open} aria-controls="account-menu" onClick={() => setOpen(!open)}>
-              <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95' >
-                <Image src={avatar} alt={account?.name || 'avatar'} />
+            <button
+              className="flex flex-row gap-1.5 items-center"
+              aria-label={t("Menu tài khoản")}
+              aria-expanded={open}
+              aria-controls="account-menu"
+              onClick={() => setOpen(!open)}
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border focus:outline-none flex items-center justify-center cursor-pointer transition-transform active:scale-95">
+                <Image src={avatar} alt={account?.name || "avatar"} />
               </div>
               <ChevronDown />
             </button>
-            {open &&
-              <div id="account-menu" className='account-menu absolute right-0 top-full mt-2 p-3.5 gap-3 rounded-lg shadow-xl flex flex-col items-start'>
-                {login &&
-                  (<>
-                    <span className='text-sm'>{account.name}</span>
 
-                    <Link
-                      href="/users/minh-tho-ha"
-                      className="btn-avt w-full cursor-pointer"
-                      onClick={() => setOpen(false)}
+            {
+              open && (
+                <div
+                  id="account-menu"
+                  className="account-menu absolute right-0 top-full mt-2 p-3.5 gap-3 rounded-lg shadow-xl flex flex-col items-start"
+                >
+                  {login && (
+                    <>
+                      <span className="text-sm">{account.name}</span>
+
+                      {/* Profile */}
+                      <Link
+                        href="/users/minh-tho-ha"
+                        className="btn-avt w-full cursor-pointer"
+                        onClick={() => setOpen(false)}
+                      >
+                        <span><UserPen /></span>
+                        <span>{t("profile")}</span>
+                      </Link>
+
+                      <hr className="w-full" />
+
+                      {/* Writer */}
+                      <Link href="/Writer">
+                        <button className="btn-avt">
+                          <span><PencilSparkles /></span>
+                          <span>Writer</span>
+                        </button>
+                      </Link>
+
+                      {/* Thông báo trên mobile */}
+                      <div className="block md:hidden">
+                        <button className="btn-avt">
+                          <span><BellIcon /></span>
+                          <span>Thông báo</span>
+                        </button>
+                      </div>
+
+                      <hr className="w-full" />
+                    </>
+                  )}
+
+                  {/* Settings đang được ẩn trên main */}
+                  <ThemeToggle />
+                  <LanguageSwitcher />
+
+                  <div className="block md:hidden">
+                    {!login ? (
+                      <button
+                        className="btn-avt"
+                        disabled={!sessionReady}
+                        onClick={() => {
+                          signIn();
+                          setOpen(false);
+                        }}
+                      >
+                        <span><LogIn /></span>
+                        <span>{t("Đăng nhập")}</span>
+                      </button>
+                    ) : (
+                      <button className="btn-avt">
+                        <span><ShoppingCartPlus /></span>
+                        <span>{t("Mua gói Vip")}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {login && (
+                    <button
+                      className="btn-avt"
+                      onClick={() => {
+                        signOut();
+                        setOpen(false);
+                      }}
                     >
-                      <span><UserPen /></span>
-                      <span>{t("profile")}</span>
-                    </Link>
-                    <hr className='w-full' />
-                    <Link href="/Writer">
-                      <button className='btn-avt'> <span><PencilSparkles /></span><span>Writer</span></button>
-                    </Link>
-
-                    <div className='block md:hidden'>
-                      <button className='btn-avt '> <span><BellIcon /></span><span>Thông báo</span></button>
-                    </div>
-
-                    <hr className='w-full' />
-                  </>)
-                }
-
-                <button className='btn-avt'><span><Settings /></span><span>{t("setting")}</span></button>
-                <ThemeToggle />
-                <LanguageSwitcher />
-                <div className='block md:hidden'>
-                  {!login ? <button className='block md:hidden btn-avt' disabled={!sessionReady} onClick={() => { signIn(); setOp(false); }}><span><LogIn /> </span><span>{t("Đăng nhập")}</span>
-
-                  </button> : <button className='btn-avt block md:hidden'><span><ShoppingCartPlus /></span><span>{t("Mua gói Vip")}</span>
-                  </button>}
+                      <span><LogOut /></span>
+                      <span>{t("Đăng xuất")}</span>
+                    </button>
+                  )}
                 </div>
-
-                {login && <button className='btn-avt' onClick={() => { signOut(); setOpen(false); }}><span><LogOut /> </span><span>{t("Đăng xuất")}</span></button>}
-              </div>}
-          </div>
-        </div>
-      </div>
-    </nav>
+              )
+            }
+          </div >
+        </div >
+      </div >
+    </nav >
   );
 }

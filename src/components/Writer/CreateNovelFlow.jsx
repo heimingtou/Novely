@@ -213,7 +213,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
             <span>{t("Giới thiệu")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <textarea
               rows={5}
-              maxLength={3000}
+              maxLength={300}
               required
               value={novelForm.description}
               onChange={(event) => setNovelForm((form) => ({ ...form, description: event.target.value }))}

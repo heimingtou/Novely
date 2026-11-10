@@ -11,7 +11,7 @@ export default function ListStory({title,DataStory}){
                         DataStory.map((novel)=>(
                         <CardStory
                             key={novel.id}
-                            href={getNovel(novel.id) ? `/novels/${encodeURIComponent(novel.id)}` : undefined}
+                            href="/novels/demo"
                             title={novel.title} like={novel.likes}
                             genres={novel.genres}
                             coverImage={novel.coverImage} 

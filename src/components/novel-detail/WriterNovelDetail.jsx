@@ -70,14 +70,14 @@ export default function WriterNovelDetail({ novelId }) {
   }
 
   return (
-    <main className="mx-auto flex w-full flex-col px-6 py-10 md:flex-row">
+    <main className="mx-auto flex w-full  flex-col px-6 py-10 md:flex-row">
      
-      <section className="content w-full shrink-0 md:w-1/4">
+      <section className="w-full min-w-0 md:w-1/4">
         <div className="flex flex-row gap-5" >
-          <div className="img w-full p-[35px]">
+          <div className="img w-full p-[35px]  ">
             <Image
                 src={novel.coverImage}
-                className="aspect-[2/3] h-auto w-full rounded object-cover"
+                className="aspect-[2/3] h-auto w-full max-w-[240px] rounded object-cover"
                 alt={t("Ảnh bìa truyện")}
                 width={48}
                 height={64}
@@ -121,10 +121,11 @@ export default function WriterNovelDetail({ novelId }) {
       {message && <p className="mb-4 text-sm text-green-600" role="status">{message}</p>}
 
       {activeTab === "contents" ? (
-        <section className="rounded-2xl border border-border bg-card p-6" role="tabpanel">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        
+        <section role="tabpanel">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-4 pl-2 pr-1">
             <div>
-              <h2 className="text-xl font-bold">{t("Danh sách chương")}</h2>
+              <h2 className="text-2xl font-bold">{t("Danh sách chương")}</h2>
               <p className="mt-1 text-sm text-muted">{t("Đã cập nhật")} {novel.chapters.length} {t("chương")}</p>
             </div>
             <Link
@@ -134,8 +135,9 @@ export default function WriterNovelDetail({ novelId }) {
               {t("Thêm chương")}
             </Link>
           </div>
-          <hr/>
-          {novel.chapters.length ? (
+
+          <div className="rounded-[0.5rem] border border-border bg-card p-6">
+            {novel.chapters.length ? (
             <ul className="divide-y divide-border">
               {novel.chapters.map((chapter) => (
                 <li key={chapter.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -162,9 +164,11 @@ export default function WriterNovelDetail({ novelId }) {
           ) : (
             <p className="text-muted">{t("Chưa có chương nào.")}</p>
           )}
+          </div>
+          
         </section>
       ) : (
-        <section className="rounded-2xl border border-border bg-card p-6" role="tabpanel">
+        <section className="" role="tabpanel">
           <form className="grid gap-5" onSubmit={handleSaveNovel}>
             <label className="grid gap-2 font-semibold">
               <span>{t("Tiêu đề truyện")}</span>
@@ -181,7 +185,7 @@ export default function WriterNovelDetail({ novelId }) {
               <legend className="font-semibold">{t("Thể loại")}</legend>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {WRITER_GENRES.map((genre) => (
-                  <label key={genre} className="flex items-center gap-2 rounded-lg border border-border p-2 text-sm">
+                  <label key={genre} className="flex items-center gap-2  p-2 text-sm">
                     <input
                       type="checkbox"
                       checked={draft.genres.includes(genre)}
