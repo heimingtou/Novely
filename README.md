@@ -9,5 +9,3 @@ Giao diện sáng/tối: mở menu ảnh đại diện → **Chế độ tối**
 Tiếng Việt / English: mở menu ảnh đại diện → **Ngôn ngữ**. Xem [quy ước tên tính năng và bản dịch](docs/languages.md).
 
 Cộng đồng đọc truyện: `/forum` — xem [hướng dẫn Forum](docs/forum.md) cho mô tả chức năng, dữ liệu demo và kiểm thử.
-
-Góc tác giả: `/Writer` — xem [hướng dẫn Dashboard](docs/dashboard.md) để thử thống kê, chia sẻ tác phẩm mẫu và lưu bản nháp.

@@ -25,7 +25,7 @@
 }
 
 .writer-tabs__tab[aria-selected="true"] {
-    color: var(--primary);
+    color: #c2410c;
 }
 
 .writer-tabs__indicator {

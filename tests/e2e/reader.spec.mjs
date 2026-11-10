@@ -42,14 +42,19 @@ test("chi tiết có một danh sách, sắp xếp vẫn dẫn đúng chương",
   await expect(page).toHaveURL(/\/chapters\/2$/);
 });
 
-test("URL sai trả 404 và chương đầu không có chương trước", async ({ page }) => {
+test("chặn chương sai và báo truyện không có trên trình duyệt", async ({ page }) => {
   await openReader(page);
   await expect(page.getByRole("navigation", { name: "Điều hướng đầu chương" }).getByRole("button", { name: "Chương trước" })).toBeDisabled();
-  for (const url of ["/novels/missing/chapters/1", "/novels/demo/chapters/999", "/novels/demo/chapters/1abc", "/novels/missing"]) {
+  for (const url of ["/novels/missing/chapters/1", "/novels/demo/chapters/999", "/novels/demo/chapters/1abc"]) {
     const response = await page.goto(url);
     expect(response.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Không tìm thấy");
   }
+  // Truyện do Writer tạo được tìm trong localStorage sau khi trang đã tải.
+  const response = await page.goto("/novels/missing");
+  expect(response.status()).toBe(200);
+  await expect(page.getByRole("alert").filter({ hasText: "Không tìm thấy truyện" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Quay lại danh sách truyện", exact: true })).toHaveAttribute("href", "/Writer");
 });
 
 test("thiết lập đọc được lưu và khôi phục sau tải lại", async ({ page }) => {

@@ -1,8 +1,6 @@
 'use client'
 
 import './Tabs.css'
-import { useI18n } from '@/components/i18n/LocaleProvider'
-import { handleTabKey } from '@/lib/tab-navigation'
 
 const tabs = [
     { id: 'published', label: 'Đã đăng tải' },
@@ -11,11 +9,10 @@ const tabs = [
 ]
 
 export default function Tabs({ activeTab, onTabChange }) {
-    const { t } = useI18n()
     const activeIndex = tabs.findIndex((tab) => tab.id === activeTab)
 
     return (
-        <nav className="writer-tabs" role="tablist" aria-label={t("Danh sách truyện")} onKeyDown={handleTabKey}>
+        <nav className="writer-tabs" role="tablist" aria-label="Danh sách truyện">
             {tabs.map((tab) => (
                 <button
                     key={tab.id}
@@ -23,11 +20,9 @@ export default function Tabs({ activeTab, onTabChange }) {
                     type="button"
                     role="tab"
                     aria-selected={activeTab === tab.id}
-                    tabIndex={activeTab === tab.id ? 0 : -1}
-                    aria-controls="writer-story-list"
                     onClick={() => onTabChange(tab.id)}
                 >
-                    {t(tab.label)}
+                    {tab.label}
                 </button>
             ))}
             <span
