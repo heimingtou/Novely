@@ -59,7 +59,7 @@ export default function NovelActions({ novelTitle }) {
           type="button"
           aria-pressed={isSaved}
           onClick={handleLibrary}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FF5454] px-5 py-3 font-semibold text-white transition hover:opacity-90"
+          className="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white transition hover:opacity-90"
         >
           {isSaved ? (
             <BookmarkCheck size={20} />
