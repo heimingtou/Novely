@@ -199,36 +199,9 @@ export default function Navbar() {
               )
             }
            
-            {/* <button className='btn-avt'><span><Settings/></span><span>{t("setting")}</span></button> */}
-            <ThemeToggle />
-            <LanguageSwitcher />
-            <div className='block md:hidden'>
-                {!login ? (
-                  <Link 
-                    href="/auth" 
-                    className='btn-avt flex items-center' 
-                    onClick={() => setOpen(false)}
-                  >
-                    <span><LogIn/></span>
-                    <span>{t("Đăng nhập")}</span>
-                  </Link>
-              ) : (
-                  <button className='btn-avt block md:hidden'>
-                    <span><ShoppingCartPlus/></span>
-                    <span>{t("Mua gói Vip")}</span>
-                  </button>
-              )}
-            </div>
-          
-            {login&&<button className='btn-avt' onClick={() => { signOut(); setOpen(false); }}><span><LogOut/> </span><span>{t("Đăng xuất")}</span></button> }
-            </div>} 
           </div>
         </div>
       </div>
     </nav>
-          </div >
-        </div >
-      </div >
-    </nav >
   );
 }
