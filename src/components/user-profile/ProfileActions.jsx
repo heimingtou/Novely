@@ -32,7 +32,8 @@ export default function ProfileActions({
   }
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-5">
+
+    <div className="w-full">
 
       {/* Thống kê */}
       <div className="flex gap-8">

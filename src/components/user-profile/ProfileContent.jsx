@@ -207,14 +207,8 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
       facebook: form.facebook.trim(),
     };
     const requiredFields = [
-      ["Ảnh đại diện", updated.avatar],
       ["Tên hiển thị", updated.name],
       ["Username", updated.username],
-      ["Ngày sinh", updated.birthday],
-      ["Giới tính", updated.gender],
-      ["Số điện thoại", updated.phone],
-      ["Email", updated.email],
-      ["Giới thiệu", updated.bio],
     ];
     const missing = requiredFields
       .filter(([, value]) => !String(value ?? "").trim())
@@ -232,18 +226,28 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
     }
     updated.facebook = facebookLink;
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updated.email)) {
+
+    if (
+      updated.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updated.email)
+    ) {
       setError("Địa chỉ email không hợp lệ!");
       return;
     }
-    if (!/^\+?[0-9]{9,15}$/.test(updated.phone)) {
-      setError("Số điện thoại phải có 9–15 chữ số (có thể bắt đầu bằng +)!");
+
+    if (
+      updated.phone &&
+      !/^\+?[0-9]{9,15}$/.test(updated.phone)
+    ) {
+      setError("Số điện thoại phải có 9–15 chữ số!");
       return;
     }
-    if (!validBirthday(updated.birthday)) {
+
+    if (updated.birthday && !validBirthday(updated.birthday)) {
       setError("Ngày sinh không hợp lệ!");
       return;
     }
+
 
     // Bản demo: chỉ lưu bằng React state; refresh trang sẽ trở về dữ liệu ban đầu.
     setProfile(updated);
@@ -338,13 +342,18 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
             </button>
           ))}
         </nav>
-        {isOwnProfile && (
-          <button type="button" onClick={isEditing ? handleCancel : handleEdit}
-            className="mb-3 mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#FF5454] hover:text-[#FF5454] dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-red-400 dark:hover:text-red-300">
-            {isEditing ? <X size={18} /> : <Settings size={18} />}
-            {isEditing ? "Đóng chỉnh sửa" : "Sửa Hồ sơ"}
+
+        {isOwnProfile && !isEditing && (
+          <button
+            type="button"
+            onClick={handleEdit}
+            className="mb-3 mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#FF5454] hover:text-[#FF5454] dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-red-400 dark:hover:text-red-300"
+          >
+            <Settings size={18} />
+            Sửa Hồ sơ
           </button>
         )}
+
       </div>
 
       {/* Form mở ngay dưới thanh tab để giữ đúng luồng Edit Profile trước đó */}
@@ -355,36 +364,30 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
             <h2 className="text-xl font-bold">Chỉnh sửa hồ sơ</h2>
           </div>
 
-          <div>
-            <p className="mb-2 text-sm font-semibold">Ảnh đại diện <span className="text-[#FF5454]">*</span></p>
-            <input id="avatar-upload" type="file" accept="image/png,image/jpeg,image/webp"
-              onChange={handleAvatarChange} className="peer sr-only" aria-label="Chọn ảnh đại diện" />
-            <label htmlFor="avatar-upload"
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition hover:border-[#FF5454] hover:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-[#FF5454] dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700">
-              <span className="rounded-full bg-red-100 p-3 text-[#FF5454] dark:bg-red-950"><Camera size={25} /></span>
-              <span className="text-sm font-semibold">Bấm để chọn ảnh đại diện</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">JPG, PNG hoặc WEBP · Tối đa 2MB</span>
-            </label>
-          </div>
+          <input id="avatar-upload" type="file" accept="image/png,image/jpeg,image/webp"
+            onChange={handleAvatarChange} className="peer sr-only" aria-label="Chọn ảnh đại diện" />
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="edit-name" className="mb-2 block text-sm font-semibold">Tên hiển thị *</label>
-              <input id="edit-name" type="text" maxLength={60} value={form.name}
+              <label htmlFor="edit-name" className="mb-2 block text-sm font-semibold">
+                Tên hiển thị <span className="text-[#FF5454]">*</span>
+              </label>              <input id="edit-name" type="text" maxLength={60} value={form.name}
                 onChange={(e) => updateField("name", e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label htmlFor="edit-username" className="mb-2 block text-sm font-semibold">Username *</label>
+              <label htmlFor="edit-username" className="mb-2 block text-sm font-semibold">
+                Username <span className="text-[#FF5454]">*</span>
+              </label>
               <input id="edit-username" type="text" maxLength={30} value={form.username}
                 onChange={(e) => updateField("username", e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label htmlFor="edit-birthday" className="mb-2 block text-sm font-semibold">Ngày sinh *</label>
+              <label htmlFor="edit-birthday" className="mb-2 block text-sm font-semibold">Ngày sinh </label>
               <input id="edit-birthday" type="date" value={form.birthday}
                 onChange={(e) => updateField("birthday", e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label htmlFor="edit-gender" className="mb-2 block text-sm font-semibold">Giới tính *</label>
+              <label htmlFor="edit-gender" className="mb-2 block text-sm font-semibold">Giới tính </label>
               <select id="edit-gender" value={form.gender}
                 onChange={(e) => updateField("gender", e.target.value)} className={fieldClass}>
                 <option value="">Chọn giới tính</option>
@@ -395,26 +398,26 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
               </select>
             </div>
             <div>
-              <label htmlFor="edit-phone" className="mb-2 block text-sm font-semibold">Số điện thoại *</label>
+              <label htmlFor="edit-phone" className="mb-2 block text-sm font-semibold">Số điện thoại </label>
               <input id="edit-phone" type="tel" maxLength={16} placeholder="Nhập số điện thoại" value={form.phone}
                 onChange={(e) => updateField("phone", e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label htmlFor="edit-email" className="mb-2 block text-sm font-semibold">Email *</label>
+              <label htmlFor="edit-email" className="mb-2 block text-sm font-semibold">Email </label>
               <input id="edit-email" type="email" maxLength={254} placeholder="example@gmail.com" value={form.email}
                 onChange={(e) => updateField("email", e.target.value)} className={fieldClass} />
             </div>
           </div>
 
           <div>
-            <label htmlFor="edit-bio" className="mb-2 block text-sm font-semibold">Giới thiệu *</label>
+            <label htmlFor="edit-bio" className="mb-2 block text-sm font-semibold">Giới thiệu </label>
             <textarea id="edit-bio" rows={3} maxLength={300} value={form.bio}
               onChange={(e) => updateField("bio", e.target.value)} className={fieldClass} />
           </div>
 
           <div>
             <label htmlFor="edit-facebook" className="mb-2 block text-sm font-semibold">
-              Facebook <span className="font-normal text-gray-500 dark:text-gray-400">(không bắt buộc)</span>
+              Facebook
             </label>
             <input
               id="edit-facebook"
