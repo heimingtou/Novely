@@ -1,15 +1,21 @@
-/* Container bao bọc toàn màn hình */
 .auth-container {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - 75px);
+  background-color: #ffffff; /* Nền trắng khi sáng */
+  color: var(--foreground, #f8fafc);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 16px;
+  padding: 40px 20px;
   position: relative;
   overflow: hidden;
-  background-color: var(--background, #0f172a);
-  color: var(--foreground, #f8fafc);
-  font-family: inherit;
+}
+
+/* Khi bật chế độ tối */
+html.dark .auth-container,
+body.dark .auth-container,
+[data-theme="dark"] .auth-container,
+.dark .auth-container {
+  background-color: #111729 !important; /* Nền #111729 khi tối */
 }
 
 /* Hiệu ứng nền mờ (Gradient blur) */
@@ -117,9 +123,9 @@
 }
 
 .auth-tab.active {
-  background: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  background-color: #e4615b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 /* Thông báo lỗi / thành công */
@@ -170,9 +176,9 @@
   align-items: center;
 }
 
-.forgot-password-link {
-  font-size: 0.82rem;
-  color: #60a5fa;
+.forgot-password {
+  font-size: 0.85rem;
+  color: #e4615b !important;
   text-decoration: none;
 }
 
@@ -250,7 +256,7 @@
 }
 
 .checkbox-label a {
-  color: #60a5fa;
+  color: #e4615b;
   text-decoration: none;
 }
 
@@ -258,28 +264,26 @@
   text-decoration: underline;
 }
 
-/* Submit Button */
 .auth-submit-btn {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  padding: 14px;
+  border-radius: 12px;
+  background: #e4615b !important; /* Đổi sang #e4615b */
+  color: #ffffff !important;
   border: none;
-  border-radius: 10px;
-  color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  margin-top: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  box-shadow: none !important;
+  transition: opacity 0.2s ease;
 }
 
-.auth-submit-btn:hover:not(:disabled) {
-  opacity: 0.92;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+.auth-submit-btn:hover {
+  opacity: 0.9;
 }
 
 .auth-submit-btn:disabled {
