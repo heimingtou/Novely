@@ -4,18 +4,15 @@ import { useI18n } from "@/components/i18n/LocaleProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Clock3, Flame, PenLine, Search, SearchX } from "lucide-react";
+import { ArrowRight, Clock3, Flame, Search, SearchX } from "lucide-react";
 import { categoryById, filterForumPosts, forumHref, normalizeFilters, removeForumPost, toggleForumFlag } from "@/lib/forum-model.mjs";
 import ForumShell from "./ForumShell";
-import { ForumAvatar } from "./ForumIcons";
 import ForumPost from "./ForumPost";
 import PostComposer from "./PostComposer";
 import { useForumStore } from "./useForumStore";
-import { useDemoSession } from "@/lib/useDemoSession";
 
 export default function ForumFeed({ params }) {
   const { t } = useI18n();
-  const { account } = useDemoSession();
   const router = useRouter();
   const [state, update, ready, failed] = useForumStore();
   const [composer, setComposer] = useState(null);
@@ -26,7 +23,6 @@ export default function ForumFeed({ params }) {
   function compose() { setComposer({}); }
   return (
     <ForumShell state={state} filters={filters} ready={ready} failed={failed} onCompose={compose}>
-      <section className="forum-compose-card" aria-label={t("Bắt đầu một bài viết")}><ForumAvatar name={account?.name || t("Độc giả Novely")} /><button type="button" disabled={!ready} onClick={compose}>{t("Bạn đang đọc điều gì thú vị?")}</button><button type="button" className="forum-icon-button" aria-label={t("Viết bài mới")} disabled={!ready} onClick={compose}><PenLine size={19} /></button></section>
       <div className="forum-feed-card">
         <div className="forum-feed-tabs"><nav aria-label={t("Sắp xếp bài viết")}><Link href={forumHref({ ...filters, sort: "trending" })} aria-current={filters.sort === "trending" ? "page" : undefined}><Flame size={17} /> {t("Trending")}</Link><Link href={forumHref({ ...filters, sort: "latest" })} aria-current={filters.sort === "latest" ? "page" : undefined}><Clock3 size={17} /> {t("Latest")}</Link></nav><span>{posts.length} {t("bài viết")}</span></div>
         <div className="forum-feed-controls">

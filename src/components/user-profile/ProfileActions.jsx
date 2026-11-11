@@ -32,7 +32,8 @@ export default function ProfileActions({
   }
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-5">
+
+    <div className="w-full">
 
       {/* Thống kê */}
       <div className="flex gap-8">
@@ -63,7 +64,7 @@ export default function ProfileActions({
             type="button"
             onClick={handleFollow}
             aria-pressed={isFollowing}
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FF5454] px-5 py-3 font-semibold text-white hover:opacity-90"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white hover:opacity-90"
           >
             {isFollowing ? (
               <UserCheck size={20} />

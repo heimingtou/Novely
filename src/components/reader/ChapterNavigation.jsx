@@ -7,12 +7,12 @@ import { ArrowLeft, ArrowRight, ChevronDown, List } from "lucide-react";
 import { chapterHref } from "@/data/novels.mjs";
 import { ChapterOptions } from "./ChapterPicker";
 
-export default function ChapterNavigation({ novelId, chapters, currentChapter, previous, next, label }) {
+export default function ChapterNavigation({ novelId, chapters, currentChapter, previous, next, label, sticky = false }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const id = useId();
   return (
-    <nav className="reader-chapter-nav" aria-label={label}>
+    <nav className="reader-chapter-nav" aria-label={label} data-sticky={sticky}>
       <div className="reader-chapter-nav-controls">
       {previous ? <Link className="reader-button" href={chapterHref(novelId, previous.number)}><ArrowLeft size={17} /><span>{t("Chương trước")}</span></Link>
         : <button className="reader-button" type="button" disabled><ArrowLeft size={17} /><span>{t("Chương trước")}</span></button>}

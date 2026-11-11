@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import logoLight from '../../../public/logo.png';
 import logoDark from '../../../public/darklogo.png';
 import './auth.css';
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,7 +57,7 @@ export default function AuthPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
       if (isLogin) {
-        window.location.href = '/';
+        router.push('/');
       } else {
         setIsLogin(true);
         setError('Đăng ký thành công! Vui lòng đăng nhập.');

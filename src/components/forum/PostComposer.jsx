@@ -34,7 +34,7 @@ export default function PostComposer({ post, category = "general", onClose, onSa
   }
   return (
     <ForumDialog title={post ? t("Chỉnh sửa bài viết") : t("Chia sẻ một câu chuyện")} onClose={onClose}>
-      <p className="forum-muted">{t("Một câu hỏi, một góc nhìn hay một cuốn sách bạn muốn kể.")}</p>
+      <p className="forum-muted">{t("Chia sẻ cảm nhận, đặt câu hỏi hoặc giới thiệu một tác phẩm.")}</p>
       {account ? <form className="forum-form" onSubmit={submit}>
         <ForumAccount account={account} />
         <label>{t("Chủ đề")}<select name="category" aria-label={t("Chủ đề")} required defaultValue={post?.category || category}>{FORUM_CATEGORIES.map((item) => <option value={item.id} key={item.id}>{t(item.name)}</option>)}</select></label>

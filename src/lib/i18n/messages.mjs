@@ -1,5 +1,6 @@
 // Khóa là nhãn gốc để giữ bản dịch và quy tắc biên tập trong một nơi.
 export const english = {
+  "Chia sẻ cảm nhận, đặt câu hỏi hoặc giới thiệu một tác phẩm.": "Share your thoughts, ask a question or introduce a story.",
   "Thống kê": "Statistics", "Xóa ": "Delete ", "Câu truyện của bạn": "Your story", "Xem trước": "Preview",
   "Xóa truyện": "Delete story", "Xóa truyện {0}": "Delete story {0}", "Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.": "Are you sure you want to delete “{0}”? This action cannot be undone.",
   "Quản lý truyện": "Manage story", "Mục lục": "Table of contents", "Lưu thay đổi": "Save changes", "Đã cập nhật thông tin truyện.": "Story details updated.", "Đã xóa chương.": "Chapter deleted.",

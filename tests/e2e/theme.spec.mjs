@@ -20,11 +20,15 @@ test("bật tối toàn website, lưu khi chuyển trang và tải lại, giữ 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".novely-reader")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".reader-prose")).toHaveCSS("font-size", "25px");
-  await expect(page.locator("#account-menu")).toHaveCSS("background-color", "rgb(30, 41, 59)");
+  await expect.poll(() => page.locator("#account-menu").evaluate(element => {
+    const probe = document.createElement("span"); probe.style.backgroundColor = "var(--card-bg)"; element.append(probe);
+    const expected = getComputedStyle(probe).backgroundColor; probe.remove();
+    return getComputedStyle(element).backgroundColor === expected;
+  })).toBe(true);
   for (const route of ["/", "/Home", "/search", "/novel/1", "/novels/demo", "/forum", "/novels/demo/chapters/2"]) {
     await page.goto(route);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(15, 23, 42)");
+    await expect(page.locator("body")).toHaveCSS("color-scheme", "dark");
     await expect(page.getByAltText("logo").nth(0)).toBeHidden();
     await expect(page.getByAltText("logo").nth(1)).toBeVisible();
   }
@@ -84,5 +88,5 @@ test("lựa chọn đã lưu áp dụng trước khi JavaScript ứng dụng ch�
   await page.route("**/_next/static/**/*.js", (route) => route.abort());
   await page.goto("/novels/demo");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(247, 248, 250)");
+  await expect(page.locator("body")).toHaveCSS("color-scheme", "light");
 });

@@ -42,6 +42,8 @@ Các đường dẫn:
 
 ## Dữ liệu và giới hạn
 
+Trang Cộng đồng chỉ có một nút **Tạo bài viết** ở đầu trang. Khung gợi mở giữa trang đã được bỏ; hướng dẫn chia sẻ cảm nhận, đặt câu hỏi và giới thiệu tác phẩm nằm trong form tạo bài viết. Trang chi tiết vẫn có nút tạo bài viết để sử dụng trong ngữ cảnh riêng.
+
 - Đây là **bản frontend demo**. Forum dùng chung `useDemoSession` với Navbar và Trang đọc: đăng nhập để tạo bài hoặc bình luận, tự lấy tên tài khoản và không có ô nhập tên riêng. Phiên hiện tại vẫn là mô phỏng; cần backend để xác thực thật, phân quyền server và chia sẻ bài giữa nhiều người dùng.
 - Các nhân vật, bài viết, bình luận và số liệu mẫu trong `src/data/forum.mjs` được tự soạn. Không hiển thị số người đang online hoặc tạo cảm giác có dữ liệu thời gian thực.
 - Bài và tương tác mới lưu trong `localStorage` tại khóa `novely:v1:forum`, theo origin hiện tại. Thay đổi đồng bộ giữa các tab cùng origin. Khác cổng/hostname hoặc trình duyệt sẽ là kho dữ liệu khác.

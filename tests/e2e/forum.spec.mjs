@@ -27,6 +27,8 @@ test("navbar vào Forum, có 8 chủ đề và feed kiểu thảo luận", async
   await page.goto("/novels/demo");
   await page.getByRole("link", { name: "Cộng đồng", exact: true }).click();
   await expect(page).toHaveURL(/\/forum$/);
+  await expect(page.getByRole("button", { name: "Tạo bài viết", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Bạn đang đọc điều gì thú vị?", exact: true })).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Chủ đề cộng đồng" });
   await expect(nav.getByRole("link")).toHaveCount(10);
   await expect(page.locator(".forum-feed-list > .forum-post")).toHaveCount(10);
@@ -156,6 +158,7 @@ test("đăng xuất đồng bộ chặn gửi bài và bình luận đang mở",
   await openForum(other, path);
   await page.locator(".forum-page-heading").getByRole("button", { name: "Tạo bài viết", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Tạo bài viết" });
+  await expect(dialog).toContainText("Chia sẻ cảm nhận, đặt câu hỏi hoặc giới thiệu một tác phẩm.");
   await dialog.getByLabel("Tiêu đề", { exact: true }).fill("Bản nháp khi đăng xuất");
   await other.getByRole("button", { name: "Menu tài khoản", exact: true }).click();
   await other.getByRole("button", { name: "Đăng xuất", exact: true }).click();
