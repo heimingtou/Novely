@@ -1,38 +1,54 @@
-/* Container bao bọc toàn trang thư viện */
+/* ==========================================================================
+   1. KHAI BÁO BIẾN MÀU THEME (CHẾ ĐỘ SÁNG & TỐI)
+   ========================================================================== */
+/* MẶC ĐỊNH / CHỦ ĐỀ SÁNG: Nền trắng tinh 100%, chữ đen */
+:root,
+html,
+body,
+.library-container.light-mode {
+  --lib-bg: #ffffff;
+  --lib-card-bg: #ffffff;
+  --lib-text: #000000;
+  --lib-text-muted: #52525b;
+  --lib-border: #e4e4e7;
+  --lib-input-bg: #f4f4f5;
+  --lib-brand: #e4615b;
+}
+
+/* CHỦ ĐỀ TỐI: Nền #111729, chữ trắng, không ửng màu */
+html.dark,
+body.dark,
+[data-theme="dark"],
+.dark,
+.library-container.dark-mode {
+  --lib-bg: #111729;
+  --lib-card-bg: #182038;
+  --lib-text: #ffffff;
+  --lib-text-muted: #94a3b8;
+  --lib-border: #283556;
+  --lib-input-bg: #1e293b;
+  --lib-brand: #e4615b;
+}
+
+/* ==========================================================================
+   2. KHUNG CHÍNH (CONTAINER) & XÓA BỎ VỆT ỬNG MÀU
+   ========================================================================== */
 .library-container {
   min-height: calc(100vh - 75px);
-  background-color: var(--background, #0b1120);
-  color: var(--foreground, #f8fafc);
+  background-color: var(--lib-bg) !important;
+  color: var(--lib-text) !important;
   padding: 40px 20px 80px 20px;
   position: relative;
-  overflow: hidden;
   font-family: inherit;
+  box-shadow: none !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Ánh sáng mờ trang trí nền */
-.library-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  opacity: 0.12;
-  z-index: 0;
-}
-
-.glow-1 {
-  width: 500px;
-  height: 500px;
-  background: #3b82f6;
-  top: -100px;
-  left: -100px;
-}
-
+/* Ẩn hoàn toàn hiệu ứng ánh sáng mờ trang trí nền */
+.library-glow,
+.glow-1,
 .glow-2 {
-  width: 600px;
-  height: 600px;
-  background: #8b5cf6;
-  bottom: -150px;
-  right: -100px;
+  display: none !important;
 }
 
 .library-content {
@@ -42,7 +58,9 @@
   margin: 0 auto;
 }
 
-/* Header & Thanh tìm kiếm */
+/* ==========================================================================
+   3. HEADER & THANH TÌM KIẾM
+   ========================================================================== */
 .library-header {
   display: flex;
   justify-content: space-between;
@@ -58,31 +76,34 @@
   gap: 16px;
 }
 
+/* 1. Badge icon tiêu đề thư viện: Nền #e4615b, icon trắng */
 .library-icon-badge {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: #ffffff;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+  border-radius: 12px;
+  background-color: var(--lib-brand) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .library-title {
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 4px 0;
-  color: #f8fafc;
+  color: var(--lib-text) !important;
 }
 
 .library-subtitle {
   font-size: 0.95rem;
-  color: #94a3b8;
+  color: var(--lib-text-muted);
   margin: 0;
 }
 
+/* 2. Khung ô tìm kiếm: Nền #e4615b, chữ và icon trắng */
 .library-search-box {
   position: relative;
   width: 100%;
@@ -94,33 +115,39 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .library-search-box input {
   width: 100%;
   padding: 10px 16px 10px 42px;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #f8fafc;
+  background-color: var(--lib-brand) !important;
+  border: 1px solid var(--lib-brand) !important;
+  border-radius: 10px;
+  color: #ffffff !important;
   font-size: 0.9rem;
   outline: none;
-  transition: all 0.2s ease;
+  box-shadow: none !important;
+  transition: opacity 0.2s ease;
+}
+
+.library-search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .library-search-box input:focus {
-  border-color: #3b82f6;
-  background: rgba(30, 41, 59, 0.9);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  opacity: 0.95;
+  box-shadow: none !important;
 }
 
-/* Tabs Bar */
+/* ==========================================================================
+   4. THANH ĐIỀU HƯỚNG TABS
+   ========================================================================== */
 .library-tabs-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--lib-border);
   padding-bottom: 16px;
   margin-bottom: 30px;
   flex-wrap: wrap;
@@ -136,34 +163,42 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
-  border-radius: 12px;
+  padding: 8px 16px;
+  border-radius: 8px;
   background: transparent;
   border: 1px solid transparent;
-  color: #94a3b8;
+  color: var(--lib-text-muted);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
+  box-shadow: none !important;
+  transition: all 0.2s ease;
 }
 
 .lib-tab:hover {
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--lib-text);
+  background: var(--lib-input-bg);
 }
 
+/* 3. Tab đang chọn: Nền #e4615b, chữ trắng */
 .lib-tab.active {
-  background: rgba(37, 99, 235, 0.15);
-  border-color: rgba(37, 99, 235, 0.4);
-  color: #60a5fa;
+  background-color: var(--lib-brand) !important;
+  border-color: var(--lib-brand) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 .tab-count {
   font-size: 0.75rem;
   padding: 2px 7px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  color: inherit;
+  background: var(--lib-border);
+  color: var(--lib-text);
+}
+
+.lib-tab.active .tab-count {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
 }
 
 .clear-history-btn {
@@ -171,21 +206,24 @@
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #f87171;
+  border: 1px solid var(--lib-border);
+  color: #ef4444;
   padding: 8px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.85rem;
   cursor: pointer;
+  box-shadow: none !important;
   transition: all 0.2s;
 }
 
 .clear-history-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
 }
 
-/* Grid danh sách card truyện */
+/* ==========================================================================
+   5. DANH SÁCH CARD TRUYỆN
+   ========================================================================== */
 .history-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -195,19 +233,19 @@
 .history-card {
   display: flex;
   gap: 16px;
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  background: var(--lib-card-bg);
+  border: 1px solid var(--lib-border);
+  border-radius: 12px;
   padding: 16px;
-  transition: all 0.25s ease;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease;
 }
 
 .history-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(96, 165, 250, 0.35);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  background: rgba(30, 41, 59, 0.7);
+  transform: none;
+  border-color: var(--lib-text-muted);
+  box-shadow: none !important;
+  background: var(--lib-card-bg);
 }
 
 /* Ảnh bìa */
@@ -215,21 +253,17 @@
   position: relative;
   width: 105px;
   height: 145px;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--lib-border);
+  box-shadow: none !important;
 }
 
 .card-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.history-card:hover .card-cover {
-  transform: scale(1.05);
 }
 
 .cover-overlay {
@@ -248,24 +282,18 @@
 }
 
 .play-read-btn {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #2563eb;
-  color: #fff;
+  background: var(--lib-brand);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 3px;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.6);
-  transition: transform 0.2s ease;
+  box-shadow: none !important;
 }
 
-.play-read-btn:hover {
-  transform: scale(1.1);
-}
-
-/* Nội dung thông tin truyện */
+/* Chi tiết truyện */
 .card-info {
   display: flex;
   flex-direction: column;
@@ -282,11 +310,12 @@
 
 .card-category {
   font-size: 0.75rem;
-  color: #38bdf8;
+  color: var(--lib-text-muted);
   font-weight: 600;
-  background: rgba(56, 189, 248, 0.1);
+  background: var(--lib-input-bg);
+  border: 1px solid var(--lib-border);
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: 4px;
   max-width: 80%;
   white-space: nowrap;
   overflow: hidden;
@@ -296,35 +325,30 @@
 .delete-item-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--lib-text-muted);
   cursor: pointer;
   padding: 4px;
-  transition: color 0.2s;
 }
 
 .delete-item-btn:hover {
-  color: #f87171;
+  color: #ef4444;
 }
 
 .card-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--lib-text);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 4px;
-  transition: color 0.2s;
 }
 
-.card-title:hover {
-  color: #60a5fa;
-}
-
-.card-author, .latest-chap {
+.card-author,
+.latest-chap {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--lib-text-muted);
   margin: 0 0 10px 0;
 }
 
@@ -338,23 +362,22 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.78rem;
-  color: #cbd5e1;
+  color: var(--lib-text-muted);
   margin-bottom: 6px;
 }
 
 .progress-bar-bg {
   width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  height: 4px;
+  background: var(--lib-border);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #a855f7);
-  border-radius: 10px;
-  transition: width 0.3s ease;
+  background: var(--lib-brand);
+  border-radius: 4px;
 }
 
 /* Footer card */
@@ -369,7 +392,7 @@
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--lib-text-muted);
 }
 
 .continue-btn {
@@ -378,81 +401,80 @@
   gap: 4px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #60a5fa;
+  color: var(--lib-brand);
   text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.continue-btn:hover {
-  color: #93c5fd;
-  transform: translateX(2px);
 }
 
 .continue-btn.full-width {
   width: 100%;
   justify-content: center;
   padding: 8px 0;
-  background: rgba(37, 99, 235, 0.15);
-  border-radius: 8px;
+  background: var(--lib-input-bg);
+  border: 1px solid var(--lib-border);
+  border-radius: 6px;
+  color: var(--lib-text);
+  text-decoration: none;
 }
 
-.continue-btn.full-width:hover {
-  background: rgba(37, 99, 235, 0.25);
-}
-
-/* Trạng thái trống (Empty State) */
+/* ==========================================================================
+   6. TRẠNG THÁI TRỐNG (EMPTY STATE)
+   ========================================================================== */
 .empty-state {
   text-align: center;
-  padding: 70px 20px;
-  background: rgba(30, 41, 59, 0.3);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  padding: 60px 20px;
+  background-color: var(--lib-card-bg);
+  border: 1px solid var(--lib-border);
+  border-radius: 12px;
   margin-top: 20px;
+  box-shadow: none !important;
 }
 
+/* Xóa bỏ icon quyển sách/bookmark */
 .empty-icon {
-  color: #475569;
-  margin-bottom: 16px;
+  display: none !important;
 }
 
 .empty-state h3 {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #e2e8f0;
+  color: var(--lib-text);
 }
 
 .empty-state p {
-  color: #94a3b8;
+  color: var(--lib-text-muted);
   font-size: 0.95rem;
   max-width: 420px;
   margin: 0 auto 24px auto;
 }
 
+/* 4. Nút Khám phá truyện ngay: Nền #e4615b, chữ trắng */
 .explore-btn {
   display: inline-flex;
   padding: 10px 22px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: #ffffff;
-  border-radius: 10px;
+  background-color: var(--lib-brand) !important;
+  color: #ffffff !important;
+  border-radius: 8px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.25s ease;
+  border: none !important;
+  box-shadow: none !important;
+  transition: opacity 0.2s ease;
 }
 
 .explore-btn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  opacity: 0.88;
 }
 
-/* Responsive */
+/* ==========================================================================
+   7. RESPONSIVE
+   ========================================================================== */
 @media (max-width: 640px) {
   .library-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .library-search-box {
     max-width: 100%;
   }
