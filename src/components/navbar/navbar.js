@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BellIcon, ChevronDown, LogIn, LogOut, MessageCircle, PencilSparkles, Settings, ShoppingCartPlus, TextSearch, UserPen } from "lucide-react";
+import { BellIcon, ChevronDown, LogIn, LogOut, MessageCircle, PencilSparkles, SearchIcon, Settings, ShoppingCartPlus, TextSearch, UserPen } from "lucide-react";
 import { LanguageSwitcher, useI18n } from "@/components/i18n/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/SiteTheme";
 import { useDemoSession } from "@/lib/useDemoSession";
@@ -59,10 +59,11 @@ export default function Navbar() {
             </div>}
           </div>
           <Link href="/library">{t("Thư viện")}</Link>
+          <Link href="/forum"  aria-label={t("Cộng đồng")} title={t("Cộng đồng Novely")}><span>{t("Forum")}</span></Link>
         </div>
 
         <div className="btn_Containt flex flex-row justify-around items-center w-[50%] gap-3 md:gap-12">
-          <Link href="/forum" className="forum-nav-link" aria-label={t("Cộng đồng")} title={t("Cộng đồng Novely")}><MessageCircle size={20} /></Link>
+          <Link href="/search" className="btn_search" aria-label={t("Tìm kiếm")}><div className="btn_searchbar"><span>{t("Tìm kiếm câu truyện")}</span><span className="bg-primary"><SearchIcon/></span></div></Link>
           <Link href="/search" className="btn_search" aria-label={t("Tìm kiếm")}><TextSearch /></Link>
           <div className="max-md:hidden flex flex-row gap-[3rem] items-center ml-2 mr-2">
             <Link href="/novel/2" aria-label={t("thông báo")}><BellIcon /></Link>

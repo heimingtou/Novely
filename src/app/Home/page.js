@@ -1,7 +1,7 @@
 
 import { getServerI18n } from "@/lib/i18n/server";
 
-import CardStory from '@/components/cardStory/cardStory';
+import HeroCarousel from '@/components/home/HeroCarousel';
 import { faker } from '@faker-js/faker';
 import './page.css'
 import cardImg from '../../../public/CardStory.jpg'
@@ -33,8 +33,17 @@ export default async function Homepage(){
         }))
     }));
 
+    const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel) => ({
+        id: novel.id,
+        title: novel.title,
+        likes: novel.likes,
+        genres: novel.genres,
+        image: '/CardStory.jpg',
+    }));
+
     return(
-        <div className='homeContaint'>          
+        <div className='homeContaint'>
+            <HeroCarousel slides={featuredStories} locale={locale} />
             {fakeCategoriesData.map((cat)=>(
             <div key={cat.categoryId}>
                     <ListStory title={cat.categoryName} DataStory={cat.novels}/>

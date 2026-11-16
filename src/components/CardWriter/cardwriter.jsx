@@ -8,10 +8,23 @@ import { useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import { useWriterDispatch } from "@/components/Writer/useWriterStore";
 import './cardWriter.css'
-export default function CardWriter({id, title, img, date, view, like, comment,current_chap, chapters = [], isWriterNovel = false}){
+export default function CardWriter({
+    id,
+    title,
+    img,
+    date,
+    view,
+    like,
+    comment,
+    current_chap,
+    chapters = [],
+    isWriterNovel = false,
+    chaptersOpen,
+    onToggleChapters,
+    onCloseChapters,
+}){
 const { t } = useI18n();
 const dispatch = useWriterDispatch();
-const [chaptersOpen, setChaptersOpen] = useState(false);
 const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     year: "numeric",
     month: "long",
@@ -82,7 +95,7 @@ return(
                     className="btn-card"
                     aria-expanded={chaptersOpen}
                     aria-controls={`writer-chapters-${id}`}
-                    onClick={() => setChaptersOpen((open) => !open)}
+                    onClick={onToggleChapters}
                 >
                     <span>{t("Tiếp tục viết")}</span>
                     <ChevronDown aria-hidden="true" />
@@ -99,7 +112,7 @@ return(
                                         className="writer-card-menu__action"
                                         href={`/Writer/new?novelId=${encodeURIComponent(id)}&chapterId=${encodeURIComponent(chapter.id)}`}
                                         aria-label={t("Sửa chương {0}", [chapter.number])}
-                                        onClick={() => setChaptersOpen(false)}
+                                        onClick={onCloseChapters}
                                     >
                                         <Pencil size={16} aria-hidden="true" />
                                         <span>{t("Sửa")}</span>
@@ -119,7 +132,7 @@ return(
                         <li className="writer-card-menu__add">
                             <Link
                                 href={`/Writer/new?novelId=${encodeURIComponent(id)}`}
-                                onClick={() => setChaptersOpen(false)}
+                                onClick={onCloseChapters}
                             >
                                 <Plus size={16} aria-hidden="true" />
                                 <span>{t("Thêm chương")}</span>

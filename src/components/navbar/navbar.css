@@ -61,11 +61,22 @@ button{
 .btn_nav:hover {
   background-color: var(--primary-hover); /* Hoặc mã màu hover thực tế */
 }
-
+.btn_searchbar{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: none;
+  border: 1px solid var(--border-color);
+  width:20rem;
+  height: 3rem;
+  border-radius: 10px;
+  padding: 2px 15px;
+}
 
 .btn_search{
     width: fit-content;
-    background-color: var(--primary);
+    /* background-color: var(--primary); */
     padding: 0.5rem 0.5rem;
     border-radius: 10px;
 }
@@ -120,7 +131,7 @@ button{
 
 @media (min-width: 768px) {
   .site-navbar > div:nth-child(2) { width: auto; flex: 1; min-width: 0; }
-  .site-navbar .navText { flex-shrink: 0; white-space: nowrap; gap: clamp(12px, 3vw, 36px); }
+  .site-navbar .navText { flex-shrink: 0; white-space: nowrap; gap: clamp(22px, 8vw, 50px); }
   .site-navbar .btn_Containt {
     width: auto;
     flex: 1;
