@@ -36,12 +36,17 @@ export default async function NovelDetailPage({ params }) {
         categoryId: index,
         categoryName: cat,
         
-        novels: Array.from({ length: 15 }, () => ({
+        novels: Array.from({ length: 15 }, (_, storyIndex) => ({
             id: faker.string.uuid(),
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: t(cat),
             coverImage: cardImg,
+            badges: {
+                full: storyIndex % 4 === 0,
+                age18: storyIndex % 5 === 1,
+                vip: storyIndex % 3 === 0,
+            },
         }))
     }));
   

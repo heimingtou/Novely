@@ -15,6 +15,7 @@ export default function ListStory({title,DataStory}){
                             title={novel.title} like={novel.likes}
                             genres={novel.genres}
                             coverImage={novel.coverImage} 
+                            badges={novel.badges}
                             />
                     ))}
                     </div>       

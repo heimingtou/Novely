@@ -24,21 +24,26 @@ export default async function Homepage(){
         categoryId: cat.id,
         categoryName: cat.name,
         
-        novels: Array.from({ length: 15 }, () => ({
+        novels: Array.from({ length: 15 }, (_, index) => ({
             id: faker.string.uuid(),
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: cat.name,
             coverImage: cardImg,
+            badges: {
+                full: index % 4 === 0,
+                age18: index % 5 === 1,
+                vip: index % 3 === 0,
+            },
         }))
     }));
 
-    const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel) => ({
+    const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel, index) => ({
         id: novel.id,
         title: novel.title,
         likes: novel.likes,
         genres: novel.genres,
-        image: '/CardStory.jpg',
+        image: `/CardStorys${index + 1}.jpg`,
     }));
 
     return(

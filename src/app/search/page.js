@@ -14,10 +14,15 @@ const serverReady = () => false;
 export default function SearchPage() {
   const { t } = useI18n();
   const ready = useSyncExternalStore(subscribe, clientReady, serverReady);
-  const [stories] = useState(() => Array.from({ length: 50 }, () => ({
+  const [stories] = useState(() => Array.from({ length: 50 }, (_, index) => ({
     id: faker.string.uuid(), title: faker.book.title(),
     likes: faker.number.float({ min: 0.5, max: 5, fractionDigits: 1 }).toFixed(1) + "M",
     genres: "Fanfiction", coverImage: cardImg,
+    badges: {
+      full: index % 4 === 0,
+      age18: index % 5 === 1,
+      vip: index % 3 === 0,
+    },
   })));
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");

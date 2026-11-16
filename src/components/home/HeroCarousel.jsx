@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./HeroCarousel.css";
 
-const AUTOPLAY_DELAY = 5000;
+const AUTOPLAY_DELAY = 10000;
 
 export default function HeroCarousel({ slides, locale }) {
   const [activeIndex, setActiveIndex] = useState(0);

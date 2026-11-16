@@ -61,20 +61,50 @@ button{
 .btn_nav:hover {
   background-color: var(--primary-hover); /* Hoặc mã màu hover thực tế */
 }
+.btn_searchbar-link {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  max-width: 40rem;
+  text-decoration: none;
+}
 .btn_searchbar{
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  background-color: none;
-  border: 1px solid var(--border-color);
-  width:20rem;
-  height: 3rem;
+  background-color: var(--background);
+  border: 1px solid var(--input-border);
+  height: clamp(2.5em,2vw, 3.5em);
+  width: 100%;
+  min-width: 0;
   border-radius: 10px;
-  padding: 2px 15px;
+  overflow: hidden;
+}
+.btn_searchbar > span:first-child {
+  min-width: 0;
+  padding-left: 15px;
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.btn_searchbar-action {
+  display: flex;
+  width: 3.5rem;
+  height: 100%;
+  flex: 0 0 3.5rem;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .btn_search{
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     width: fit-content;
     /* background-color: var(--primary); */
     padding: 0.5rem 0.5rem;
@@ -130,6 +160,9 @@ button{
 .forum-nav-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
 @media (min-width: 768px) {
+  .site-navbar .btn_searchbar-link { display: flex; }
+  .site-navbar .btn_searchbar-link.is-search-page { display: none; }
+  .site-navbar .btn_search.btn_search--on-search { display: inline-flex; }
   .site-navbar > div:nth-child(2) { width: auto; flex: 1; min-width: 0; }
   .site-navbar .navText { flex-shrink: 0; white-space: nowrap; gap: clamp(22px, 8vw, 50px); }
   .site-navbar .btn_Containt {
@@ -158,6 +191,8 @@ button{
   .site-navbar .btn_Containt { width: auto; flex: 1; min-width: 0; gap: 4px; }
   .site-navbar .forum-nav-link { min-width: 32px; min-height: 32px; }
   .site-navbar .btn_search { padding: 6px; }
+  .site-navbar .btn_searchbar-link { display: none; }
+  .site-navbar .btn_search { display: inline-flex; }
   .site-navbar .avatar { width: 32px; flex-shrink: 0; }
   .site-navbar .avatar > button > span { width: 32px; height: 32px; }
   .site-navbar .avatar > button > svg { display: none; }

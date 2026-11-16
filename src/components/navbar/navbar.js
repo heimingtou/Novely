@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BellIcon, ChevronDown, LogIn, LogOut, MessageCircle, PencilSparkles, SearchIcon, Settings, ShoppingCartPlus, TextSearch, UserPen } from "lucide-react";
 import { LanguageSwitcher, useI18n } from "@/components/i18n/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/SiteTheme";
@@ -23,6 +23,8 @@ const genres = [
 export default function Navbar() {
   const { t } = useI18n();
   const router = useRouter();
+  const pathname = usePathname();
+  const isSearchPage = pathname === "/search";
   const [open, setOpen] = useState(false);
   const [openGen, setOpenGen] = useState(false);
   const { account, signIn, signOut, ready: sessionReady } = useDemoSession();
@@ -54,7 +56,7 @@ export default function Navbar() {
             <button type="button" className="flex flex-row items-center" aria-expanded={openGen} onClick={() => setOpenGen(!openGen)}>
               <span>{t("Điều hướng")}</span><ChevronDown />
             </button>
-            {openGen && <div className="listGenre absolute left-0 top-20 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
+            {openGen && <div className="listGenre absolute left-0 top-15 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
               {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" onClick={() => setOpenGen(false)}>{genre}</Link>)}
             </div>}
           </div>
@@ -63,8 +65,24 @@ export default function Navbar() {
         </div>
 
         <div className="btn_Containt flex flex-row justify-around items-center w-[50%] gap-3 md:gap-12">
-          <Link href="/search" className="btn_search" aria-label={t("Tìm kiếm")}><div className="btn_searchbar"><span>{t("Tìm kiếm câu truyện")}</span><span className="bg-primary"><SearchIcon/></span></div></Link>
-          <Link href="/search" className="btn_search" aria-label={t("Tìm kiếm")}><TextSearch /></Link>
+          <Link
+            href="/search"
+            className={`btn_searchbar-link${isSearchPage ? " is-search-page" : ""}`}
+            aria-label={t("Tìm kiếm")}
+          >
+            <div className="btn_searchbar">
+              <span>{t("Tìm kiếm câu truyện")}</span>
+              <span className="btn_searchbar-action"><SearchIcon /></span>
+            </div>
+          </Link>
+          <Link
+            href="/search"
+            className={`btn_search${isSearchPage ? " btn_search--on-search" : ""}`}
+            aria-label={t("Tìm kiếm")}
+            aria-current={isSearchPage ? "page" : undefined}
+          >
+            <TextSearch />
+          </Link>
           <div className="max-md:hidden flex flex-row gap-[3rem] items-center ml-2 mr-2">
             <Link href="/novel/2" aria-label={t("thông báo")}><BellIcon /></Link>
             {!login
