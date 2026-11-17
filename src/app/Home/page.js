@@ -1,7 +1,7 @@
 
 import { getServerI18n } from "@/lib/i18n/server";
 
-import CardStory from '@/components/cardStory/cardStory';
+import HeroCarousel from '@/components/home/HeroCarousel';
 import { faker } from '@faker-js/faker';
 import './page.css'
 import cardImg from '../../../public/CardStory.jpg'
@@ -24,17 +24,31 @@ export default async function Homepage(){
         categoryId: cat.id,
         categoryName: cat.name,
         
-        novels: Array.from({ length: 15 }, () => ({
+        novels: Array.from({ length: 15 }, (_, index) => ({
             id: faker.string.uuid(),
             title: faker.book.title(),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: cat.name,
             coverImage: cardImg,
+            badges: {
+                full: index % 4 === 0,
+                age18: index % 5 === 1,
+                vip: index % 3 === 0,
+            },
         }))
     }));
 
+    const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel, index) => ({
+        id: novel.id,
+        title: novel.title,
+        likes: novel.likes,
+        genres: novel.genres,
+        image: `/CardStorys${index + 1}.jpg`,
+    }));
+
     return(
-        <div className='homeContaint'>          
+        <div className='homeContaint'>
+            <HeroCarousel slides={featuredStories} locale={locale} />
             {fakeCategoriesData.map((cat)=>(
             <div key={cat.categoryId}>
                     <ListStory title={cat.categoryName} DataStory={cat.novels}/>
