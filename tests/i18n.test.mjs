@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createTranslator, english, vietnamese } from "../src/lib/i18n/messages.mjs";
 import { FORUM_CATEGORIES } from "../src/data/forum.mjs";
+import { WRITER_GENRES } from "../src/lib/writer-model.mjs";
 
 test("nhãn biên tập có đủ hai ngôn ngữ và không còn tên tính năng pha trộn", () => {
   for (const key of Object.keys(vietnamese)) assert.ok(english[key], `Missing English: ${key}`);
@@ -14,6 +15,7 @@ test("nhãn biên tập có đủ hai ngôn ngữ và không còn tên tính nă
     assert.ok(vietnamese[category.name]);
     assert.ok(english[category.description]);
   }
+  for (const genre of WRITER_GENRES) assert.ok(english[genre], `Missing English genre: ${genre}`);
 });
 
 test("mẫu động giữ nguyên nội dung chèn vào và thông báo có thể đổi ngôn ngữ", () => {

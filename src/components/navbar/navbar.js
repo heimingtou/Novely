@@ -57,7 +57,7 @@ export default function Navbar() {
               <span>{t("Điều hướng")}</span><ChevronDown />
             </button>
             {openGen && <div className="listGenre absolute left-0 top-15 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
-              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" onClick={() => setOpenGen(false)}>{genre}</Link>)}
+              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" title={t(genre)} onClick={() => setOpenGen(false)}>{t(genre)}</Link>)}
             </div>}
           </div>
           <Link href="/library">{t("Thư viện")}</Link>
