@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/components/i18n/LocaleProvider';
 import logoLight from '../../../public/logo.png';
 import logoDark from '../../../public/darklogo.png';
+import googleLogo from './Google__G__logo.svg';
 import './auth.css';
 
 export default function AuthPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -25,6 +28,7 @@ export default function AuthPage() {
   });
 
   const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -34,19 +38,21 @@ export default function AuthPage() {
       [name]: type === 'checkbox' ? checked : value,
     }));
     setError('');
+    setIsSuccess(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSuccess(false);
 
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp!');
+      setError(t('Mật khẩu xác nhận không khớp!'));
       return;
     }
 
     if (!isLogin && !formData.agreeTerms) {
-      setError('Vui lòng đồng ý với điều khoản sử dụng của Novely!');
+      setError(t('Vui lòng đồng ý với điều khoản sử dụng của Novely!'));
       return;
     }
 
@@ -60,10 +66,12 @@ export default function AuthPage() {
         router.push('/');
       } else {
         setIsLogin(true);
-        setError('Đăng ký thành công! Vui lòng đăng nhập.');
+        setError(t('Đăng ký thành công! Vui lòng đăng nhập.'));
+        setIsSuccess(true);
       }
     } catch (err) {
-      setError(err?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+      setError(err?.message || t('Có lỗi xảy ra, vui lòng thử lại.'));
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -98,12 +106,12 @@ export default function AuthPage() {
             />
           </Link>
           <h1 className="auth-title">
-            {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản mới'}
+            {isLogin ? t('Chào mừng trở lại') : t('Tạo tài khoản mới')}
           </h1>
           <p className="auth-subtitle">
             {isLogin
-              ? 'Đăng nhập để tiếp tục hành trình đọc và sáng tác tiểu thuyết.'
-              : 'Gia nhập cộng đồng tác giả và độc giả tại Novely.'}
+              ? t('Đăng nhập để tiếp tục hành trình đọc và sáng tác tiểu thuyết.')
+              : t('Gia nhập cộng đồng tác giả và độc giả tại Novely.')}
           </p>
         </div>
 
@@ -115,9 +123,10 @@ export default function AuthPage() {
             onClick={() => {
               setIsLogin(true);
               setError('');
+              setIsSuccess(false);
             }}
           >
-            Đăng nhập
+            {t('Đăng nhập')}
           </button>
           <button
             type="button"
@@ -125,17 +134,18 @@ export default function AuthPage() {
             onClick={() => {
               setIsLogin(false);
               setError('');
+              setIsSuccess(false);
             }}
           >
-            Đăng ký
+            {t('Đăng ký')}
           </button>
         </div>
 
         {/* Error notification */}
         {error && (
-          <div className={`auth-alert ${error.includes('thành công') ? 'success' : 'error'}`}>
-            <span className="alert-icon">{error.includes('thành công') ? '✓' : '⚠️'}</span>
-            <span className="alert-text">{error}</span>
+          <div className={`auth-alert ${isSuccess ? 'success' : 'error'}`}>
+            <span className="alert-icon">{isSuccess ? '✓' : '⚠️'}</span>
+            <span className="alert-text">{t(error)}</span>
           </div>
         )}
 
@@ -144,7 +154,7 @@ export default function AuthPage() {
           {/* Tên đăng nhập / Bút danh (chỉ hiện khi Đăng ký) */}
           {!isLogin && (
             <div className="form-group">
-              <label htmlFor="username">Tên người dùng / Bút danh</label>
+              <label htmlFor="username">{t('Tên người dùng / Bút danh')}</label>
               <div className="input-wrapper">
                 <span className="input-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -156,7 +166,7 @@ export default function AuthPage() {
                   type="text"
                   id="username"
                   name="username"
-                  placeholder="Nhập tên tài khoản hoặc bút danh"
+                  placeholder={t('Nhập tên tài khoản hoặc bút danh')}
                   value={formData.username}
                   onChange={handleChange}
                   required={!isLogin}
@@ -167,7 +177,7 @@ export default function AuthPage() {
 
           {/* Email */}
           <div className="form-group">
-            <label htmlFor="email">Địa chỉ Email</label>
+            <label htmlFor="email">{t('Địa chỉ Email')}</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -190,12 +200,7 @@ export default function AuthPage() {
           {/* Mật khẩu */}
           <div className="form-group">
             <div className="form-group-header">
-              <label htmlFor="password">Mật khẩu</label>
-              {isLogin && (
-                <Link href="/auth/forgot-password" className="forgot-password-link">
-                  Quên mật khẩu?
-                </Link>
-              )}
+              <label htmlFor="password">{t('Mật khẩu')}</label>
             </div>
             <div className="input-wrapper">
               <span className="input-icon">
@@ -208,7 +213,7 @@ export default function AuthPage() {
                 type={showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
-                placeholder="Tối thiểu 6 ký tự"
+                placeholder={t('Tối thiểu 6 ký tự')}
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -219,6 +224,7 @@ export default function AuthPage() {
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex="-1"
+                aria-label={showPassword ? t('Ẩn mật khẩu') : t('Hiện mật khẩu')}
               >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -238,7 +244,7 @@ export default function AuthPage() {
           {/* Nhập lại mật khẩu (Đăng ký) */}
           {!isLogin && (
             <div className="form-group">
-              <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
+              <label htmlFor="confirmPassword">{t('Xác nhận mật khẩu')}</label>
               <div className="input-wrapper">
                 <span className="input-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -249,7 +255,7 @@ export default function AuthPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"
                   name="confirmPassword"
-                  placeholder="Nhập lại mật khẩu vừa đặt"
+                  placeholder={t('Nhập lại mật khẩu vừa đặt')}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required={!isLogin}
@@ -259,8 +265,19 @@ export default function AuthPage() {
                   className="toggle-password"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex="-1"
+                  aria-label={showConfirmPassword ? t('Ẩn mật khẩu xác nhận') : t('Hiện mật khẩu xác nhận')}
                 >
-                  {showConfirmPassword ? 'Ẩn' : 'Hiện'}
+                  {showConfirmPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
@@ -269,15 +286,20 @@ export default function AuthPage() {
           {/* Tuỳ chọn ghi nhớ / điều khoản */}
           <div className="form-options">
             {isLogin ? (
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                />
-                <span>Ghi nhớ đăng nhập</span>
-              </label>
+              <>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                  />
+                  <span>{t('Ghi nhớ đăng nhập')}</span>
+                </label>
+                <Link href="/auth/forgot-password" className="forgot-password-link">
+                  {t('Quên mật khẩu?')}
+                </Link>
+              </>
             ) : (
               <label className="checkbox-label">
                 <input
@@ -288,7 +310,7 @@ export default function AuthPage() {
                   required
                 />
                 <span>
-                  Tôi đồng ý với <Link href="/terms">Điều khoản</Link> & <Link href="/privacy">Bảo mật</Link>
+                  {t('Tôi đồng ý với')} <Link href="/terms">{t('Điều khoản')}</Link> & <Link href="/privacy">{t('Bảo mật')}</Link>
                 </span>
               </label>
             )}
@@ -299,48 +321,22 @@ export default function AuthPage() {
             {loading ? (
               <span className="spinner"></span>
             ) : isLogin ? (
-              'Đăng nhập'
+              t('Đăng nhập')
             ) : (
-              'Đăng ký tài khoản'
+              t('Đăng ký tài khoản')
             )}
           </button>
         </form>
 
-        {/* Đăng nhập bằng mạng xã hội */}
+        {/* Đăng nhập bằng Gmail */}
         <div className="auth-divider">
-          <span>Hoặc tiếp tục với</span>
+          <span>{t('Hoặc tiếp tục với')}</span>
         </div>
 
         <div className="social-auth-grid">
-          {/* Nút Google */}
           <button type="button" className="social-auth-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path
-                fill="#EA4335"
-                d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.6 3.6 1.8 7.3l3.7 2.9C6.4 7.3 9 5 12 5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.5 14.8c-.3-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.8 6.3C.7 8.5 0 10.2 0 12s.7 3.5 1.8 5.7l3.7-2.9z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.3-6.5-5.2L1.8 16c1.8 3.7 5.6 7 10.2 7z"
-              />
-            </svg>
-            <span>Google</span>
-          </button>
-
-          {/* 2. ĐÃ ĐỔI GITHUB THÀNH FACEBOOK */}
-          <button type="button" className="social-auth-btn facebook-btn">
-            <svg width="18" height="18" fill="#1877F2" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>
-            <span>Facebook</span>
+            <Image src={googleLogo} alt="" width={18} height={18} aria-hidden="true" />
+            <span>{t('Gmail')}</span>
           </button>
         </div>
 
@@ -348,30 +344,32 @@ export default function AuthPage() {
         <div className="auth-footer">
           {isLogin ? (
             <p>
-              Chưa có tài khoản?{' '}
+              {t('Chưa có tài khoản?')}{' '}
               <button
                 type="button"
                 className="link-button"
                 onClick={() => {
                   setIsLogin(false);
                   setError('');
+                  setIsSuccess(false);
                 }}
               >
-                Đăng ký ngay
+                {t('Đăng ký ngay')}
               </button>
             </p>
           ) : (
             <p>
-              Đã có tài khoản?{' '}
+              {t('Đã có tài khoản?')}{' '}
               <button
                 type="button"
                 className="link-button"
                 onClick={() => {
                   setIsLogin(true);
                   setError('');
+                  setIsSuccess(false);
                 }}
               >
-                Đăng nhập
+                {t('Đăng nhập')}
               </button>
             </p>
           )}
