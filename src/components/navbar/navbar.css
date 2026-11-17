@@ -1,7 +1,9 @@
 .imgContain{
     margin-right: auto;
+    margin-left: 10px;
+
 }
-.site-navbar { position: relative; z-index: 40; }
+.site-navbar { position: fixed; z-index: 40; }
 .account-menu { width: 250px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 90px); overflow-y: auto; background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-color); font: 400 18px/1.5 var(--font-sans); }
 .account-menu hr { border-color: var(--border-color); }
 .account-menu .btn-avt { align-items: center; font: inherit; }
@@ -107,10 +109,11 @@ button{
   background-color: var(--background);
   border: 1px solid var(--input-border);
   height: clamp(2.5em,2vw, 3.5em);
-  width: 100%;
+  width: 90%;
   min-width: 0;
   border-radius: 10px;
   overflow: hidden;
+  margin-right: 15px;
 }
 .btn_searchbar > span:first-child {
   min-width: 0;
