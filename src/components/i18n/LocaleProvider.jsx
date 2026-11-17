@@ -57,7 +57,7 @@ export function LanguageSwitcher() {
 
 export function SiteFooter() {
   const { t } = useI18n();
-  return <footer className="site-footer">
+  return <footer className="site-footer rounded-tl-2xl rounded-tr-4xl">
     <div className="site-footer-inner">
       <div className="site-footer-brand">
         <Link href="/" className="w-[35%]">

@@ -42,7 +42,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="site-navbar flex flex-row items-center text-xl text-foreground bg-card border-b border-border justify-around gap-3.5 w-full">
+    <nav className="site-navbar flex flex-row items-center text-xl text-foreground bg-card border-b border-border justify-around gap-3.5 w-full fixed top-0 right-0 left-0 ">
       <div className="imgContain w-26 md:w-36">
         <Link href="/">
           <Image src={logoLight} alt="logo" className="block dark:hidden" />
@@ -57,7 +57,7 @@ export default function Navbar() {
               <span>{t("Điều hướng")}</span><ChevronDown />
             </button>
             {openGen && <div className="listGenre absolute left-0 top-15 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
-              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" onClick={() => setOpenGen(false)}>{genre}</Link>)}
+              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" title={t(genre)} onClick={() => setOpenGen(false)}>{t(genre)}</Link>)}
             </div>}
           </div>
           <Link href="/library">{t("Thư viện")}</Link>

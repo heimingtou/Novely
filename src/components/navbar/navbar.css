@@ -1,7 +1,9 @@
 .imgContain{
     margin-right: auto;
+    margin-left: 10px;
+
 }
-.site-navbar { position: relative; z-index: 40; }
+.site-navbar { position: fixed; z-index: 40; }
 .account-menu { width: 250px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 90px); overflow-y: auto; background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-color); font: 400 18px/1.5 var(--font-sans); }
 .account-menu hr { border-color: var(--border-color); }
 .account-menu .btn-avt { align-items: center; font: inherit; }
@@ -65,12 +67,13 @@ button{
     font-size: clamp(15px,2vw,20px);
     padding: 15px;
     display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 5px 5px ;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 5px 15px ;
     background-color: var(--color-background);
     color: var(--color-foreground);
     border: 1px solid var(--color-border);
-    justify-items: start;
+    align-items: center;
+    justify-items: stretch;
 }
 
 .btn_nav {
@@ -106,10 +109,11 @@ button{
   background-color: var(--background);
   border: 1px solid var(--input-border);
   height: clamp(2.5em,2vw, 3.5em);
-  width: 100%;
+  width: 90%;
   min-width: 0;
   border-radius: 10px;
   overflow: hidden;
+  margin-right: 15px;
 }
 .btn_searchbar > span:first-child {
   min-width: 0;
@@ -151,6 +155,14 @@ button{
 }
 .btnGenre:hover{
   text-decoration: underline;
+}
+.btnGenre {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* Responsive cho màn hình từ small (sm) trở lên */
 @media (min-width: 640px) {
