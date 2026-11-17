@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
 import { ThemeManager } from "@/components/theme/SiteTheme";
-import { themeBootstrap } from "@/lib/theme-bootstrap.mjs";
 import { LocaleProvider, SiteFooter } from "@/components/i18n/LocaleProvider";
 import { getServerI18n, getServerLocale } from "@/lib/i18n/server";
 
@@ -29,8 +29,8 @@ export default async function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-       <head><script dangerouslySetInnerHTML={{ __html: themeBootstrap }} /></head>
        <body className="min-h-full flex flex-col">
+        <Script src="/theme-bootstrap.js" strategy="beforeInteractive" />
         <LocaleProvider initialLocale={locale}>
           <ThemeManager />
           <Navbar/>

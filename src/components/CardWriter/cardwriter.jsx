@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ChartNoAxesCombined, ChevronDown, Eye, MessageCircle, Pencil, Plus, Share2, StarIcon, Trash2 } from "lucide-react";
+import { ChartNoAxesCombined, ChevronDown, Eye, HeartIcon, MessageCircle, Pencil, Plus, Share2, StarIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -82,7 +82,7 @@ return(
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
                 <div className="flex flex-row gap-5">
                     <p className=" icontext"><span><Eye/> </span><span>{view}</span></p>
-                    <p className="icontext"><span><StarIcon/></span><span>{like}</span></p>
+                    <p className="icontext"><span><HeartIcon/></span><span>{like}</span></p>
                     <p className="icontext"><span><MessageCircle/></span><span>{comment}</span></p>
                 </div>
             </div>

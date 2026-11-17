@@ -42,7 +42,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="site-navbar flex flex-row items-center text-xl text-foreground bg-card border-b border-border justify-around w-full">
+    <nav className="site-navbar flex flex-row items-center text-xl text-foreground bg-card border-b border-border justify-around gap-3.5 w-full">
       <div className="imgContain w-26 md:w-36">
         <Link href="/">
           <Image src={logoLight} alt="logo" className="block dark:hidden" />

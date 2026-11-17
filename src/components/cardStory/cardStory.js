@@ -8,15 +8,17 @@ export default function CardStory({ title, like, genres, coverImage, href, badge
         <div className="CardContaint w-full  flex flex-col items-center ">
            <Link href={href}>
                 <div className="imgCard">
-                <Image src={coverImage} className="imgCard__image" alt={title} fill sizes="(max-width: 825px) 38vw, 18vw" />
-                <span className="imgCard__spine" aria-hidden="true" />
-                <div className="imgCard__badges">
-                    {badges.full && <span className="imgCard__badge imgCard__badge--full">FULL</span>}
-                    <div className="imgCard__badge-stack">
-                        {badges.vip && <span className="imgCard__badge imgCard__badge--vip">VIP</span>}
-                        {badges.age18 && <span className="imgCard__badge imgCard__badge--adult">18+</span>}
+                    <div className="imgCard__cover">
+                        <Image src={coverImage} className="imgCard__image" alt={title} fill sizes="(max-width: 825px) 38vw, 18vw" />
+                        <span className="imgCard__spine" aria-hidden="true" />
+                        <div className="imgCard__badges">
+                            {badges.full && <span className="imgCard__badge imgCard__badge--full">FULL</span>}
+                            <div className="imgCard__badge-stack">
+                                {badges.age18 && <span className="imgCard__badge imgCard__badge--adult">18+</span>}
+                                {badges.vip && <span className="imgCard__badge imgCard__badge--vip">VIP</span>}
+                            </div>
+                        </div>
                     </div>
-                </div>
                 </div>
             </Link>
             

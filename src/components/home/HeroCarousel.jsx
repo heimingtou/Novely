@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, HeartIcon } from "lucide-react";
 import "./HeroCarousel.css";
 
 const AUTOPLAY_DELAY = 10000;
@@ -54,7 +54,7 @@ export default function HeroCarousel({ slides, locale }) {
       <div className="home-hero__content" key={slide.id}>
         <span className="home-hero__eyebrow">{isEnglish ? "FEATURED STORY" : "TRUYỆN ĐỀ CỬ"}</span>
         <h1 className="home-hero__title">{slide.title}</h1>
-        <p className="home-hero__meta">{slide.genres} <span aria-hidden="true">·</span> {slide.likes} {isEnglish ? "reads" : "lượt yêu thích"}</p>
+        <p className="home-hero__meta"><span>{slide.genres}</span><span className="flex flex-row items-center gap-1"><HeartIcon/> {slide.likes} </span> </p>
         <Link className="home-hero__link" href="/novels/demo">
           {isEnglish ? "Read story" : "Đọc truyện"}
           <ChevronRight size={18} aria-hidden="true" />
