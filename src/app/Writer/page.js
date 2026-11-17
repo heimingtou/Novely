@@ -109,6 +109,7 @@ const novelDataByTab = {
 
 export default function WriterPage(){
     const [activeTab, setActiveTab] = useState('published')
+    const [openChapterListId, setOpenChapterListId] = useState(null)
     const [writerState, , writerReady] = useWriterStore()
     const selectedNovelData = novelDataByTab[activeTab]
     const writerNovels = writerReady && activeTab !== 'series'
@@ -149,6 +150,11 @@ export default function WriterPage(){
                                 current_chap={novelData.current_chapters}
                                 chapters={novelData.chapters || []}
                                 isWriterNovel={Boolean(novelData.isWriterNovel)}
+                                chaptersOpen={openChapterListId === novelData.id}
+                                onToggleChapters={() => setOpenChapterListId((openId) => (
+                                    openId === novelData.id ? null : novelData.id
+                                ))}
+                                onCloseChapters={() => setOpenChapterListId(null)}
                             />
                         ))
                     }
