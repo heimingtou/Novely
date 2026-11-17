@@ -37,3 +37,14 @@ test("nhãn khu vực tác giả có bản dịch cho cả hai ngôn ngữ", () 
   assert.equal(vi("Câu truyện của bạn"), "Câu truyện của bạn");
   assert.equal(vi("Xem trước"), "Xem trước");
 });
+
+test("nhãn thư viện có bản dịch và giữ nguyên giá trị động", () => {
+  const en = createTranslator("en");
+  const vi = createTranslator("vi");
+
+  assert.equal(en("Thư viện của bạn"), "Your library");
+  assert.equal(en("Đã đọc: Chương {0}/{1}", [3, 12]), "Read: Chapter 3/12");
+  assert.equal(en("Tiên Hiệp"), "Xianxia");
+  assert.equal(vi("Thư viện của bạn"), "Thư viện của bạn");
+  assert.equal(vi("Xem chi tiết"), "Xem chi tiết");
+});
