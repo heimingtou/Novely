@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useI18n } from '@/components/i18n/LocaleProvider';
 import { 
   Clock, 
   Trash2, 
@@ -72,6 +73,7 @@ const DEFAULT_BOOKMARKS = [
 ];
 
 export default function LibraryPage() {
+  const { locale, t } = useI18n();
   const [activeTab, setActiveTab] = useState('history'); // 'history' | 'bookmarks'
   const [historyList, setHistoryList] = useState([]);
   const [bookmarkList, setBookmarkList] = useState([]);
@@ -127,7 +129,7 @@ export default function LibraryPage() {
 
   // Xóa toàn bộ lịch sử đọc (nếu F5 tải lại trang sẽ tự phục hồi lại danh sách mẫu)
   const handleClearHistory = () => {
-    if (confirm('Bạn có chắc muốn xóa lịch sử? (Tải lại trang F5 sẽ tự khôi phục dữ liệu mẫu)')) {
+    if (confirm(t('Bạn có chắc muốn xóa lịch sử? (Tải lại trang F5 sẽ tự khôi phục dữ liệu mẫu)'))) {
       setHistoryList([]);
       localStorage.removeItem('novely_reading_history');
     }
@@ -161,10 +163,11 @@ export default function LibraryPage() {
 
   const formatTimeAgo = (dateString) => {
     const diff = Math.floor((new Date() - new Date(dateString)) / 1000);
-    if (diff < 60) return 'Vừa xong';
-    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-    return `${Math.floor(diff / 86400)} ngày trước`;
+    if (diff < 60) return t('Vừa xong');
+    const relativeTime = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (diff < 3600) return relativeTime.format(-Math.floor(diff / 60), 'minute');
+    if (diff < 86400) return relativeTime.format(-Math.floor(diff / 3600), 'hour');
+    return relativeTime.format(-Math.floor(diff / 86400), 'day');
   };
 
   const filteredHistory = historyList.filter(item =>
@@ -187,8 +190,8 @@ export default function LibraryPage() {
               <LibraryIcon size={26} />
             </div>
             <div>
-              <h1 className="library-title">Thư viện của bạn</h1>
-              <p className="library-subtitle">Quản lý lịch sử đọc và những bộ tiểu thuyết bạn đã lưu</p>
+              <h1 className="library-title">{t('Thư viện của bạn')}</h1>
+              <p className="library-subtitle">{t('Quản lý lịch sử đọc và những bộ tiểu thuyết bạn đã lưu')}</p>
             </div>
           </div>
 
@@ -196,7 +199,8 @@ export default function LibraryPage() {
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder="Tìm kiếm truyện trong thư viện..."
+              aria-label={t('Tìm kiếm')}
+              placeholder={t('Tìm kiếm truyện trong thư viện...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -211,7 +215,7 @@ export default function LibraryPage() {
               onClick={() => setActiveTab('history')}
             >
               <Clock size={17} />
-              <span>Đã đọc gần đây</span>
+              <span>{t('Đã đọc gần đây')}</span>
               <span className="tab-count">{historyList.length}</span>
             </button>
 
@@ -220,7 +224,7 @@ export default function LibraryPage() {
               onClick={() => setActiveTab('bookmarks')}
             >
               <BookMarked size={17} />
-              <span>Tủ sách đã lưu</span>
+              <span>{t('Tủ sách đã lưu')}</span>
               <span className="tab-count">{bookmarkList.length}</span>
             </button>
           </div>
@@ -228,7 +232,7 @@ export default function LibraryPage() {
           {activeTab === 'history' && historyList.length > 0 && (
             <button className="clear-history-btn" onClick={handleClearHistory}>
               <Trash2 size={16} />
-              <span>Xóa lịch sử</span>
+              <span>{t('Xóa lịch sử')}</span>
             </button>
           )}
         </div>
@@ -250,11 +254,11 @@ export default function LibraryPage() {
 
                   <div className="card-info">
                     <div className="card-top">
-                      <span className="card-category">{novel.category}</span>
+                      <span className="card-category">{t(novel.category)}</span>
                       <button 
                         className="delete-item-btn" 
                         onClick={(e) => handleRemoveHistoryItem(novel.id, e)}
-                        title="Xóa khỏi lịch sử"
+                        title={t('Xóa khỏi lịch sử')}
                       >
                         <Trash2 size={15} />
                       </button>
@@ -264,11 +268,11 @@ export default function LibraryPage() {
                       {novel.title}
                     </Link>
 
-                    <p className="card-author">Tác giả: {novel.author}</p>
+                    <p className="card-author">{t('Tác giả:')} {novel.author}</p>
 
                     <div className="progress-section">
                       <div className="progress-labels">
-                        <span>Đã đọc: Chương {novel.currentChapter}/{novel.totalChapters}</span>
+                        <span>{t('Đã đọc: Chương {0}/{1}', [novel.currentChapter, novel.totalChapters])}</span>
                         <span>{novel.progress}%</span>
                       </div>
                       <div className="progress-bar-bg">
@@ -288,7 +292,7 @@ export default function LibraryPage() {
                         href={`/novel/${novel.id}`}
                         className="continue-btn"
                       >
-                        <span>Đọc tiếp</span>
+                        <span>{t('Đọc tiếp')}</span>
                         <ChevronRight size={16} />
                       </Link>
                     </div>
@@ -298,10 +302,10 @@ export default function LibraryPage() {
             </div>
           ) : (
             <div className="empty-state">
-              <h3>Chưa có lịch sử đọc truyện</h3>
-              <p>Khám phá kho tàng tiểu thuyết phong phú của Novely hoặc tải lại dữ liệu mẫu!</p>
+              <h3>{t('Chưa có lịch sử đọc truyện')}</h3>
+              <p>{t('Khám phá kho tàng tiểu thuyết phong phú của Novely hoặc tải lại dữ liệu mẫu!')}</p>
               <button onClick={handleRestoreDefault} className="explore-btn">
-                Tạo lại dữ liệu mẫu
+                {t('Tạo lại dữ liệu mẫu')}
               </button>
             </div>
           )
@@ -322,11 +326,11 @@ export default function LibraryPage() {
 
                   <div className="card-info">
                     <div className="card-top">
-                      <span className="card-category">{novel.category}</span>
+                      <span className="card-category">{t(novel.category)}</span>
                       <button 
                         className="delete-item-btn" 
                         onClick={(e) => handleRemoveBookmarkItem(novel.id, e)}
-                        title="Bỏ lưu truyện"
+                        title={t('Bỏ lưu truyện')}
                       >
                         <Trash2 size={15} />
                       </button>
@@ -336,15 +340,15 @@ export default function LibraryPage() {
                       {novel.title}
                     </Link>
 
-                    <p className="card-author">Tác giả: {novel.author}</p>
-                    <p className="latest-chap">Mới nhất: Chương {novel.latestChapter}</p>
+                    <p className="card-author">{t('Tác giả:')} {novel.author}</p>
+                    <p className="latest-chap">{t('Mới nhất: Chương {0}', [novel.latestChapter])}</p>
 
                     <div className="card-footer bookmark-footer">
                       <Link 
                         href={`/novel/${novel.id}`}
                         className="continue-btn full-width"
                       >
-                        <span>Xem chi tiết</span>
+                        <span>{t('Xem chi tiết')}</span>
                         <ChevronRight size={16} />
                       </Link>
                     </div>
@@ -354,10 +358,10 @@ export default function LibraryPage() {
             </div>
           ) : (
             <div className="empty-state">
-              <h3>Tủ sách đang trống</h3>
-              <p>Hãy lưu lại các bộ tiểu thuyết yêu thích hoặc khôi phục danh sách mẫu!</p>
+              <h3>{t('Tủ sách đang trống')}</h3>
+              <p>{t('Hãy lưu lại các bộ tiểu thuyết yêu thích hoặc khôi phục danh sách mẫu!')}</p>
               <button onClick={handleRestoreDefault} className="explore-btn">
-                Tạo lại dữ liệu mẫu
+                {t('Tạo lại dữ liệu mẫu')}
               </button>
             </div>
           )

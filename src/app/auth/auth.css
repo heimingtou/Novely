@@ -20,28 +20,7 @@ body.dark .auth-container,
 
 /* Hiệu ứng nền mờ (Gradient blur) */
 .auth-backdrop-circle {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.15;
-}
-
-.circle-1 {
-  width: 450px;
-  height: 450px;
-  background: #3b82f6;
-  top: -100px;
-  left: -100px;
-}
-
-.circle-2 {
-  width: 500px;
-  height: 500px;
-  background: #8b5cf6;
-  bottom: -150px;
-  right: -100px;
+  display: none;
 }
 
 /* Hộp form (Card) */
@@ -50,13 +29,11 @@ body.dark .auth-container,
   z-index: 1;
   width: 100%;
   max-width: 460px;
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
   border-radius: 20px;
   padding: 36px 32px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 /* Header & Logo */
@@ -88,13 +65,13 @@ body.dark .auth-container,
 .auth-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #0f172a;
   margin: 0 0 8px 0;
 }
 
 .auth-subtitle {
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: #64748b;
   line-height: 1.5;
   margin: 0;
 }
@@ -102,11 +79,11 @@ body.dark .auth-container,
 /* Tabs chuyển chế độ */
 .auth-tabs {
   display: flex;
-  background: rgba(15, 23, 42, 0.6);
+  background: #ffffff;
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 2px solid #cbd5e1;
 }
 
 .auth-tab {
@@ -114,7 +91,7 @@ body.dark .auth-container,
   padding: 10px 0;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: #475569;
   font-weight: 600;
   font-size: 0.95rem;
   border-radius: 8px;
@@ -123,7 +100,7 @@ body.dark .auth-container,
 }
 
 .auth-tab.active {
-  background-color: #e4615b !important;
+  background-color: #FF5454 !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }
@@ -167,7 +144,7 @@ body.dark .auth-container,
 .form-group label {
   font-size: 0.86rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: #334155;
 }
 
 .form-group-header {
@@ -176,9 +153,9 @@ body.dark .auth-container,
   align-items: center;
 }
 
-.forgot-password {
+.forgot-password-link {
   font-size: 0.85rem;
-  color: #e4615b !important;
+  color: #FF5454 !important;
   text-decoration: none;
 }
 
@@ -203,23 +180,23 @@ body.dark .auth-container,
 .input-wrapper input {
   width: 100%;
   padding: 11px 42px 11px 42px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
   border-radius: 10px;
-  color: #f8fafc;
+  color: #0f172a;
   font-size: 0.95rem;
   transition: all 0.2s ease;
   outline: none;
 }
 
 .input-wrapper input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-  background: rgba(15, 23, 42, 0.7);
+  border-color: #FF5454;
+  box-shadow: 0 0 0 3px rgba(255, 84, 84, 0.2);
+  background: #ffffff;
 }
 
 .input-wrapper input::placeholder {
-  color: #475569;
+  color: #94a3b8;
 }
 
 .toggle-password {
@@ -236,7 +213,7 @@ body.dark .auth-container,
 }
 
 .toggle-password:hover {
-  color: #cbd5e1;
+  color: #334155;
 }
 
 /* Checkbox & Options */
@@ -251,12 +228,12 @@ body.dark .auth-container,
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: #475569;
   cursor: pointer;
 }
 
 .checkbox-label a {
-  color: #e4615b;
+  color: #FF5454;
   text-decoration: none;
 }
 
@@ -268,7 +245,7 @@ body.dark .auth-container,
   width: 100%;
   padding: 14px;
   border-radius: 12px;
-  background: #e4615b !important; /* Đổi sang #e4615b */
+  background: #FF5454 !important;
   color: #ffffff !important;
   border: none;
   font-size: 1rem;
@@ -320,8 +297,8 @@ body.dark .auth-container,
 .auth-divider::after {
   content: '';
   flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 2px;
+  background: #e2e8f0;
 }
 
 .auth-divider span {
@@ -331,7 +308,7 @@ body.dark .auth-container,
 /* Social Login */
 .social-auth-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
@@ -341,10 +318,10 @@ body.dark .auth-container,
   justify-content: center;
   gap: 8px;
   padding: 10px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
   border-radius: 10px;
-  color: #e2e8f0;
+  color: #334155;
   font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
@@ -352,8 +329,8 @@ body.dark .auth-container,
 }
 
 .social-auth-btn:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* Footer Switch */
@@ -361,13 +338,13 @@ body.dark .auth-container,
   text-align: center;
   margin-top: 24px;
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #60a5fa;
+  color: #FF5454;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
@@ -392,6 +369,71 @@ body.dark .auth-container,
   object-fit: contain;
 }
 
-.social-auth-btn.facebook-btn:hover {
-  border-color: rgba(24, 119, 242, 0.4);
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-card {
+  background: #182038;
+  border-color: #334155;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-title {
+  color: #f8fafc;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-subtitle,
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-footer {
+  color: #94a3b8;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-tabs {
+  background: #111729;
+  border-color: #334155;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-tab:not(.active) {
+  color: #cbd5e1;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .form-group label {
+  color: #e2e8f0;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .input-wrapper input {
+  background: #111729;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .input-wrapper input:focus {
+  border-color: #FF5454;
+  background: #111729;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .input-wrapper input::placeholder,
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .input-icon,
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .toggle-password {
+  color: #94a3b8;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .toggle-password:hover {
+  color: #f8fafc;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .checkbox-label,
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-divider {
+  color: #cbd5e1;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-divider::before,
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .auth-divider::after {
+  background: #334155;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .social-auth-btn {
+  background: #111729;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+:is(html.dark, body.dark, [data-theme="dark"], .dark) .social-auth-btn:hover {
+  background: #1e293b;
+  border-color: #64748b;
 }

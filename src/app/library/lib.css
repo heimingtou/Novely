@@ -12,7 +12,7 @@ body,
   --lib-text-muted: #52525b;
   --lib-border: #e4e4e7;
   --lib-input-bg: #f4f4f5;
-  --lib-brand: #e4615b;
+  --lib-brand: #FF5454;
 }
 
 /* CHỦ ĐỀ TỐI: Nền #111729, chữ trắng, không ửng màu */
@@ -27,7 +27,7 @@ body.dark,
   --lib-text-muted: #94a3b8;
   --lib-border: #283556;
   --lib-input-bg: #1e293b;
-  --lib-brand: #e4615b;
+  --lib-brand: #FF5454;
 }
 
 /* ==========================================================================
@@ -76,7 +76,7 @@ body.dark,
   gap: 16px;
 }
 
-/* 1. Badge icon tiêu đề thư viện: Nền #e4615b, icon trắng */
+/* 1. Badge icon tiêu đề thư viện: Nền #FF5454, icon trắng */
 .library-icon-badge {
   display: flex;
   align-items: center;
@@ -103,7 +103,7 @@ body.dark,
   margin: 0;
 }
 
-/* 2. Khung ô tìm kiếm: Nền #e4615b, chữ và icon trắng */
+/* 2. Khung ô tìm kiếm: Nền #FF5454, chữ và icon trắng */
 .library-search-box {
   position: relative;
   width: 100%;
@@ -112,6 +112,7 @@ body.dark,
 
 .library-search-box .search-icon {
   position: absolute;
+  z-index: 1;
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
@@ -128,7 +129,6 @@ body.dark,
   font-size: 0.9rem;
   outline: none;
   box-shadow: none !important;
-  transition: opacity 0.2s ease;
 }
 
 .library-search-box input::placeholder {
@@ -136,7 +136,7 @@ body.dark,
 }
 
 .library-search-box input:focus {
-  opacity: 0.95;
+  opacity: 1;
   box-shadow: none !important;
 }
 
@@ -180,7 +180,7 @@ body.dark,
   background: var(--lib-input-bg);
 }
 
-/* 3. Tab đang chọn: Nền #e4615b, chữ trắng */
+/* 3. Tab đang chọn: Nền #FF5454, chữ trắng */
 .lib-tab.active {
   background-color: var(--lib-brand) !important;
   border-color: var(--lib-brand) !important;
@@ -243,7 +243,7 @@ body.dark,
 
 .history-card:hover {
   transform: none;
-  border-color: var(--lib-text-muted);
+  border-color: var(--lib-brand);
   box-shadow: none !important;
   background: var(--lib-card-bg);
 }
@@ -409,10 +409,10 @@ body.dark,
   width: 100%;
   justify-content: center;
   padding: 8px 0;
-  background: var(--lib-input-bg);
-  border: 1px solid var(--lib-border);
+  background: var(--lib-brand);
+  border: 1px solid var(--lib-brand);
   border-radius: 6px;
-  color: var(--lib-text);
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -448,7 +448,7 @@ body.dark,
   margin: 0 auto 24px auto;
 }
 
-/* 4. Nút Khám phá truyện ngay: Nền #e4615b, chữ trắng */
+/* 4. Nút Khám phá truyện ngay: Nền #FF5454, chữ trắng */
 .explore-btn {
   display: inline-flex;
   padding: 10px 22px;
