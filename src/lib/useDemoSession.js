@@ -1,13 +1,16 @@
 "use client";
 
-import { useLocalStorageState } from "./useLocalStorageState";
+import { useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "@/components/auth/SessionProvider";
 
-// Navbar hiện chỉ mô phỏng đăng nhập. Thay hook này bằng phiên xác thực thật
-// khi có backend; không dùng localStorage để kiểm tra quyền trên server.
-const DEMO_ACCOUNT = { id: "demo-reader", name: "Bạn đọc Novely" };
-const normalizeSession = (value) => value?.id === DEMO_ACCOUNT.id ? DEMO_ACCOUNT : null;
-
+// Giữ API cũ ({ account, ready, signIn, signOut }) cho forum và bình luận trong trang đọc,
+// nhưng dùng phiên đăng nhập thật thay vì localStorage.
 export function useDemoSession() {
-  const [account, setAccount, ready] = useLocalStorageState("novely:v1:demo-session", null, normalizeSession);
-  return { account, ready, signIn: () => setAccount(DEMO_ACCOUNT), signOut: () => setAccount(null) };
+  const { user, ready, logout } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const signIn = useCallback(() => router.push(`/auth?next=${encodeURIComponent(pathname || "/")}`), [router, pathname]);
+  const account = user ? { id: String(user.id), name: user.username } : null;
+  return { account, ready, signIn, signOut: logout };
 }

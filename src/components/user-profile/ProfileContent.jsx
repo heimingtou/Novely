@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   BookOpen,
@@ -20,34 +22,8 @@ import {
   X,
 } from "lucide-react";
 import ProfileActions from "./ProfileActions";
-
-// Dữ liệu demo trước khi nối API. Có thể thay bằng initialUser.stories/posts/reviews.
-const demoStories = [
-  {
-    id: "demo",
-    title: "Thư Viện Ánh Trăng",
-    chapters: 24,
-    status: "Đang cập nhật",
-    description: "Một câu chuyện kỳ ảo về những bí mật bên trong thư viện ánh trăng.",
-  },
-  {
-    id: "nhung-ngay-mua",
-    title: "Những Ngày Mưa",
-    chapters: 12,
-    status: "Hoàn thành",
-    description: "Những ký ức dịu dàng qua từng mùa mưa.",
-  },
-];
-
-const demoPosts = [
-  { id: 1, content: "Chương mới sẽ được đăng vào cuối tuần này! ✨", date: "12/10/2026" },
-  { id: 2, content: "Cảm ơn mọi người đã ủng hộ truyện của mình!", date: "10/10/2026" },
-];
-
-const demoReviews = [
-  { id: 1, title: "Khu Vườn Mùa Hạ", rating: 5, content: "Một câu chuyện nhẹ nhàng và rất cảm động!" },
-  { id: 2, title: "Ngôi Sao Cuối Cùng", rating: 4, content: "Cốt truyện thú vị, nhân vật được xây dựng tốt." },
-];
+import { updateProfile } from "@/app/users/actions";
+import { GENDERS, PHONE_PATTERN, normalizeFacebookLink, validBirthday } from "@/lib/profile-model.mjs";
 
 const tabs = [
   { id: "about", label: "Giới thiệu" },
@@ -60,9 +36,9 @@ const fieldClass =
 const cardClass =
   "rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900";
 
+// Database chỉ có username (không có cột tên hiển thị riêng) nên tên hiển thị = username.
 function createForm(user) {
   return {
-    name: user.name ?? "",
     username: user.username ?? "",
     bio: user.bio ?? "",
     avatar: user.avatar ?? "",
@@ -74,55 +50,13 @@ function createForm(user) {
   };
 }
 
-// Chỉ cho phép đường dẫn Facebook thật, không chấp nhận URL của website khác.
-// Có thể dán cả "facebook.com/username" hoặc "https://facebook.com/username".
-// Facebook là thông tin công khai tùy chọn, không nằm trong các trường bắt buộc.
-function normalizeFacebookLink(value) {
-  const trimmed = String(value ?? "").trim();
-  if (!trimmed) return "";
+const genderLabel = (value) => GENDERS.find((gender) => gender.value === value)?.label ?? "";
 
-  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  try {
-    const url = new URL(candidate);
-    const allowedHosts = [
-      "facebook.com", "www.facebook.com", "m.facebook.com",
-      "web.facebook.com", "fb.com", "www.fb.com", "fb.me", "www.fb.me",
-    ];
-    if (
-      !["https:", "http:"].includes(url.protocol) ||
-      !allowedHosts.includes(url.hostname.toLowerCase()) ||
-      url.username || url.password ||
-      (url.pathname === "/" && !url.searchParams.has("id"))
-    ) {
-      return null;
-    }
-    url.protocol = "https:";
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function validBirthday(birthday) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) return false;
-  const [year, month, day] = birthday.split("-").map(Number);
-  const parsed = new Date(Date.UTC(year, month - 1, day));
-  const today = new Date();
-  const localToday = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
-  return (
-    parsed.getUTCFullYear() === year &&
-    parsed.getUTCMonth() + 1 === month &&
-    parsed.getUTCDate() === day &&
-    birthday <= localToday
-  );
-}
-
-export default function ProfileContent({ initialUser, isOwnProfile }) {
+export default function ProfileContent({ initialUser, isOwnProfile, signedIn = false }) {
+  const router = useRouter();
+  const [saving, startSaving] = useTransition();
   const [profile, setProfile] = useState(initialUser);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [form, setForm] = useState(() => createForm(initialUser));
   const [activeTab, setActiveTab] = useState("about");
   const [isEditing, setIsEditing] = useState(false);
@@ -130,14 +64,9 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
-  // Nếu sau này API trả danh sách thật, component sẽ ưu tiên danh sách đó.
-  const stories = Array.isArray(profile.stories)
-    ? profile.stories
-    : Number(profile.storiesCount) > 0
-      ? demoStories.slice(0, Number(profile.storiesCount))
-      : [];
-  const posts = Array.isArray(profile.posts) ? profile.posts : demoPosts;
-  const reviews = Array.isArray(profile.reviews) ? profile.reviews : demoReviews;
+  const stories = Array.isArray(profile.stories) ? profile.stories : [];
+  const posts = Array.isArray(profile.posts) ? profile.posts : [];
+  const reviews = Array.isArray(profile.reviews) ? profile.reviews : [];
   const followingUsers = Array.isArray(profile.followingUsers) ? profile.followingUsers : [];
 
   const avatar = isEditing ? form.avatar : profile.avatar;
@@ -163,6 +92,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
 
   function handleCancel() {
     setForm(createForm(profile));
+    setAvatarFile(null);
     setError("");
     setIsEditing(false);
   }
@@ -182,6 +112,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
     }
 
     setError("");
+    setAvatarFile(file);
     setIsLoadingAvatar(true);
     const reader = new FileReader();
     reader.onload = () => {
@@ -194,66 +125,44 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
 
   function handleSave(event) {
     event.preventDefault();
-    if (!isOwnProfile || isLoadingAvatar) return;
+    if (!isOwnProfile || isLoadingAvatar || saving) return;
 
     const updated = {
-      ...profile,
       ...form,
-      name: form.name.trim(),
       username: form.username.trim(),
       bio: form.bio.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
       facebook: form.facebook.trim(),
     };
-    const requiredFields = [
-      ["Tên hiển thị", updated.name],
-      ["Username", updated.username],
-    ];
-    const missing = requiredFields
-      .filter(([, value]) => !String(value ?? "").trim())
-      .map(([label]) => label);
 
+    // Kiểm tra nhanh trên trình duyệt; Server Action kiểm tra lại toàn bộ.
     setNotice("");
-    if (missing.length) {
-      setError(`Vui lòng nhập đầy đủ: ${missing.join(", ")}`);
-      return;
-    }
+    if (!updated.username) { setError("Vui lòng nhập đầy đủ: Username"); return; }
+    if (!updated.email) { setError("Vui lòng nhập đầy đủ: Email"); return; }
     const facebookLink = normalizeFacebookLink(updated.facebook);
     if (facebookLink === null) {
       setError("Link Facebook không hợp lệ. Hãy dùng facebook.com/tennguoidung hoặc một link hồ sơ Facebook.");
       return;
     }
-    updated.facebook = facebookLink;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updated.email)) { setError("Địa chỉ email không hợp lệ!"); return; }
+    if (updated.phone && !PHONE_PATTERN.test(updated.phone)) { setError("Số điện thoại phải có 9–14 chữ số!"); return; }
+    if (updated.birthday && !validBirthday(updated.birthday)) { setError("Ngày sinh không hợp lệ!"); return; }
 
+    const data = new FormData();
+    for (const field of ["username", "email", "bio", "birthday", "gender", "phone", "facebook"]) data.set(field, updated[field] ?? "");
+    if (avatarFile) data.set("avatar", avatarFile);
 
-    if (
-      updated.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updated.email)
-    ) {
-      setError("Địa chỉ email không hợp lệ!");
-      return;
-    }
-
-    if (
-      updated.phone &&
-      !/^\+?[0-9]{9,15}$/.test(updated.phone)
-    ) {
-      setError("Số điện thoại phải có 9–15 chữ số!");
-      return;
-    }
-
-    if (updated.birthday && !validBirthday(updated.birthday)) {
-      setError("Ngày sinh không hợp lệ!");
-      return;
-    }
-
-
-    // Bản demo: chỉ lưu bằng React state; refresh trang sẽ trở về dữ liệu ban đầu.
-    setProfile(updated);
-    setError("");
-    setIsEditing(false);
-    setNotice("Cập nhật hồ sơ thành công (bản demo)!");
+    startSaving(async () => {
+      const result = await updateProfile(null, data);
+      if (result?.error) { setError(result.error); return; }
+      setProfile((current) => ({ ...current, ...updated, name: updated.username, facebook: facebookLink, genderLabel: genderLabel(updated.gender) }));
+      setAvatarFile(null);
+      setError("");
+      setIsEditing(false);
+      setNotice(result.message || "Cập nhật hồ sơ thành công!");
+      router.refresh(); // cập nhật navbar (username/avatar) và dữ liệu server
+    });
   }
 
   async function handleCopyLink() {
@@ -318,14 +227,14 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
           <h1 className="break-words text-2xl font-bold">{profile.name}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-200">Reader</span>
-            {(Number(profile.storiesCount) > 0 || stories.length > 0) && (
+            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-200">{profile.role === "admin" ? "Admin" : "Reader"}</span>
+            {(profile.role === "author" || stories.length > 0) && (
               <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-[#D43D3D] dark:bg-red-950 dark:text-red-300">Writer</span>
             )}
           </div>
         </div>
         <div className="w-full sm:w-auto">
-          <ProfileActions followers={profile.followers} following={profile.following} isOwnProfile={isOwnProfile} />
+          <ProfileActions userId={profile.id} followers={profile.followers} following={profile.following} initialFollowing={profile.isFollowing} isOwnProfile={isOwnProfile} signedIn={signedIn} />
         </div>
       </div>
 
@@ -369,16 +278,10 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="edit-name" className="mb-2 block text-sm font-semibold">
-                Tên hiển thị <span className="text-[#FF5454]">*</span>
-              </label>              <input id="edit-name" type="text" maxLength={60} value={form.name}
-                onChange={(e) => updateField("name", e.target.value)} className={fieldClass} />
-            </div>
-            <div>
               <label htmlFor="edit-username" className="mb-2 block text-sm font-semibold">
                 Username <span className="text-[#FF5454]">*</span>
               </label>
-              <input id="edit-username" type="text" maxLength={30} value={form.username}
+              <input id="edit-username" type="text" minLength={3} maxLength={50} value={form.username}
                 onChange={(e) => updateField("username", e.target.value)} className={fieldClass} />
             </div>
             <div>
@@ -390,20 +293,17 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
               <label htmlFor="edit-gender" className="mb-2 block text-sm font-semibold">Giới tính </label>
               <select id="edit-gender" value={form.gender}
                 onChange={(e) => updateField("gender", e.target.value)} className={fieldClass}>
-                <option value="">Chọn giới tính</option>
-                <option value="Nam">Nam</option>
-                <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
-                <option value="Không muốn tiết lộ">Không muốn tiết lộ</option>
+                <option value="">Không muốn tiết lộ</option>
+                {GENDERS.map((gender) => <option key={gender.value} value={gender.value}>{gender.label}</option>)}
               </select>
             </div>
             <div>
               <label htmlFor="edit-phone" className="mb-2 block text-sm font-semibold">Số điện thoại </label>
-              <input id="edit-phone" type="tel" maxLength={16} placeholder="Nhập số điện thoại" value={form.phone}
+              <input id="edit-phone" type="tel" maxLength={15} placeholder="Nhập số điện thoại" value={form.phone}
                 onChange={(e) => updateField("phone", e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label htmlFor="edit-email" className="mb-2 block text-sm font-semibold">Email </label>
+              <label htmlFor="edit-email" className="mb-2 block text-sm font-semibold">Email <span className="text-[#FF5454]">*</span></label>
               <input id="edit-email" type="email" maxLength={254} placeholder="example@gmail.com" value={form.email}
                 onChange={(e) => updateField("email", e.target.value)} className={fieldClass} />
             </div>
@@ -436,9 +336,9 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button type="submit" disabled={isLoadingAvatar}
+            <button type="submit" disabled={isLoadingAvatar || saving}
               className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#FF5454] px-5 py-3 font-semibold text-white transition hover:bg-[#E44646] disabled:cursor-not-allowed disabled:opacity-50">
-              <Save size={18} /> {isLoadingAvatar ? "Đang xử lý ảnh..." : "Lưu thay đổi"}
+              <Save size={18} /> {isLoadingAvatar ? "Đang xử lý ảnh..." : saving ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
             <button type="button" onClick={handleCancel}
               className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-900 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
@@ -520,7 +420,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
                 <h3 className="mb-3 text-sm font-bold">Thông tin cá nhân <span className="font-normal text-gray-500 dark:text-gray-400">(chỉ mình bạn)</span></h3>
                 <div className="space-y-2 break-words text-sm text-gray-600 dark:text-gray-300">
                   <p>Ngày sinh: {profile.birthday || "Chưa cập nhật"}</p>
-                  <p>Giới tính: {profile.gender || "Chưa cập nhật"}</p>
+                  <p>Giới tính: {profile.genderLabel || genderLabel(profile.gender) || "Chưa cập nhật"}</p>
                   <p>Số điện thoại: {profile.phone || "Chưa cập nhật"}</p>
                   <p>Email: {profile.email || "Chưa cập nhật"}</p>
                 </div>
@@ -532,7 +432,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
             <div className="mb-6 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold sm:text-2xl">Truyện của {profile.name}</h2>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{stories.length} truyện đã đăng (dữ liệu demo)</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{stories.length} truyện</p>
               </div>
               <BookOpen className="shrink-0 text-gray-400" size={24} />
             </div>
@@ -551,7 +451,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
                       )}
                     </div>
                     <div className="min-w-0 flex-1 space-y-2">
-                      <h3 className="break-words text-lg font-bold">{story.title}</h3>
+                      <h3 className="break-words text-lg font-bold">{story.href ? <Link href={story.href} className="hover:text-[#FF5454]">{story.title}</Link> : story.title}</h3>
                       <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <BookOpen size={15} /> {story.chapters ?? story.chapterCount ?? 0} chương
                       </p>
@@ -590,7 +490,7 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
             <div className="space-y-4">
               {reviews.length ? reviews.map((review) => (
                 <article key={review.id} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <p className="font-semibold">{review.title}</p>
+                  <p className="font-semibold">{review.href ? <Link href={review.href} className="hover:text-[#FF5454]">{review.title}</Link> : review.title}</p>
                   <p className="mt-2 text-sm text-amber-500" aria-label={`${review.rating} trên 5 sao`}>
                     {"★".repeat(Math.min(5, Math.max(0, review.rating || 0)))}{"☆".repeat(5 - Math.min(5, Math.max(0, review.rating || 0)))}
                   </p>
@@ -611,14 +511,14 @@ export default function ProfileContent({ initialUser, isOwnProfile }) {
             <div className="space-y-3">
               {followingUsers.map((person) => (
                 <div key={person.id} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <p className="font-semibold">{person.name}</p>
+                  <Link href={`/users/${person.id}`} className="font-semibold hover:text-[#FF5454]">{person.name}</Link>
                   {person.username && <p className="text-xs text-gray-500 dark:text-gray-400">@{person.username}</p>}
                 </div>
               ))}
             </div>
           ) : (
             <p className="rounded-lg bg-gray-50 p-5 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-              Danh sách người đang theo dõi sẽ hiển thị khi kết nối API.
+              Chưa theo dõi ai.
             </p>
           )}
         </div>

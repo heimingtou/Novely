@@ -1,11 +1,11 @@
 
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { getServerI18n } from "@/lib/i18n/server";
 
 import ChapterList from "@/components/novel-detail/ChapterList";
 import NovelActions from "@/components/novel-detail/NovelActions";
 import ResumeReading from "@/components/novel-detail/ResumeReading";
-import WriterNovelDetail from "@/components/novel-detail/WriterNovelDetail";
 import { getNovelDetail } from "@/server/services/catalog";
 
 export async function generateMetadata({ params }) {
@@ -19,8 +19,8 @@ export default async function NovelDetailPage({ params }) {
   const { t, locale } = await getServerI18n();
   const { id } = await params;
   const novel = await getNovelDetail(id);
-  // Không có trong database: có thể là bản nháp người viết lưu trên trình duyệt.
-  if (!novel) return <WriterNovelDetail novelId={id} />;
+  // Truyện không tồn tại hoặc chưa xuất bản (tác giả quản lý bản nháp ở /Writer/novels/:id).
+  if (!novel) notFound();
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10" lang={locale}>
