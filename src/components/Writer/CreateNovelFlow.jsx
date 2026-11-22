@@ -3,59 +3,36 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
-import { validateChapterInput, validateNovelInput, WRITER_GENRES } from "@/lib/writer-model.mjs";
-import { useWriterDispatch, useWriterStore } from "@/components/Writer/useWriterStore";
+import { saveChapterAction, saveNovelAction } from "@/app/Writer/actions";
 import "./create-novel.css";
 import { UploadCloudIcon } from "lucide-react";
 
 const MAX_COVER_BYTES = 750 * 1024;
-const initialNovel = { title: "", genres: [], coverImage: "", description: "" };
+const COVER_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-function createId() {
-  return crypto.randomUUID();
-}
-
-export default function CreateNovelFlow({ novelId: existingNovelId = "", chapterId = "" }) {
+// Bước 1: tạo truyện (lưu vào database, ảnh bìa lên Supabase Storage).
+// Bước 2: viết chương — đăng ngay hoặc lưu nháp. Server kiểm tra lại toàn bộ dữ liệu và quyền sở hữu.
+export default function CreateNovelFlow({ genres, novel = null, chapter = null, loadError = "" }) {
   const { t } = useI18n();
   const router = useRouter();
-  const [writerState, , ready, storageFailed] = useWriterStore();
-  const dispatch = useWriterDispatch();
-  const [step, setStep] = useState("novel");
-  const [novelForm, setNovelForm] = useState(initialNovel);
-  const [novelId, setNovelId] = useState("");
-  const [chapterDraftState, setChapterDraftState] = useState(null);
-  const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [novelForm, setNovelForm] = useState({ title: "", genreIds: [], description: "" });
+  const [cover, setCover] = useState({ file: null, preview: "" });
+  const [chapterTitle, setChapterTitle] = useState(chapter?.title ?? "");
+  const [chapterContent, setChapterContent] = useState(chapter?.content ?? "");
+  const [error, setError] = useState(loadError);
   const [message, setMessage] = useState("");
   const [coverError, setCoverError] = useState("");
-  const existingNovel = existingNovelId
-    ? writerState.novels.find((item) => item.id === existingNovelId)
-    : null;
-  const existingChapter = existingNovel?.chapters.find((item) => item.id === chapterId);
-  const activeStep = existingNovelId ? "chapter" : step;
-  const chapterDraft = chapterDraftState?.chapterId === chapterId ? chapterDraftState : null;
-  const chapterTitle = chapterDraft?.title ?? existingChapter?.title ?? "";
-  const chapterContent = chapterDraft?.content ?? existingChapter?.content ?? "";
-
-  function updateChapterDraft(field, value) {
-    setChapterDraftState((current) => {
-      const draft = current?.chapterId === chapterId
-        ? current
-        : {
-            chapterId,
-            title: existingChapter?.title || "",
-            content: existingChapter?.content || "",
-          };
-      return { ...draft, [field]: value };
-    });
-  }
+  const activeStep = novel ? "chapter" : "novel";
+  const previewHref = novel ? (novel.published ? `/novels/${novel.slug}` : `/Writer/novels/${novel.id}`) : "";
 
   function handleCoverChange(event) {
     const file = event.target.files?.[0];
     setCoverError("");
     if (!file) return;
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+    if (!COVER_TYPES.includes(file.type)) {
       setCoverError(t("Ảnh bìa phải có định dạng PNG, JPG hoặc WebP."));
       event.target.value = "";
       return;
@@ -65,68 +42,51 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
       event.target.value = "";
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        setCoverError(t("Không thể đọc ảnh bìa. Vui lòng thử lại."));
-        return;
-      }
-      setNovelForm((form) => ({ ...form, coverImage: reader.result }));
-    };
-    reader.onerror = () => setCoverError(t("Không thể đọc ảnh bìa. Vui lòng thử lại."));
-    reader.readAsDataURL(file);
+    if (cover.preview) URL.revokeObjectURL(cover.preview);
+    setCover({ file, preview: URL.createObjectURL(file) });
   }
 
   function handleCreateNovel(event) {
     event.preventDefault();
     setError("");
     setMessage("");
-    const errors = validateNovelInput(novelForm);
-    const firstError = Object.values(errors)[0];
-    if (firstError) {
-      setError(t(firstError));
-      return;
-    }
+    if (!novelForm.title.trim()) return setError(t("Vui lòng nhập tiêu đề truyện."));
+    if (!novelForm.genreIds.length) return setError(t("Vui lòng chọn ít nhất một thể loại."));
+    if (!cover.file) return setError(t("Vui lòng chọn ảnh bìa PNG, JPG hoặc WebP (tối đa 750 KB)."));
+    if (!novelForm.description.trim()) return setError(t("Vui lòng nhập phần giới thiệu truyện."));
 
-    const id = createId();
-    dispatch({ type: "CREATE_NOVEL", novel: novelForm, id, now: new Date().toISOString() });
-    setNovelId(id);
-    setStep("chapter");
+    const data = new FormData();
+    data.set("title", novelForm.title);
+    data.set("description", novelForm.description);
+    novelForm.genreIds.forEach((id) => data.append("genre", String(id)));
+    data.set("cover", cover.file);
+    startTransition(async () => {
+      const result = await saveNovelAction(null, data);
+      if (result?.error) { setError(t(result.error)); return; }
+      router.replace(`/Writer/new?novelId=${result.novelId}`);
+    });
   }
 
-  function handleAddChapter(event) {
+  function handleSaveChapter(event) {
     event.preventDefault();
     setError("");
     setMessage("");
-    const input = { title: chapterTitle, content: chapterContent };
-    const errors = validateChapterInput(input);
-    const firstError = Object.values(errors)[0];
-    if (firstError) {
-      setError(t(firstError));
-      return;
-    }
+    if (!chapterTitle.trim()) return setError(t("Vui lòng nhập tên chương."));
+    if (!chapterContent.trim()) return setError(t("Vui lòng nhập nội dung chương."));
 
-    if (chapterId) {
-      dispatch({
-        type: "UPDATE_CHAPTER",
-        novelId: existingNovelId,
-        chapterId,
-        chapter: input,
-        now: new Date().toISOString(),
-      });
-      setMessage(t("Đã cập nhật chương."));
-    } else {
-      dispatch({
-        type: "ADD_CHAPTER",
-        novelId: existingNovelId || novelId,
-        chapter: input,
-        id: createId(),
-        now: new Date().toISOString(),
-      });
-      setChapterDraftState({ chapterId, title: "", content: "" });
-      setMessage(t("Đã lưu chương. Bạn có thể viết chương tiếp theo."));
-    }
+    const data = new FormData();
+    data.set("novelId", String(novel.id));
+    if (chapter) data.set("chapterId", String(chapter.id));
+    data.set("title", chapterTitle);
+    data.set("content", chapterContent);
+    data.set("intent", event.nativeEvent.submitter?.value === "draft" ? "draft" : "publish");
+    startTransition(async () => {
+      const result = await saveChapterAction(null, data);
+      if (result?.error) { setError(t(result.error)); return; }
+      if (!result.updated) { setChapterTitle(""); setChapterContent(""); }
+      setMessage(t(result.message));
+      router.refresh();
+    });
   }
 
   return (
@@ -144,16 +104,9 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
         </button>
       </div>
 
-      {!ready ? (
-        <p className="writer-create__notice" role="status">{t("Đang tải dữ liệu…")}</p>
-      ) : existingNovelId && !existingNovel ? (
+      {loadError ? (
         <div className="writer-create__form">
-          <p className="writer-create__error" role="alert">{t("Không tìm thấy truyện cần thêm chapter trên trình duyệt này.")}</p>
-          <Link className="writer-create__secondary" href="/Writer">{t("Quay lại danh sách truyện")}</Link>
-        </div>
-      ) : chapterId && !existingChapter ? (
-        <div className="writer-create__form">
-          <p className="writer-create__error" role="alert">{t("Không tìm thấy chương cần sửa trên trình duyệt này.")}</p>
+          <p className="writer-create__error" role="alert">{t(loadError)}</p>
           <Link className="writer-create__secondary" href="/Writer">{t("Quay lại danh sách truyện")}</Link>
         </div>
       ) : activeStep === "novel" ? (
@@ -174,19 +127,19 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
             <legend>{t("Thể loại")} <b aria-hidden="true" className="text-red-500">*</b></legend>
             <p>{t("Có thể chọn nhiều thể loại.")}</p>
             <div className="writer-create__genre-grid">
-              {WRITER_GENRES.map((genre) => (
-                <label key={genre}>
+              {genres.map((genre) => (
+                <label key={genre.genre_id}>
                   <input
                     type="checkbox"
-                    checked={novelForm.genres.includes(genre)}
+                    checked={novelForm.genreIds.includes(genre.genre_id)}
                     onChange={(event) => setNovelForm((form) => ({
                       ...form,
-                      genres: event.target.checked
-                        ? [...form.genres, genre]
-                        : form.genres.filter((item) => item !== genre),
+                      genreIds: event.target.checked
+                        ? [...form.genreIds, genre.genre_id]
+                        : form.genreIds.filter((item) => item !== genre.genre_id),
                     }))}
                   />
-                  <span>{t(genre)}</span>
+                  <span>{t(genre.name)}</span>
                 </label>
               ))}
             </div>
@@ -197,14 +150,14 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
             <p className="writer-create__hint">{t("Chọn ảnh PNG, JPG hoặc WebP, dung lượng tối đa 750 KB.")}</p>
             <div className="w-full h-14">
               <input id="novel-cover" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCoverChange} />
-              <label htmlFor="novel-cover" 
+              <label htmlFor="novel-cover"
     className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white font-medium rounded-lg cursor-pointer hover:bg-primary-hover transition-all shadow-sm gap-2">
                 <UploadCloudIcon/>
               </label>
             </div>
-            
-            {novelForm.coverImage && (
-              <Image className="writer-create__cover-preview" src={novelForm.coverImage} alt={t("Ảnh bìa truyện")} width={120} height={160} unoptimized />
+
+            {cover.preview && (
+              <Image className="writer-create__cover-preview" src={cover.preview} alt={t("Ảnh bìa truyện")} width={120} height={160} unoptimized />
             )}
             {coverError && <p className="writer-create__error" role="alert">{coverError}</p>}
           </div>
@@ -213,7 +166,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
             <span>{t("Giới thiệu")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <textarea
               rows={5}
-              maxLength={300}
+              maxLength={3000}
               required
               value={novelForm.description}
               onChange={(event) => setNovelForm((form) => ({ ...form, description: event.target.value }))}
@@ -222,11 +175,12 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
           </label>
 
           {error && <p className="writer-create__error" role="alert">{error}</p>}
-          <button className="writer-create__primary" type="submit">{t("Tạo")}</button>
+          <button className="writer-create__primary" type="submit" disabled={pending}>{pending ? t("Đang lưu…") : t("Tạo")}</button>
         </form>
       ) : (
-        <form className="writer-create__form" onSubmit={handleAddChapter}>
-          <h1 className="writer-create__story-title">{existingNovel?.title || novelForm.title}</h1>
+        <form className="writer-create__form" onSubmit={handleSaveChapter}>
+          <h1 className="writer-create__story-title">{novel.title}</h1>
+          {chapter && <p className="writer-create__hint">{t("Đang sửa chương {0}", [chapter.number])}{chapter.status === "draft" ? ` (${t("nháp")})` : ""}</p>}
           <label className="writer-create__field">
             <span>{t("Tên chap")} <b aria-hidden="true"className="text-red-500">*</b></span>
             <input
@@ -234,7 +188,7 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
               maxLength={150}
               required
               value={chapterTitle}
-              onChange={(event) => updateChapterDraft("title", event.target.value)}
+              onChange={(event) => setChapterTitle(event.target.value)}
               placeholder={t("Ví dụ: Chương 1 - Khởi đầu")}
             />
           </label>
@@ -245,30 +199,31 @@ export default function CreateNovelFlow({ novelId: existingNovelId = "", chapter
               maxLength={50000}
               required
               value={chapterContent}
-              onChange={(event) => updateChapterDraft("content", event.target.value)}
+              onChange={(event) => setChapterContent(event.target.value)}
               placeholder={t("Nhập nội dung chapter…")}
             />
-            <small>{chapterContent.length.toLocaleString()} / 50.000</small>
+            <small>{chapterContent.length.toLocaleString()} / 50.000 · {t("Để trống một dòng giữa các đoạn văn.")}</small>
           </label>
           {error && <p className="writer-create__error" role="alert">{error}</p>}
           {message && <p className="writer-create__success" role="status">{message}</p>}
           <div className="writer-create__actions">
-            <button className="writer-create__primary" type="submit">
-              {chapterId ? t("Cập nhật chương") : t("Lưu chapter")}
+            <button className="writer-create__primary" type="submit" value="publish" disabled={pending}>
+              {pending ? t("Đang lưu…") : chapter ? t("Cập nhật chương") : t("Lưu chapter")}
+            </button>
+            <button className="writer-create__secondary" type="submit" value="draft" disabled={pending}>
+              {t("Lưu nháp")}
             </button>
             <button
               className="writer-create__secondary"
               type="button"
-              disabled={!(existingNovel || writerState.novels.find((novel) => novel.id === novelId))?.chapters.length}
-              onClick={() => router.push(`/novels/${encodeURIComponent(existingNovelId || novelId)}`)}
+              disabled={!novel.chapters.length}
+              onClick={() => router.push(previewHref)}
             >
               {t("Xem trước")}
             </button>
           </div>
         </form>
       )}
-
-      {storageFailed && <p className="writer-create__notice" role="status">{t("Trình duyệt không cho phép lưu dữ liệu hoặc đã hết dung lượng. Truyện chỉ được giữ trong phiên này.")}</p>}
     </section>
   );
 }

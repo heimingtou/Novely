@@ -7,28 +7,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { BellIcon, ChevronDown, LogIn, LogOut, MessageCircle, PencilSparkles, SearchIcon, Settings, ShoppingCartPlus, TextSearch, UserPen } from "lucide-react";
 import { LanguageSwitcher, useI18n } from "@/components/i18n/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/SiteTheme";
-import { useDemoSession } from "@/lib/useDemoSession";
+import { useSession } from "@/components/auth/SessionProvider";
 import logoLight from "../../../public/logo.png";
 import logoDark from "../../../public/darklogo.png";
 import avatar from "../../../public/avarta.jpg";
 import "./navbar.css";
 
-const genres = [
-  "Ngôn Tình", "Đam Mỹ", "Bách Hợp", "Tiên Hiệp", "Kiếm Hiệp",
-  "Huyền Huyễn", "Đô Thị", "Khoa Huyễn", "Trọng Sinh", "Xuyên Không",
-  "Hệ Thống", "Trinh Thám", "Kinh Dị", "Hài Hước", "Trường Học",
-  "Cổ Đại", "Mạt Thế", "Dinh Dưỡng", "Võ Luyện", "Lịch Sử",
-];
-
-export default function Navbar() {
+// Danh sách thể loại lấy từ database, truyền xuống từ app/layout.js.
+export default function Navbar({ genres = [] }) {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const isSearchPage = pathname === "/search";
   const [open, setOpen] = useState(false);
   const [openGen, setOpenGen] = useState(false);
-  const { account, signIn, signOut, ready: sessionReady } = useDemoSession();
-  const login = Boolean(account);
+  const { user, logout, pending: loggingOut } = useSession();
+  const login = Boolean(user);
+  const authHref = `/auth?next=${encodeURIComponent(pathname || "/")}`;
   const genreRef = useRef(null);
   const avatarRef = useRef(null);
 
@@ -57,7 +52,7 @@ export default function Navbar() {
               <span>{t("Điều hướng")}</span><ChevronDown />
             </button>
             {openGen && <div className="listGenre absolute left-0 top-15 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
-              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" title={t(genre)} onClick={() => setOpenGen(false)}>{t(genre)}</Link>)}
+              {genres.map((genre) => <Link key={genre.slug} href={`/novel/${genre.slug}`} className="btnGenre" title={t(genre.name)} onClick={() => setOpenGen(false)}>{t(genre.name)}</Link>)}
             </div>}
           </div>
           <Link href="/library">{t("Thư viện")}</Link>
@@ -86,7 +81,7 @@ export default function Navbar() {
           <div className="max-md:hidden flex flex-row gap-[3rem] items-center ml-2 mr-2">
             <Link href="/novel/2" aria-label={t("thông báo")}><BellIcon /></Link>
             {!login
-              ? <button type="button" className="btn_nav" disabled={!sessionReady} onClick={signIn}>{t("Đăng nhập")}</button>
+              ? <Link href={authHref} className="btn_nav">{t("Đăng nhập")}</Link>
               : <button type="button" className="btn_nav">{t("Mua gói Vip")}</button>}
           </div>
 
@@ -95,15 +90,17 @@ export default function Navbar() {
           }}>
             <button type="button" className="flex flex-row gap-1.5 items-center" aria-label={t("Menu tài khoản")} aria-expanded={open} aria-controls="account-menu" onClick={() => setOpen(!open)}>
               <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-border flex items-center justify-center cursor-pointer transition-transform active:scale-95">
-                <Image src={avatar} alt={account?.name || "avatar"} />
+                {user?.avatar
+                  ? <Image src={user.avatar} alt={user.username} width={48} height={48} unoptimized className="h-full w-full object-cover" />
+                  : <Image src={avatar} alt={user?.username || "avatar"} />}
               </span>
               <ChevronDown />
             </button>
 
             {open && <div id="account-menu" className="account-menu absolute right-0 top-full mt-2 p-3.5 gap-3 rounded-lg shadow-xl flex flex-col items-start">
               {login && <>
-                <span className="text-sm">{account.name}</span>
-                <button type="button" className="btn-avt w-full cursor-pointer" onClick={() => { setOpen(false); router.push("/users/minh-tho-ha"); }}><UserPen /><span>{t("profile")}</span></button>
+                <span className="text-sm">{user.username}</span>
+                <button type="button" className="btn-avt w-full cursor-pointer" onClick={() => { setOpen(false); router.push(`/users/${user.id}`); }}><UserPen /><span>{t("profile")}</span></button>
                 <hr className="w-full" />
                 <Link href="/Writer" className="btn-avt" onClick={() => setOpen(false)}><PencilSparkles /><span>{t("writer")}</span></Link>
                 <div className="block md:hidden"><button type="button" className="btn-avt"><BellIcon /><span>{t("thông báo")}</span></button></div>
@@ -115,10 +112,10 @@ export default function Navbar() {
               <LanguageSwitcher />
               <div className="block md:hidden">
                 {!login
-                  ? <Link href="/auth" className="btn-avt flex items-center" onClick={() => setOpen(false)}><LogIn /><span>{t("Đăng nhập")}</span></Link>
+                  ? <Link href={authHref} className="btn-avt flex items-center" onClick={() => setOpen(false)}><LogIn /><span>{t("Đăng nhập")}</span></Link>
                   : <button type="button" className="btn-avt"><ShoppingCartPlus /><span>{t("Mua gói Vip")}</span></button>}
               </div>
-              {login && <button type="button" className="btn-avt" onClick={() => { signOut(); setOpen(false); }}><LogOut /><span>{t("Đăng xuất")}</span></button>}
+              {login && <button type="button" className="btn-avt" disabled={loggingOut} onClick={async () => { setOpen(false); await logout(); }}><LogOut /><span>{t("Đăng xuất")}</span></button>}
             </div>}
           </div>
         </div>

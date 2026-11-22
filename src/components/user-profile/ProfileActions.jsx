@@ -1,30 +1,52 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   UserPlus,
   UserCheck,
   MessageCircle,
 } from "lucide-react";
+import { toggleFollow } from "@/app/users/actions";
 
 export default function ProfileActions({
+  userId,
   followers,
   following,
+  initialFollowing = false,
   isOwnProfile,
+  signedIn = false,
 }) {
-  const [isFollowing, setIsFollowing] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [pending, startTransition] = useTransition();
+  // Hiển thị ngay (optimistic), rồi đồng bộ lại theo kết quả server.
+  const [isFollowing, setIsFollowing] = useState(initialFollowing);
+  const [followerCount, setFollowerCount] = useState(followers ?? 0);
   const [message, setMessage] = useState("");
 
   function handleFollow() {
-    const nextValue = !isFollowing;
-    setIsFollowing(nextValue);
+    if (!signedIn) {
+      router.push(`/auth?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    const previous = { isFollowing, followerCount };
+    setIsFollowing(!isFollowing);
+    setFollowerCount((count) => count + (isFollowing ? -1 : 1));
+    setMessage("");
 
-    setMessage(
-      nextValue
-        ? "Đã theo dõi trong phiên dùng thử!"
-        : "Đã bỏ theo dõi trong phiên dùng thử!"
-    );
+    startTransition(async () => {
+      const result = await toggleFollow(userId);
+      if (result?.error) {
+        setIsFollowing(previous.isFollowing);
+        setFollowerCount(previous.followerCount);
+        setMessage(result.error);
+        return;
+      }
+      setMessage(result.following ? "Đã theo dõi!" : "Đã bỏ theo dõi!");
+      router.refresh();
+    });
   }
 
   function handleMessage() {
@@ -39,7 +61,7 @@ export default function ProfileActions({
       <div className="flex gap-8">
         <div>
           <p className="text-xl font-bold">
-            {followers + (isFollowing ? 1 : 0)}
+            {followerCount}
           </p>
           <p className="text-sm text-gray-500">
             Followers
@@ -48,7 +70,7 @@ export default function ProfileActions({
 
         <div>
           <p className="text-xl font-bold">
-            {following}
+            {following ?? 0}
           </p>
           <p className="text-sm text-gray-500">
             Following
@@ -63,8 +85,9 @@ export default function ProfileActions({
           <button
             type="button"
             onClick={handleFollow}
+            disabled={pending}
             aria-pressed={isFollowing}
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white hover:opacity-90"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-60"
           >
             {isFollowing ? (
               <UserCheck size={20} />

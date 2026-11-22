@@ -4,12 +4,14 @@
 import { ChartNoAxesCombined, ChevronDown, Eye, HeartIcon, MessageCircle, Pencil, Plus, Share2, StarIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
-import { useWriterDispatch } from "@/components/Writer/useWriterStore";
+import { deleteChapterAction, deleteNovelAction } from "@/app/Writer/actions";
 import './cardWriter.css'
 export default function CardWriter({
     id,
+    href,
     title,
     img,
     date,
@@ -18,13 +20,15 @@ export default function CardWriter({
     comment,
     current_chap,
     chapters = [],
-    isWriterNovel = false,
+    published = false,
     chaptersOpen,
     onToggleChapters,
     onCloseChapters,
 }){
 const { t } = useI18n();
-const dispatch = useWriterDispatch();
+const router = useRouter();
+const [pending, startTransition] = useTransition();
+const novelHref = href || `/Writer/novels/${id}`;
 const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     year: "numeric",
     month: "long",
@@ -33,22 +37,30 @@ const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
     minute: "2-digit",
 });
  const [message, setMessage] = useState("");
-function handleDeleteChapter(chapterId) {
-    dispatch({
-        type: "DELETE_CHAPTER",
-        novelId: id,
-        chapterId,
-        now: new Date().toISOString(),
+// Xoá qua Server Action (server kiểm tra quyền sở hữu), rồi tải lại dữ liệu từ database.
+function runAction(action, successMessage) {
+    setMessage("");
+    startTransition(async () => {
+        const result = await action();
+        if (result?.error) { setMessage(result.error); return; }
+        if (successMessage) setMessage(successMessage);
+        router.refresh();
     });
+}
+
+function handleDeleteChapter(chapter) {
+    if (!window.confirm(t("Xóa chương {0}? Bình luận và lượt thích của chương cũng bị xóa.", [chapter.number]))) return;
+    runAction(() => deleteChapterAction(id, chapter.id), t("Đã xóa chương."));
 }
 
 function handleDeleteNovel() {
     if (!window.confirm(t("Bạn có chắc muốn xóa truyện “{0}” không? Thao tác này không thể hoàn tác.", [title]))) return;
-    dispatch({ type: "DELETE_NOVEL", novelId: id });
+    runAction(() => deleteNovelAction(id));
 }
 
 async function handleShare() {
-    const url = new URL(`/novels/${encodeURIComponent(id)}`, window.location.origin).toString();
+    if (!published) { setMessage(t("Truyện chưa xuất bản nên chưa thể chia sẻ.")); return; }
+    const url = new URL(novelHref, window.location.origin).toString();
     setMessage("");
 
     try {
@@ -77,8 +89,8 @@ return(
                 <Image src={img} width={100} height={140} unoptimized className="object-cover rounded" alt={title} />
             </div>
             <div className="title">
-                <h1><Link href={`/novels/${encodeURIComponent(id)}`} className=" focus-visible:outline-2 focus-visible:outline-primary">{title}</Link></h1>
-                <p className="text-green-600">Số chương đã đăng: {current_chap}</p>
+                <h1><Link href={novelHref} className=" focus-visible:outline-2 focus-visible:outline-primary">{title}</Link></h1>
+                <p className="text-green-600">Số chương đã đăng: {current_chap}{!published && <span className="ml-2 text-amber-600">· Chưa xuất bản</span>}</p>
                 <p className="text-gray-500">Cập nhật lần cuối {formattedDate}</p>
                 <div className="flex flex-row gap-5">
                     <p className=" icontext"><span><Eye/> </span><span>{view}</span></p>
@@ -105,7 +117,7 @@ return(
                         {chapters.map((chapter) => (
                             <li className="writer-card-menu__chapter" key={chapter.id}>
                                 <span className="writer-card-menu__title">
-                                    {t("Chương {0}: {1}", [chapter.number, chapter.title])}
+                                    {t("Chương {0}: {1}", [chapter.number, chapter.title])}{chapter.status === "draft" && ` (${t("nháp")})`}
                                 </span>
                                 <div className="writer-card-menu__actions">
                                     <Link
@@ -121,7 +133,8 @@ return(
                                         type="button"
                                         className="writer-card-menu__action writer-card-menu__delete"
                                         aria-label={t("Xóa chương {0}", [chapter.number])}
-                                        onClick={() => handleDeleteChapter(chapter.id)}
+                                        disabled={pending}
+                                        onClick={() => handleDeleteChapter(chapter)}
                                     >
                                         <Trash2 size={16} aria-hidden="true" />
                                         <span>{t("Xóa")}</span>
@@ -146,10 +159,11 @@ return(
                     <ChartNoAxesCombined/>{t("Thống kê")}
                 </Link>
                 <button type="button" className="btn-card btn-card--stats" onClick={handleShare}><Share2 size={18} />{t("Share")}</button>
-                {isWriterNovel && (
+                {(
                     <button
                         type="button"
                         className="btn-card btn-card--stats writer-card-menu__delete"
+                        disabled={pending}
                         onClick={handleDeleteNovel}
                         aria-label={t("Xóa truyện {0}", [title])}
                     >

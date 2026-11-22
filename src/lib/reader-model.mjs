@@ -34,7 +34,9 @@ export function normalizeSettings(value) {
 export function normalizePosition(value, chapters) {
   if (!value || typeof value !== "object") return null;
   const chapter = chapters.find((item) => item.number === value.chapterNumber);
-  if (!chapter?.paragraphs.some((paragraph) => paragraph.id === value.paragraphId)) return null;
+  if (!chapter || typeof value.paragraphId !== "string") return null;
+  // Chương chưa tải nội dung (chỉ có tiêu đề) thì chỉ kiểm tra được chương tồn tại.
+  if (Array.isArray(chapter.paragraphs) && !chapter.paragraphs.some((paragraph) => paragraph.id === value.paragraphId)) return null;
   return {
     chapterNumber: chapter.number, paragraphId: value.paragraphId,
     fraction: clampNumber(value.fraction, 0, 0, 1),
@@ -47,17 +49,21 @@ export function normalizeBookmarks(value, paragraphs) {
   return [...new Set(value.filter((id) => paragraphs.some((p) => p.id === id)))];
 }
 
+// paragraphs = undefined nghĩa là nội dung chương chưa được tải (ví dụ My Clipping liệt kê
+// các chương khác): chỉ kiểm tra cấu trúc và giữ nguyên trích dẫn đã lưu, không xóa dữ liệu.
 export function normalizeAnnotations(value, paragraphs) {
   if (!Array.isArray(value)) return [];
+  const known = Array.isArray(paragraphs);
   const accepted = [];
   for (const item of value.slice(0, 200)) {
-    const paragraph = paragraphs.find((p) => p.id === item?.paragraphId);
-    if (!paragraph || typeof item.id !== "string" || !Number.isInteger(item.start)
-      || !Number.isInteger(item.end) || item.start < 0 || item.end > paragraph.text.length
+    const paragraph = known ? paragraphs.find((p) => p.id === item?.paragraphId) : null;
+    if ((known && !paragraph) || !item || typeof item.paragraphId !== "string" || typeof item.id !== "string"
+      || !Number.isInteger(item.start) || !Number.isInteger(item.end) || item.start < 0
+      || (known && item.end > paragraph.text.length) || typeof item.quote !== "string"
       || item.start >= item.end || accepted.some((a) => a.id === item.id
         || (a.paragraphId === item.paragraphId && a.start < item.end && item.start < a.end))) continue;
     // Bỏ annotation cũ nếu nội dung gốc đã thay đổi, tránh đánh dấu nhầm câu.
-    const quote = paragraph.text.slice(item.start, item.end);
+    const quote = known ? paragraph.text.slice(item.start, item.end) : item.quote.slice(0, 2000);
     if (quote !== item.quote) continue;
     accepted.push({ id: item.id, paragraphId: item.paragraphId, start: item.start,
       end: item.end, quote, note: typeof item.note === "string" ? item.note.slice(0, 1000) : "" });

@@ -49,3 +49,26 @@ Chỉ trả truyện `published = true`. Phản hồi: `{ data, meta? }` khi th�
   (`password_hash`, `email`, `phone_number`, `birthday`).
 - Giữ RLS bật trên Supabase, không tạo policy cho `anon` đọc `users`/`profiles`, để publishable key
   (lộ ra trình duyệt) không đọc được dữ liệu nhạy cảm.
+
+## Đăng nhập & phân quyền
+
+- Tài khoản nằm trong bảng `users` (mật khẩu bcrypt, tương thích hash `crypt(..., gen_salt('bf'))` của seed).
+  Đăng nhập bằng email **hoặc** username. Đăng ký tạo `users` + `profiles`, role `reader`.
+- Phiên = JWT HS256 ký bằng `AUTH_SECRET`, lưu trong cookie `novely_session` (httpOnly, SameSite=Lax,
+  Secure khi production). Hạn 1 ngày, 30 ngày nếu chọn "Ghi nhớ đăng nhập".
+- `src/proxy.js`: chặn sớm `/Writer/**` khi không có token hợp lệ (chỉ kiểm tra chữ ký, không gọi DB).
+- `src/server/auth/dal.js`: kiểm tra thật sự — `getCurrentUser()` đọc lại user từ DB mỗi request,
+  `requireUser()` cho page, `assertUser()` cho Server Action. Mọi thao tác ghi lấy user id từ phiên,
+  không bao giờ từ dữ liệu client gửi lên; service Writer kiểm tra `novels.author_id` trước khi sửa/xoá.
+- Đồng bộ trạng thái: layout truyền user xuống `SessionProvider` (client). Đăng nhập/đăng xuất làm mới
+  layout; các tab khác được báo qua `BroadcastChannel` và tự làm mới; hết hạn token thì tự chuyển về
+  trạng thái chưa đăng nhập.
+
+| Server Action | File | Việc |
+| --- | --- | --- |
+| `login`, `register`, `logout` | `src/app/auth/actions.js` | phiên đăng nhập |
+| `updateProfile`, `toggleFollow` | `src/app/users/actions.js` | hồ sơ của chính mình, theo dõi |
+| `saveNovelAction`, `deleteNovelAction`, `saveChapterAction`, `deleteChapterAction` | `src/app/Writer/actions.js` | quản lý truyện của chính mình |
+
+Ảnh đại diện / ảnh bìa lưu ở Supabase Storage, bucket công khai `avatars` và `covers` (tối đa 2MB,
+PNG/JPG/WebP; server kiểm tra magic bytes của file).

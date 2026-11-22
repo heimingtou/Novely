@@ -5,6 +5,9 @@ import Navbar from "@/components/navbar/navbar";
 import { ThemeManager } from "@/components/theme/SiteTheme";
 import { LocaleProvider, SiteFooter } from "@/components/i18n/LocaleProvider";
 import { getServerI18n, getServerLocale } from "@/lib/i18n/server";
+import { listGenres } from "@/server/services/genres";
+import { getCurrentUser } from "@/server/auth/dal";
+import { SessionProvider } from "@/components/auth/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,6 +26,18 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const locale = await getServerLocale();
+  // Lỗi database không được làm sập toàn bộ trang: navbar chỉ mất danh sách thể loại.
+  const [genres, user] = await Promise.all([
+    listGenres().catch((error) => {
+      console.error("[layout] genres", error);
+      return [];
+    }),
+    // Lỗi đọc phiên => coi như chưa đăng nhập, không làm sập trang.
+    getCurrentUser().catch((error) => {
+      console.error("[layout] session", error);
+      return null;
+    }),
+  ]);
   return (
     <html
       lang={locale}
@@ -32,10 +47,12 @@ export default async function RootLayout({ children }) {
        <body className="min-h-full flex flex-col">
         <Script src="/theme-bootstrap.js" strategy="beforeInteractive" />
         <LocaleProvider initialLocale={locale}>
-          <ThemeManager />
-          <Navbar/>
-          <main className="min-h-full flex flex-col mt-[5rem]">{children}</main>
-          <SiteFooter />
+          <SessionProvider user={user}>
+            <ThemeManager />
+            <Navbar genres={genres} />
+            <main className="min-h-full flex flex-col mt-[5rem]">{children}</main>
+            <SiteFooter />
+          </SessionProvider>
         </LocaleProvider>
        </body>
        

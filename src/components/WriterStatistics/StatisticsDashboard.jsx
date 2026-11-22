@@ -5,8 +5,6 @@ import Link from 'next/link'
 import './statistics.css'
 import Image from "next/image";
 import { ArrowLeft } from 'lucide-react';
-import { useWriterStore } from "@/components/Writer/useWriterStore";
-import { createWriterStatistics } from "@/lib/writer-statistics.mjs";
 const dashboardTabs = [
     { id: 'overview', label: 'Tổng quan' },
     { id: 'engagement', label: 'Mức độ tương tác' },
@@ -178,13 +176,9 @@ function PieChart({ title, segments }) {
     )
 }
 
-export default function StatisticsDashboard({ statistics: sampleStatistics, novelId }) {
+// Số liệu thật từ database, do app/Writer/statistics/[id]/page.js tải (đã kiểm tra quyền sở hữu).
+export default function StatisticsDashboard({ statistics }) {
     const [activeTab, setActiveTab] = useState(dashboardTabs[0].id)
-    const [writerState, , writerReady] = useWriterStore()
-    const writerNovel = writerReady
-        ? writerState.novels.find((novel) => novel.id === novelId)
-        : null
-    const statistics = sampleStatistics || (writerNovel ? createWriterStatistics(writerNovel) : null)
 
     if (!statistics) {
         return (
@@ -193,9 +187,7 @@ export default function StatisticsDashboard({ statistics: sampleStatistics, nove
                     <ArrowLeft aria-hidden="true" />
                     <span>Trở về danh sách truyện</span>
                 </Link>
-                <p role={writerReady ? "alert" : "status"}>
-                    {writerReady ? "Không tìm thấy truyện cần xem thống kê." : "Đang tải dữ liệu truyện…"}
-                </p>
+                <p role="alert">Không tìm thấy truyện cần xem thống kê.</p>
             </main>
         )
     }

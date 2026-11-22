@@ -58,7 +58,7 @@ export default function HeroCarousel({ slides, locale }) {
           <p className="home-hero__description">{slide.description}</p>
         )}
         <p className="home-hero__meta flex flex-col gap-1 "><span className="w-fit h-fit bg-primary-hover p-1 rounded-2xl">{slide.genres}</span><span className="flex flex-row items-center gap-1"><HeartIcon/> {slide.likes} </span> </p>
-        <Link className="home-hero__link" href="/novels/demo">
+        <Link className="home-hero__link" href={slide.href ?? `/novels/${slide.id}`}>
           {isEnglish ? "Read story" : "Đọc truyện"}
           <ChevronRight size={18} aria-hidden="true" />
         </Link>
