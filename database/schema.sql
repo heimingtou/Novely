@@ -1,493 +1,173 @@
---
--- PostgreSQL database dump
---
-
-\restrict x5rYAotgRotwjswRF0esemxBqRei4J4v9acqpXubXRxPdCZ1joFxwhiEw4y2hqn
-
--- Dumped from database version 18.3
--- Dumped by pg_dump version 18.3
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: bookmarks; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.bookmarks (
-    id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    story_id bigint NOT NULL,
-    is_favorite boolean DEFAULT false NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: bookmarks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.bookmarks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.bookmarks_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: categories; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.categories (
-    id bigint NOT NULL,
-    name character varying(100) NOT NULL,
-    slug character varying(120) NOT NULL,
-    description text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.categories ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.categories_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: chapters; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.chapters (
-    id bigint NOT NULL,
-    story_id bigint NOT NULL,
-    chapter_number integer NOT NULL,
-    title character varying(255) NOT NULL,
-    content text DEFAULT ''::text NOT NULL,
-    word_count integer DEFAULT 0 NOT NULL,
-    is_published boolean DEFAULT false NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT chapters_chapter_number_check CHECK ((chapter_number > 0)),
-    CONSTRAINT chapters_word_count_check CHECK ((word_count >= 0))
-);
-
-
---
--- Name: chapters_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.chapters ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.chapters_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: comments; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.comments (
-    id bigint NOT NULL,
-    story_id bigint NOT NULL,
-    chapter_id bigint,
-    user_id bigint NOT NULL,
-    content text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT comments_content_check CHECK (((length(TRIM(BOTH FROM content)) >= 1) AND (length(TRIM(BOTH FROM content)) <= 2000)))
-);
-
-
---
--- Name: comments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.comments ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.comments_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: reading_progress; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.reading_progress (
-    id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    chapter_id bigint NOT NULL,
-    progress_percent smallint DEFAULT 0 NOT NULL,
-    last_read_at timestamp with time zone DEFAULT now() NOT NULL,
-    completed_at timestamp with time zone,
-    CONSTRAINT reading_progress_progress_percent_check CHECK (((progress_percent >= 0) AND (progress_percent <= 100)))
-);
-
-
---
--- Name: reading_progress_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.reading_progress ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.reading_progress_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: stories; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.stories (
-    id bigint NOT NULL,
-    author_id bigint NOT NULL,
-    title character varying(255) NOT NULL,
-    slug character varying(300) NOT NULL,
-    description text,
-    cover_url text,
-    status character varying(20) DEFAULT 'ongoing'::character varying NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT stories_status_check CHECK (((status)::text = ANY ((ARRAY['ongoing'::character varying, 'completed'::character varying, 'paused'::character varying])::text[])))
-);
-
-
---
--- Name: stories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.stories ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.stories_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: story_categories; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.story_categories (
-    story_id bigint NOT NULL,
-    category_id bigint NOT NULL
-);
-
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: -
---
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.users (
-    id bigint NOT NULL,
-    username character varying(50) NOT NULL,
-    email character varying(255) NOT NULL,
-    password_hash text NOT NULL,
-    role character varying(20) DEFAULT 'reader'::character varying NOT NULL,
-    display_name character varying(100) NOT NULL,
-    avatar_url text,
-    bio text,
-    birthday date,
-    gender character varying(30),
-    phone character varying(20),
-    facebook_url text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['reader'::character varying, 'author'::character varying, 'admin'::character varying])::text[])))
+  user_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
+  level integer NOT NULL DEFAULT 1 CHECK (level >= 1),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  email_verified boolean NOT NULL DEFAULT false,
+  username character varying NOT NULL UNIQUE CHECK (char_length(username::text) >= 3 AND char_length(username::text) <= 50),
+  email character varying NOT NULL UNIQUE CHECK (email::text ~~ '%_@_%._%'::text),
+  password_hash character varying NOT NULL,
+  role character varying NOT NULL DEFAULT 'reader'::character varying CHECK (role::text = ANY (ARRAY['reader'::character varying, 'author'::character varying, 'admin'::character varying]::text[])),
+  count_following integer NOT NULL DEFAULT 0,
+  count_follower integer NOT NULL DEFAULT 0,
+  CONSTRAINT users_pkey PRIMARY KEY (user_id)
 );
-
-
---
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.users_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
+CREATE TABLE public.profiles (
+  user_id integer NOT NULL,
+  birthday date CHECK (birthday >= '1900-01-01'::date AND birthday <= CURRENT_DATE),
+  gender character varying CHECK (gender::text = ANY (ARRAY['male'::character varying, 'female'::character varying, 'other'::character varying]::text[])),
+  phone_number character varying CHECK (phone_number::text ~ '^\+?[0-9]{9,14}$'::text),
+  fb_link character varying CHECK (fb_link::text ~~ 'https://%'::text),
+  avatar character varying,
+  bio text,
+  CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
+  CONSTRAINT fk_profiles_user FOREIGN KEY (user_id) REFERENCES public.users(user_id)
 );
-
-
---
--- Name: bookmarks bookmarks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_pkey PRIMARY KEY (id);
-
-
---
--- Name: bookmarks bookmarks_user_id_story_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_user_id_story_id_key UNIQUE (user_id, story_id);
-
-
---
--- Name: categories categories_name_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_name_key UNIQUE (name);
-
-
---
--- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
-
-
---
--- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_slug_key UNIQUE (slug);
-
-
---
--- Name: chapters chapters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chapters
-    ADD CONSTRAINT chapters_pkey PRIMARY KEY (id);
-
-
---
--- Name: chapters chapters_story_id_chapter_number_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chapters
-    ADD CONSTRAINT chapters_story_id_chapter_number_key UNIQUE (story_id, chapter_number);
-
-
---
--- Name: comments comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.comments
-    ADD CONSTRAINT comments_pkey PRIMARY KEY (id);
-
-
---
--- Name: reading_progress reading_progress_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reading_progress
-    ADD CONSTRAINT reading_progress_pkey PRIMARY KEY (id);
-
-
---
--- Name: reading_progress reading_progress_user_id_chapter_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reading_progress
-    ADD CONSTRAINT reading_progress_user_id_chapter_id_key UNIQUE (user_id, chapter_id);
-
-
---
--- Name: stories stories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.stories
-    ADD CONSTRAINT stories_pkey PRIMARY KEY (id);
-
-
---
--- Name: stories stories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.stories
-    ADD CONSTRAINT stories_slug_key UNIQUE (slug);
-
-
---
--- Name: story_categories story_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.story_categories
-    ADD CONSTRAINT story_categories_pkey PRIMARY KEY (story_id, category_id);
-
-
---
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_email_key UNIQUE (email);
-
-
---
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-
---
--- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_username_key UNIQUE (username);
-
-
---
--- Name: idx_comments_chapter; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_comments_chapter ON public.comments USING btree (chapter_id, created_at DESC);
-
-
---
--- Name: idx_comments_story; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_comments_story ON public.comments USING btree (story_id, created_at DESC);
-
-
---
--- Name: idx_reading_progress_user_last_read; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_reading_progress_user_last_read ON public.reading_progress USING btree (user_id, last_read_at DESC);
-
-
---
--- Name: bookmarks bookmarks_story_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_story_id_fkey FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
-
-
---
--- Name: bookmarks bookmarks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: chapters chapters_story_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chapters
-    ADD CONSTRAINT chapters_story_id_fkey FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
-
-
---
--- Name: comments comments_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.comments
-    ADD CONSTRAINT comments_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.chapters(id) ON DELETE CASCADE;
-
-
---
--- Name: comments comments_story_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.comments
-    ADD CONSTRAINT comments_story_id_fkey FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
-
-
---
--- Name: comments comments_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.comments
-    ADD CONSTRAINT comments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: reading_progress reading_progress_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reading_progress
-    ADD CONSTRAINT reading_progress_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.chapters(id) ON DELETE CASCADE;
-
-
---
--- Name: reading_progress reading_progress_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reading_progress
-    ADD CONSTRAINT reading_progress_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: stories stories_author_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.stories
-    ADD CONSTRAINT stories_author_id_fkey FOREIGN KEY (author_id) REFERENCES public.users(id) ON DELETE RESTRICT;
-
-
---
--- Name: story_categories story_categories_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.story_categories
-    ADD CONSTRAINT story_categories_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE CASCADE;
-
-
---
--- Name: story_categories story_categories_story_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.story_categories
-    ADD CONSTRAINT story_categories_story_id_fkey FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
-
-
---
--- PostgreSQL database dump complete
---
-
-\unrestrict x5rYAotgRotwjswRF0esemxBqRei4J4v9acqpXubXRxPdCZ1joFxwhiEw4y2hqn
-
+CREATE TABLE public.follows (
+  follower_id integer NOT NULL,
+  follow_id integer NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT follows_pkey PRIMARY KEY (follower_id, follow_id),
+  CONSTRAINT fk_follows_follower FOREIGN KEY (follower_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_follows_follow FOREIGN KEY (follow_id) REFERENCES public.users(user_id)
+);
+CREATE TABLE public.genres (
+  genre_id smallint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name character varying NOT NULL UNIQUE,
+  slug character varying NOT NULL UNIQUE CHECK (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text),
+  CONSTRAINT genres_pkey PRIMARY KEY (genre_id)
+);
+CREATE TABLE public.novels (
+  novel_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
+  author_id integer NOT NULL,
+  last_chapter_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  count_chapter integer NOT NULL DEFAULT 0 CHECK (count_chapter >= 0),
+  published boolean NOT NULL DEFAULT false,
+  upper18 boolean NOT NULL DEFAULT false,
+  vip boolean NOT NULL DEFAULT false,
+  status character varying NOT NULL DEFAULT 'ongoing'::character varying CHECK (status::text = ANY (ARRAY['ongoing'::character varying, 'completed'::character varying]::text[])),
+  title character varying NOT NULL CHECK (char_length(TRIM(BOTH FROM title)) > 0),
+  slug character varying NOT NULL UNIQUE CHECK (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text),
+  cover_url character varying,
+  description text,
+  count_like integer NOT NULL DEFAULT 0 CHECK (count_like >= 0),
+  CONSTRAINT novels_pkey PRIMARY KEY (novel_id),
+  CONSTRAINT fk_novels_author FOREIGN KEY (author_id) REFERENCES public.users(user_id)
+);
+CREATE TABLE public.novel_genres (
+  novel_id integer NOT NULL,
+  genre_id smallint NOT NULL,
+  CONSTRAINT novel_genres_pkey PRIMARY KEY (novel_id, genre_id),
+  CONSTRAINT fk_novel_genres_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id),
+  CONSTRAINT fk_novel_genres_genre FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id)
+);
+CREATE TABLE public.novel_likes (
+  user_id integer NOT NULL,
+  novel_id integer NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT novel_likes_pkey PRIMARY KEY (user_id, novel_id),
+  CONSTRAINT fk_novel_likes_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_novel_likes_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
+CREATE TABLE public.chapters (
+  chapter_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
+  novel_id integer NOT NULL,
+  published_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  chapter_number integer NOT NULL CHECK (chapter_number > 0),
+  word_count integer NOT NULL DEFAULT 0,
+  count_view integer NOT NULL DEFAULT 0,
+  count_like integer NOT NULL DEFAULT 0,
+  count_comment integer NOT NULL DEFAULT 0,
+  status character varying NOT NULL DEFAULT 'draft'::character varying CHECK (status::text = ANY (ARRAY['draft'::character varying, 'published'::character varying]::text[])),
+  title character varying NOT NULL,
+  CONSTRAINT chapters_pkey PRIMARY KEY (chapter_id),
+  CONSTRAINT fk_chapters_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
+CREATE TABLE public.chapter_contents (
+  chapter_id integer NOT NULL,
+  content text NOT NULL,
+  CONSTRAINT chapter_contents_pkey PRIMARY KEY (chapter_id),
+  CONSTRAINT fk_chapter_contents_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id)
+);
+CREATE TABLE public.chapter_likes (
+  user_id integer NOT NULL,
+  chapter_id integer NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT chapter_likes_pkey PRIMARY KEY (user_id, chapter_id),
+  CONSTRAINT fk_chapter_likes_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_chapter_likes_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id)
+);
+CREATE TABLE public.bookshelves (
+  user_id integer NOT NULL,
+  novel_id integer NOT NULL,
+  saved_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT bookshelves_pkey PRIMARY KEY (user_id, novel_id),
+  CONSTRAINT fk_bookshelves_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_bookshelves_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
+CREATE TABLE public.reading_progress (
+  user_id integer NOT NULL,
+  novel_id integer NOT NULL,
+  last_read_at timestamp with time zone NOT NULL DEFAULT now(),
+  chapter_id integer,
+  progress_percent real NOT NULL DEFAULT 0 CHECK (progress_percent >= 0::double precision AND progress_percent <= 1::double precision),
+  CONSTRAINT reading_progress_pkey PRIMARY KEY (user_id, novel_id),
+  CONSTRAINT fk_reading_progress_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_reading_progress_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id),
+  CONSTRAINT fk_reading_progress_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id),
+  CONSTRAINT fk_reading_progress_chapter FOREIGN KEY (novel_id) REFERENCES public.chapters(novel_id)
+);
+CREATE TABLE public.comments (
+  comment_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  parent_id bigint,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  deleted_at timestamp with time zone,
+  user_id integer NOT NULL,
+  chapter_id integer NOT NULL,
+  content text NOT NULL CHECK (char_length(TRIM(BOTH FROM content)) >= 1 AND char_length(TRIM(BOTH FROM content)) <= 5000),
+  CONSTRAINT comments_pkey PRIMARY KEY (comment_id),
+  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_comments_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id),
+  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_id) REFERENCES public.comments(comment_id)
+);
+CREATE TABLE public.reviews (
+  review_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id integer NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  novel_id integer NOT NULL,
+  rating smallint NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  content text,
+  CONSTRAINT reviews_pkey PRIMARY KEY (review_id),
+  CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
+  CONSTRAINT fk_reviews_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
+CREATE TABLE public.interact_novel (
+  view bigint NOT NULL DEFAULT 0,
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  novel_id integer NOT NULL,
+  under_eighteen integer NOT NULL DEFAULT 0,
+  eighteen_to_thirty_five integer NOT NULL DEFAULT 0,
+  over_thirty_five integer NOT NULL DEFAULT 0,
+  age_unknown integer NOT NULL DEFAULT 0,
+  male integer NOT NULL DEFAULT 0,
+  female integer NOT NULL DEFAULT 0,
+  gender_other integer NOT NULL DEFAULT 0,
+  CONSTRAINT interact_novel_pkey PRIMARY KEY (novel_id),
+  CONSTRAINT fk_interact_novel_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
+CREATE TABLE public.interact_novel_day (
+  novel_id integer NOT NULL,
+  day date NOT NULL,
+  count_view integer NOT NULL DEFAULT 0,
+  count_like integer NOT NULL DEFAULT 0,
+  CONSTRAINT interact_novel_day_pkey PRIMARY KEY (novel_id, day),
+  CONSTRAINT fk_interact_novel_day_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+);
