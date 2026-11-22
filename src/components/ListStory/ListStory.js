@@ -1,5 +1,4 @@
 import CardStory from '../cardStory/cardStory'
-import { getNovel } from '@/data/novels.mjs'
 import './ListStory.css'
 
 export default function ListStory({title,DataStory}){
@@ -11,7 +10,7 @@ export default function ListStory({title,DataStory}){
                         DataStory.map((novel)=>(
                         <CardStory
                             key={novel.id}
-                            href="/novels/demo"
+                            href={`/novels/${novel.id}`}
                             title={novel.title} like={novel.likes}
                             genres={novel.genres}
                             coverImage={novel.coverImage} 

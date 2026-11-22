@@ -1,66 +1,20 @@
 
 import { getServerI18n } from "@/lib/i18n/server";
-import CardStory from "@/components/cardStory/cardStory";
-import { faker } from '@faker-js/faker';
 import './page.css'
-import cardImg from '../../../../public/CardStory.jpg'
 import ListStory from "@/components/ListStory/ListStory";
-export default async function NovelDetailPage({ params }) {
-  const { t, locale } = await getServerI18n();
+import { getGenrePage } from "@/server/services/catalog";
+
+// Trang thể loại: /novel/:slug (hoặc tên thể loại, ví dụ /novel/Ngôn Tình).
+export default async function GenrePage({ params }) {
+  const { t } = await getServerI18n();
   const { id } = await params;
+  const { genre, novels } = await getGenrePage(id);
+  const title = genre ? t(genre.name) : t(decodeURIComponent(id));
 
-   const categories = [
-    "Ngôn Tình",
-    "Đam Mỹ",
-    "Bách Hợp",
-    "Tiên Hiệp",
-    "Kiếm Hiệp",
-    "Huyền Huyễn",
-    "Đô Thị",
-    "Khoa Huyễn",
-    "Trọng Sinh",
-    "Xuyên Không",
-    "Hệ Thống",
-    "Trinh Thám",
-    "Kinh Dị",
-    "Hài Hước",
-    "Trường Học",
-    "Cổ Đại",
-    "Mạt Thế",
-    "Dinh Dưỡng",
-    "Võ Luyện",
-    "Lịch Sử"
-];
-
-  const fakeCategoriesData = categories.map((cat,index) => ({
-        categoryId: index,
-        categoryName: cat,
-        
-        novels: Array.from({ length: 15 }, (_, storyIndex) => ({
-            id: faker.string.uuid(),
-            title: faker.book.title(),
-            likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
-            genres: t(cat),
-            coverImage: cardImg,
-            badges: {
-                full: storyIndex % 4 === 0,
-                age18: storyIndex % 5 === 1,
-                vip: storyIndex % 3 === 0,
-            },
-        }))
-    }));
-  
-  // Tìm truyện khớp với id trên URL
- const decodedId = decodeURIComponent(id);
-  const matchedCategory = fakeCategoriesData.find(
-    cat => cat.categoryName.toLowerCase() === decodedId.toLowerCase()
-  );
-
-  // 2. Lấy ra mảng các truyện thuộc thể loại đó (nếu tìm thấy thì trả về mảng novels, ngược lại trả về mảng rỗng [])
-  const novelsInCategory = matchedCategory ? matchedCategory.novels: [];
   return (
     <div className="Containt">
-      <ListStory title={t(decodedId)} DataStory={novelsInCategory} />
+      <ListStory title={title} DataStory={novels} />
+      {!novels.length && <p className="px-6 py-10 text-center text-muted">{t("Chưa có truyện nào thuộc thể loại này.")}</p>}
     </div>
   );
 }

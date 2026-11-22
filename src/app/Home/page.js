@@ -2,61 +2,34 @@
 import { getServerI18n } from "@/lib/i18n/server";
 
 import HeroCarousel from '@/components/home/HeroCarousel';
-import { faker } from '@faker-js/faker';
 import './page.css'
-import cardImg from '../../../public/CardStory.jpg'
 import ListStory from '@/components/ListStory/ListStory';
+import { getHomeSections } from '@/server/services/catalog';
 
 export default async function Homepage(){
-  const { t, locale } = await getServerI18n();
-    const categories = [
-        { id: 'cat-1', name: t("Trending") },
-        { id: 'cat-2', name: t("For you") },
-        { id: 'cat-3', name: t("Top rated") },
-        { id: 'cat-4', name: t("Most Followed") },
-        { id: 'cat-5', name: t("Mood Discovery") },
-        { id: 'cat-6', name: t("Newly updated") },
-        { id: 'cat-7', name: t("Surprise") },
-    ];
+    const { t, locale } = await getServerI18n();
+    const sections = await getHomeSections();
 
-    // Tạo dữ liệu giả: mỗi thể loại chứa một danh sách truyện riêng
-    const fakeCategoriesData = categories.map((cat) => ({
-        categoryId: cat.id,
-        categoryName: cat.name,
-        
-        novels: Array.from({ length: 15 }, (_, index) => ({
-            id: faker.string.uuid(),
-            title: faker.book.title(),
-            description: faker.lorem.sentence(15),
-            likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
-            genres: cat.name,
-            coverImage: cardImg,
-            badges: {
-                full: index % 4 === 0,
-                age18: index % 5 === 1,
-                vip: index % 3 === 0,
-            },
-        }))
-    }));
-
-    const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel, index) => ({
+    // Ảnh nền ngang của carousel vẫn dùng ảnh có sẵn; nội dung lấy từ truyện thịnh hành.
+    const featuredStories = sections[0].items.slice(0, 5).map((novel, index) => ({
         id: novel.id,
         title: novel.title,
         description: novel.description,
-        likes: novel.likes,
+        likes: novel.hearts,
         genres: novel.genres,
+        href: `/novels/${novel.id}`,
         image: `/CardStorys${index + 1}.jpg`,
     }));
 
     return(
         <div className='homeContaint'>
-            <HeroCarousel slides={featuredStories} locale={locale} />
-            {fakeCategoriesData.map((cat)=>(
-            <div key={cat.categoryId}>
-                    <ListStory title={cat.categoryName} DataStory={cat.novels}/>
+            {featuredStories.length > 0 && <HeroCarousel slides={featuredStories} locale={locale} />}
+            {sections.filter((section) => section.items.length).map((section)=>(
+            <div key={section.key}>
+                    <ListStory title={t(section.title)} DataStory={section.items}/>
             </div>
             ))}
         </div>
-        
+
     )
 }

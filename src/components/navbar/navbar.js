@@ -13,14 +13,8 @@ import logoDark from "../../../public/darklogo.png";
 import avatar from "../../../public/avarta.jpg";
 import "./navbar.css";
 
-const genres = [
-  "Ngôn Tình", "Đam Mỹ", "Bách Hợp", "Tiên Hiệp", "Kiếm Hiệp",
-  "Huyền Huyễn", "Đô Thị", "Khoa Huyễn", "Trọng Sinh", "Xuyên Không",
-  "Hệ Thống", "Trinh Thám", "Kinh Dị", "Hài Hước", "Trường Học",
-  "Cổ Đại", "Mạt Thế", "Dinh Dưỡng", "Võ Luyện", "Lịch Sử",
-];
-
-export default function Navbar() {
+// Danh sách thể loại lấy từ database, truyền xuống từ app/layout.js.
+export default function Navbar({ genres = [] }) {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
@@ -57,7 +51,7 @@ export default function Navbar() {
               <span>{t("Điều hướng")}</span><ChevronDown />
             </button>
             {openGen && <div className="listGenre absolute left-0 top-15 w-[20.5rem] md:w-120 h-100 rounded-lg shadow-xl!">
-              {genres.map((genre) => <Link key={genre} href={`/novel/${genre}`} className="btnGenre" title={t(genre)} onClick={() => setOpenGen(false)}>{t(genre)}</Link>)}
+              {genres.map((genre) => <Link key={genre.slug} href={`/novel/${genre.slug}`} className="btnGenre" title={t(genre.name)} onClick={() => setOpenGen(false)}>{t(genre.name)}</Link>)}
             </div>}
           </div>
           <Link href="/library">{t("Thư viện")}</Link>

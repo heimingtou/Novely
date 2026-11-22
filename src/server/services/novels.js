@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertNoDbError, badRequest, notFound } from "@/server/http";
 
@@ -9,6 +10,7 @@ const NOVEL_FIELDS = [
   "count_chapter, count_like, last_chapter_at, created_at, updated_at",
   AUTHOR,
   "genres(genre_id, name, slug)",
+  "interact_novel(view)",
 ].join(", ");
 
 export const NOVEL_STATUSES = ["ongoing", "completed"];
@@ -38,7 +40,7 @@ export async function listNovels({ from, to, status, genre, q, sort = "latest" }
 }
 
 // Nhận novel_id (số) hoặc slug. Chỉ trả truyện đã xuất bản.
-export async function getNovel(idOrSlug) {
+export const getNovel = cache(async (idOrSlug) => {
   const supabase = createAdminClient();
   const column = /^\d+$/.test(idOrSlug) ? "novel_id" : "slug";
   if (column === "slug" && !/^[a-z0-9-]+$/.test(idOrSlug)) throw badRequest("Slug không hợp lệ");
@@ -52,4 +54,4 @@ export async function getNovel(idOrSlug) {
   assertNoDbError(error);
   if (!data) throw notFound("Không tìm thấy truyện");
   return data;
-}
+});

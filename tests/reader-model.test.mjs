@@ -71,3 +71,14 @@ test("phần trăm đọc nằm trong 0–100 kể cả ở ngoài nội dung", 
   assert.equal(readingPercent(99, 1, 12), 100);
   assert.equal(readingPercent(0, 0, 0), 0);
 });
+
+test("chương chưa tải nội dung (dữ liệu từ database) không làm mất tiến độ và trích đoạn đã lưu", () => {
+  const chapters = [{ number: 1, title: "Mở đầu" }, { number: 2, title: "Tiếp theo" }];
+  assert.deepEqual(normalizePosition({ chapterNumber: 2, paragraphId: "p3", fraction: 0.5, percent: 40 }, chapters),
+    { chapterNumber: 2, paragraphId: "p3", fraction: 0.5, percent: 40 });
+  assert.equal(normalizePosition({ chapterNumber: 9, paragraphId: "p1" }, chapters), null);
+  assert.equal(normalizePosition({ chapterNumber: 1, paragraphId: 5 }, chapters), null);
+
+  const saved = { id: "a", paragraphId: "p2", start: 0, end: 4, quote: "Ánh ", note: "x" };
+  assert.deepEqual(normalizeAnnotations([saved, { ...saved, id: "dup-range" }, { id: "bad", paragraphId: "p1" }], undefined), [saved]);
+});
