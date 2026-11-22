@@ -27,6 +27,7 @@ export default async function Homepage(){
         novels: Array.from({ length: 15 }, (_, index) => ({
             id: faker.string.uuid(),
             title: faker.book.title(),
+            description: faker.lorem.sentence(15),
             likes: (faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })).toFixed(1) + 'M',
             genres: cat.name,
             coverImage: cardImg,
@@ -41,6 +42,7 @@ export default async function Homepage(){
     const featuredStories = fakeCategoriesData[0].novels.slice(0, 5).map((novel, index) => ({
         id: novel.id,
         title: novel.title,
+        description: novel.description,
         likes: novel.likes,
         genres: novel.genres,
         image: `/CardStorys${index + 1}.jpg`,

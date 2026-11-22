@@ -34,7 +34,7 @@ export default async function RootLayout({ children }) {
         <LocaleProvider initialLocale={locale}>
           <ThemeManager />
           <Navbar/>
-          <main className="min-h-full flex flex-col">{children}</main>
+          <main className="min-h-full flex flex-col mt-[5rem]">{children}</main>
           <SiteFooter />
         </LocaleProvider>
        </body>
