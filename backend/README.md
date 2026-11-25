@@ -1,6 +1,6 @@
-# Novely Backend — BE01 và BE02.2
+# Novely Backend — Foundation đến BE02.3
 
-Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
+Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local. BE02.3 bổ sung readiness, repository tham chiếu, transaction, xử lý lỗi database và JSON serialization; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
 
 ## Yêu cầu và chạy local
 
@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath backend/.env)) {
 npm.cmd run dev --prefix backend
 ```
 
-Chỉ sao chép `.env.example` khi chưa có `backend/.env`; giữ cấu hình riêng đã có. HTTP server và Health API vẫn chạy với giá trị mặc định, không cần tạo `.env`, generate Client hoặc kết nối database. Các lệnh Prisma và kiểm thử tích hợp cần DATABASE_URL hợp lệ như hướng dẫn bên dưới.
+Chỉ sao chép `.env.example` khi chưa có `backend/.env`; giữ cấu hình riêng đã có. HTTP server và liveness `/api/v1/health` vẫn chạy với giá trị mặc định, không cần tạo `.env`, generate Client hoặc kết nối database. Readiness `/api/v1/health/ready` trả 503 nếu database/config/Client chưa sẵn sàng. Các lệnh Prisma và kiểm thử tích hợp cần DATABASE_URL hợp lệ như hướng dẫn bên dưới.
 
 Chạy không có chế độ theo dõi file:
 
@@ -40,7 +40,7 @@ Node.js tự nạp **backend/.env** bằng `process.loadEnvFile()`. Đường d�
 | `NODE_ENV` | `development` | Nhận `development`, `test`, `production` |
 | `PORT` | `4000` | Số nguyên từ 1 đến 65535 |
 | `CORS_ORIGINS` | localhost và 127.0.0.1, cổng 3000/3100 | Danh sách HTTP/HTTPS origin, phân cách bằng dấu phẩy |
-| `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Chỉ dùng khi truy cập Prisma/CLI hoặc chạy integration test; BE02.2 khóa đích Local `127.0.0.1:5432/novely_reconcile_test`, schema public |
+| `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Dùng cho Prisma, readiness và integration test; khóa đích Local `127.0.0.1:5432/novely_reconcile_test`, schema public |
 
 CORS trả origin cụ thể và hỗ trợ credentials cho origin được cấu hình; origin khác nhận JSON 403. Preflight được xử lý bởi middleware. Request không có `Origin` (CLI/server) vẫn được chấp nhận. CORS chưa phải cơ chế xác thực người dùng.
 
@@ -62,6 +62,20 @@ JSON request có giới hạn 100 KB; JSON sai nhận 400, payload quá lớn nh
 ```
 
 `timestamp` là thời điểm UTC hiện tại; `uptime` là số giây tiến trình đã chạy. Endpoint này chỉ kiểm tra tiến trình Express, không xác nhận kết nối database.
+
+`GET /api/v1/health/ready` kiểm tra kết nối bằng truy vấn đọc qua
+Route → Controller → Service → Repository → Prisma → PostgreSQL. Trả 200 khi sẵn sàng:
+
+```json
+{ "data": { "status": "ready", "service": "novely-backend" } }
+```
+
+Nếu kết nối lỗi, chưa generate Client hoặc hết thời gian, trả HTTP 503 với
+`error.code=DATABASE_UNAVAILABLE`. Cả hai trường hợp dùng `Cache-Control: no-store`.
+Endpoint không trả URL/host/user hay SQL, không đọc dữ liệu nghiệp vụ và không ghi dữ liệu.
+Thời hạn phản hồi là 2 giây; probe dùng transaction READ ONLY với SQL timeout
+1 giây, chờ transaction tối đa 1 giây và transaction timeout 1,5 giây. Các request
+đồng thời chia sẻ một probe còn chạy, không tiếp tục tạo query khi probe cũ chưa kết thúc.
 
 Đường dẫn/phương thức chưa được triển khai trả JSON 404. Định dạng lỗi giữ theo Backend Next.js hiện có:
 
@@ -94,30 +108,43 @@ backend/
 │   ├── config/env.js
 │   ├── config/database.js     # Kiểm tra URL Local, cấu hình pool
 │   ├── database/prisma.js     # getPrisma()/disconnectDatabase(), khởi tạo trễ
+│   ├── database/transaction.js # Service chọn transaction, truyền client cho repository
 │   ├── generated/prisma/      # Client tự generate, gitignore
 │   ├── middlewares/
 │   │   ├── cors.js
 │   │   ├── error-handler.js
 │   │   └── not-found.js
 │   ├── shared/errors/api-error.js
+│   ├── shared/errors/database-error.js # Prisma/SQLSTATE → HTTP, thông báo an toàn
+│   ├── shared/http/json.js    # BigInt/Date/null, bỏ passwordHash/password_hash
 │   └── modules/
-│       ├── health/            # routes → controller → service
+│       ├── health/            # routes → controller → service → repository
 │       ├── users/
 │       ├── novels/
 │       ├── chapters/
-│       ├── library/
+│       ├── library/bookshelf.repository.js # Repository tham chiếu, chưa có API
 │       ├── reading/
 │       └── forum/
-├── integration/prisma.test.js # Chỉ chạy bằng test:db, cần PostgreSQL Local
+├── integration/
+│   ├── prisma.test.js          # 77 test BE02.2, truy vấn đọc
+│   ├── express-database.test.js # 49 test BE02.3, CRUD/transaction/trigger
+│   └── helpers/              # Fixture và HTTP harness chỉ dành cho test
 └── tests/                    # Không cần database
     ├── app.test.js
     ├── env.test.js
     ├── database.test.js
+    ├── database-errors.test.js
+    ├── readiness.test.js
+    ├── repository-transaction.test.js
+    ├── serialization.test.js
     ├── server.test.js
     └── helpers/http.js
 ```
 
-Các module nghiệp vụ ngoài Health vẫn là thư mục dành chỗ. Luồng khi triển khai sau này: `routes → controller → service → repository → Prisma → PostgreSQL`. Health chưa cần repository vì không đọc database. Các module cùng chạy trong một ứng dụng Express.
+Health có repository riêng cho readiness; Library chỉ có repository tham chiếu,
+chưa có route/service nghiệp vụ. Các module còn lại vẫn là thư mục dành chỗ.
+Luồng thống nhất: `routes → controller → service → repository → Prisma → PostgreSQL`.
+Liveness không gọi repository. Các module cùng chạy trong một ứng dụng Express.
 
 Giữ Supabase làm nền tảng PostgreSQL và lưu ảnh của dự án; BE02.2 chỉ kết nối database Local đã nghiệm thu. Logic `jose`, `bcryptjs`, Zod, dịch vụ và Storage trong `src/` của Next.js được giữ nguyên để tái sử dụng ở task tương ứng. Khi chuyển module, cần thay các phụ thuộc Next.js như `next/headers`, `next/cache`, `server-only` và alias `@/` bằng adapter phù hợp; không import trực tiếp chúng vào Express.
 
@@ -155,18 +182,59 @@ Pool có connection timeout 5 giây, idle timeout 10 giây và statement timeout
 Prisma 7; không thay cấu hình PostgreSQL toàn cục. Xem [báo cáo và các giới hạn ánh xạ](prisma/README.md)
 trước khi viết bất kỳ migration hoặc API nghiệp vụ nào.
 
+## Repository và transaction
+
+`createBookshelfRepository({ getClient })` hỗ trợ dependency injection và các
+thao tác find/create/updateStatus/remove theo khóa `(userId, novelId)`. Mỗi hàm
+nhận tùy chọn `{ transaction }`; nếu có, chỉ dùng client đó, không lấy root client.
+Repository chỉ chọn cột công khai, không tăng counter trong code.
+
+Service chủ động mở transaction khi nhiều thao tác cần thành công hoặc thất bại
+cùng nhau. Ví dụ quy ước cho module sau này, chưa được mount thành API:
+
+```javascript
+const repository = createBookshelfRepository();
+await withTransaction(async (transaction) => {
+  await repository.create({ userId, novelId }, { transaction });
+  await repository.updateStatus(userId, novelId, "reading", { transaction });
+});
+```
+
+`withTransaction` nằm ở `src/database/transaction.js`, mặc định maxWait=2 giây,
+timeout=5 giây, cho phép truyền options hoặc transaction đang có. Callback lỗi
+được ném nguyên vẹn để Prisma rollback và middleware phân loại. Không tự mở
+transaction cho mọi request, không tự retry callback có thể có tác dụng bên ngoài.
+
+JSON trả BigInt thành chuỗi thập phân, Date thành ISO 8601, giữ null, loại cả
+`passwordHash` và `password_hash` ở mọi cấp. Không sửa BigInt.prototype. Các module
+vẫn phải select/projection an toàn; replacer là lớp bảo vệ cuối.
+
+Xem [báo cáo BE02.3](docs/be02_3-express-database-integration.md) để biết bảng lỗi HTTP,
+phương án fixture/commit/cleanup và kết quả kiểm thử đầy đủ.
+
 ## Kiểm thử
 
 ```powershell
 npm.cmd test --prefix backend
 ```
 
-Dùng `node:test`, `assert` và HTTP server thật ở cổng ngẫu nhiên; `npm test` không cần Supabase, credential, test database hay cổng 4000 còn trống. Hiện có **60 tests**: 42 test BE01 và 18 test mới về cấu hình/khoanh vùng database, giữ kín secret và khởi tạo trễ. Integration test được tách riêng trong `integration/`, chỉ chạy qua `npm run test:db`.
+Dùng `node:test`, `assert` và HTTP server thật ở cổng ngẫu nhiên; `npm test` không cần Supabase, credential, test database hay cổng 4000 còn trống. Hiện có **94 tests**: 60 test trước đây và 34 test mới BE02.3. Integration test được tách riêng trong `integration/`, chỉ chạy qua các lệnh DB bên dưới.
 
-`test:db` kiểm tra kết nối thật, đọc 19 model, 30 relation, 12 composite key,
-kiểu dữ liệu, timezone, pool/shutdown và catalog trước/sau. Phần đọc nghiệp vụ
-chạy trong transaction READ ONLY; không tạo fixture. Database Local rỗng nên đây
-là kiểm thử truy vấn và ánh xạ, chưa phải kiểm thử CRUD nghiệp vụ có dữ liệu.
+```powershell
+npm.cmd run test:db:prisma --prefix backend # 77 test đọc BE02.2
+npm.cmd run test:db:http --prefix backend   # 49 test Express/CRUD BE02.3
+npm.cmd run test:db --prefix backend        # 126 test, chạy hai file tuần tự
+```
+
+Test ghi yêu cầu cả 19 bảng Local rỗng và catalog khớp baseline BE02.2. Phần lớn
+fixture nằm trong transaction/savepoint rồi rollback. Ca commit thật dùng ID
+âm riêng và marker tổng hợp; kiểm tra từ connection khác rồi cleanup trong finally.
+Bảng IDENTITY được nạp bằng Prisma raw SQL với `OVERRIDING SYSTEM VALUE`, các
+bảng composite dùng Prisma Model.create; không gọi nextval hoặc reset sequence.
+HTTP CRUD thử nghiệm chỉ tồn tại trong test harness, server chính thức trả 404.
+
+Kết quả BE02.3: 94 unit + 126 integration + 479 SQL đều PASS; sau test còn đúng
+19 bảng rỗng, 57 index, 11 trigger, 4 function, cả 10 sequence chưa sử dụng.
 
 Để chạy bộ model test Frontend hiện có, dùng `npm.cmd test` từ root.
 

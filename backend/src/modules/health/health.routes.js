@@ -1,5 +1,15 @@
 import { Router } from "express";
-import { getHealthController } from "./health.controller.js";
+import { createReadinessController, getHealthController } from "./health.controller.js";
+import { createHealthRepository } from "./health.repository.js";
+import { createReadinessService } from "./health.service.js";
 
-export const healthRouter = Router();
-healthRouter.get("/", getHealthController);
+export function createHealthRouter({ getClient, readinessTimeoutMs } = {}) {
+  const router = Router();
+  const repository = createHealthRepository({ getClient });
+  const service = createReadinessService({ repository, timeoutMs: readinessTimeoutMs });
+  router.get("/", getHealthController);
+  router.get("/ready", createReadinessController({ service }));
+  return router;
+}
+
+export const healthRouter = createHealthRouter();

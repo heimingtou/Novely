@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { healthRouter } from "./modules/health/health.routes.js";
+import { createHealthRouter } from "./modules/health/health.routes.js";
 
-export const apiRouter = Router();
-apiRouter.use("/health", healthRouter);
+export function createApiRouter(dependencies = {}) {
+  const router = Router();
+  router.use("/health", createHealthRouter(dependencies));
+  return router;
+}
+
+export const apiRouter = createApiRouter();

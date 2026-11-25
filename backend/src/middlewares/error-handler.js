@@ -1,4 +1,5 @@
 import { ApiError } from "../shared/errors/api-error.js";
+import { mapDatabaseError } from "../shared/errors/database-error.js";
 
 const BODY_ERRORS = {
   "entity.parse.failed": [400, "INVALID_JSON", "Nội dung JSON không hợp lệ."],
@@ -25,7 +26,15 @@ export function createErrorHandler(logger = console) {
       return response.status(error.status).json({ error: { code: error.code, message: error.message } });
     }
 
-    logger.error("[backend] Unhandled request error", error);
+    const databaseError = mapDatabaseError(error);
+    if (databaseError) {
+      const { status, code, message, diagnostic } = databaseError;
+      if (status >= 500) logger.error("[backend] Database request failed", diagnostic);
+      return response.status(status).json({ error: { code, message } });
+    }
+
+    // Do not write arbitrary error messages/SQL/credentials into request logs.
+    logger.error("[backend] Unhandled request error");
     return response.status(500).json({ error: { code: "INTERNAL_ERROR", message: "Lỗi máy chủ." } });
   };
 }
