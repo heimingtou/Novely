@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 import { createApp } from "./app.js";
 import { loadEnvironment } from "./config/env.js";
+import { disconnectDatabase } from "./database/prisma.js";
 
 export async function startServer({ config = loadEnvironment(), logger = console } = {}) {
   const server = createServer(createApp({ config, logger }));
@@ -23,12 +24,23 @@ export function shutdownServer(server, logger = console) {
     process.exitCode = 1;
   }, 10_000);
   timer.unref();
-  server.once("close", () => clearTimeout(timer));
-  server.close((error) => {
-    if (error) {
-      logger.error("[backend] Shutdown failed", error);
-      process.exitCode = 1;
-    }
+  return new Promise((resolve) => {
+    // Stop accepting requests and drain HTTP work before closing database sockets.
+    server.close(async (error) => {
+      if (error) {
+        logger.error("[backend] Shutdown failed", error);
+        process.exitCode = 1;
+      }
+      try {
+        await disconnectDatabase();
+      } catch {
+        logger.error("[backend] Database shutdown failed; details hidden.");
+        process.exitCode = 1;
+      } finally {
+        clearTimeout(timer);
+        resolve();
+      }
+    });
   });
 }
 

@@ -1,6 +1,6 @@
-# Novely Backend — BE01
+# Novely Backend — BE01 và BE02.2
 
-Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc. Đây là Backend Foundation theo kiến trúc Layered Modular Monolith; BE01 chưa chuyển nghiệp vụ, xác thực, upload hoặc truy vấn database sang Express.
+Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
 
 ## Yêu cầu và chạy local
 
@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath backend/.env)) {
 npm.cmd run dev --prefix backend
 ```
 
-Chỉ sao chép `.env.example` khi chưa có `backend/.env`; giữ cấu hình riêng đã có. Không cần cấu hình hoặc kết nối Supabase cho BE01. Có thể chạy ngay với giá trị mặc định mà không tạo `.env`.
+Chỉ sao chép `.env.example` khi chưa có `backend/.env`; giữ cấu hình riêng đã có. HTTP server và Health API vẫn chạy với giá trị mặc định, không cần tạo `.env`, generate Client hoặc kết nối database. Các lệnh Prisma và kiểm thử tích hợp cần DATABASE_URL hợp lệ như hướng dẫn bên dưới.
 
 Chạy không có chế độ theo dõi file:
 
@@ -40,6 +40,7 @@ Node.js tự nạp **backend/.env** bằng `process.loadEnvFile()`. Đường d�
 | `NODE_ENV` | `development` | Nhận `development`, `test`, `production` |
 | `PORT` | `4000` | Số nguyên từ 1 đến 65535 |
 | `CORS_ORIGINS` | localhost và 127.0.0.1, cổng 3000/3100 | Danh sách HTTP/HTTPS origin, phân cách bằng dấu phẩy |
+| `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Chỉ dùng khi truy cập Prisma/CLI hoặc chạy integration test; BE02.2 khóa đích Local `127.0.0.1:5432/novely_reconcile_test`, schema public |
 
 CORS trả origin cụ thể và hỗ trợ credentials cho origin được cấu hình; origin khác nhận JSON 403. Preflight được xử lý bởi middleware. Request không có `Origin` (CLI/server) vẫn được chấp nhận. CORS chưa phải cơ chế xác thực người dùng.
 
@@ -77,13 +78,23 @@ backend/
 ├── README.md
 ├── package.json
 ├── package-lock.json
-├── prisma/                    # Dành chỗ, chưa có schema/migration
+├── prisma.config.mjs          # Cấu hình Prisma 7, nạp riêng backend/.env
+├── prisma/
+│   ├── schema.prisma          # 19 model introspected, @map/@@map
+│   └── README.md              # Giới hạn PostgreSQL và báo cáo BE02.2
+├── scripts/
+│   ├── prisma.js              # CLI validate/generate/format/introspect, che secret
+│   ├── snapshot-database.js   # Chụp metadata đọc, không chụp dữ liệu người dùng
+│   ├── lib/catalog.js
+│   └── sql/catalog-snapshot.sql
 ├── src/
 │   ├── app.js                 # Cấu hình Express, không mở cổng
 │   ├── server.js              # Nạp môi trường, mở cổng, tắt server
 │   ├── routes.js              # Router /api/v1
 │   ├── config/env.js
-│   ├── database/              # Dành chỗ cho Prisma client
+│   ├── config/database.js     # Kiểm tra URL Local, cấu hình pool
+│   ├── database/prisma.js     # getPrisma()/disconnectDatabase(), khởi tạo trễ
+│   ├── generated/prisma/      # Client tự generate, gitignore
 │   ├── middlewares/
 │   │   ├── cors.js
 │   │   ├── error-handler.js
@@ -97,16 +108,52 @@ backend/
 │       ├── library/
 │       ├── reading/
 │       └── forum/
-└── tests/
+├── integration/prisma.test.js # Chỉ chạy bằng test:db, cần PostgreSQL Local
+└── tests/                    # Không cần database
     ├── app.test.js
     ├── env.test.js
+    ├── database.test.js
     ├── server.test.js
     └── helpers/http.js
 ```
 
-Các thư mục dành chỗ chứa `.gitkeep`, chưa có implementation. Module nghiệp vụ sau này đi theo `routes → controller → service → repository → Prisma → PostgreSQL`. Health chưa cần repository vì không đọc database. Các module cùng chạy trong một ứng dụng Express.
+Các module nghiệp vụ ngoài Health vẫn là thư mục dành chỗ. Luồng khi triển khai sau này: `routes → controller → service → repository → Prisma → PostgreSQL`. Health chưa cần repository vì không đọc database. Các module cùng chạy trong một ứng dụng Express.
 
-Giữ Supabase làm nền tảng PostgreSQL và lưu ảnh. Chưa cài Prisma client, tạo schema, chạy seed/migration hoặc thay đổi database trong BE01. Logic `jose`, `bcryptjs`, Zod, dịch vụ và Storage trong `src/` của Next.js được giữ nguyên để tái sử dụng ở task tương ứng. Khi chuyển module, cần thay các phụ thuộc Next.js như `next/headers`, `next/cache`, `server-only` và alias `@/` bằng adapter phù hợp; không import trực tiếp chúng vào Express.
+Giữ Supabase làm nền tảng PostgreSQL và lưu ảnh của dự án; BE02.2 chỉ kết nối database Local đã nghiệm thu. Logic `jose`, `bcryptjs`, Zod, dịch vụ và Storage trong `src/` của Next.js được giữ nguyên để tái sử dụng ở task tương ứng. Khi chuyển module, cần thay các phụ thuộc Next.js như `next/headers`, `next/cache`, `server-only` và alias `@/` bằng adapter phù hợp; không import trực tiếp chúng vào Express.
+
+## Prisma ORM Foundation
+
+Prisma CLI, Client và `@prisma/adapter-pg` cố định **7.10.1**, driver `pg` **8.23.1**. Backend giữ JavaScript ES Modules. Generator `prisma-client-js` hiện còn được hỗ trợ trong Prisma 7, xuất JavaScript dùng được trực tiếp từ ESM, có trạng thái deprecated cần xem lại khi nâng major sau này.
+
+Nhập DATABASE_URL thật vào `backend/.env` bằng trình soạn thảo, dùng ví dụ đã che mật khẩu trong `.env.example`. Không ghi URL thật vào Terminal command, README hoặc Git. Không dùng Supabase URL trong BE02.2. Các lệnh dưới đây chạy từ root:
+
+```powershell
+npm.cmd run db:validate --prefix backend
+npm.cmd run db:generate --prefix backend
+npm.cmd run db:snapshot --prefix backend
+npm.cmd run test:db --prefix backend
+```
+
+`db:snapshot` chỉ đọc định nghĩa bảng/cột/ràng buộc/index/trigger/function, quyền,
+policy, sequence và số dòng; lưu baseline được gitignore tại `backend/.local/`.
+Tạo baseline trước lần introspect đầu tiên; giữ nguyên baseline trong cả lượt đối
+chiếu. Chỉ chụp lại khi chủ động bắt đầu lượt đối chiếu mới trên database đã xác nhận.
+
+Schema đã được introspect và đặt tên model/cột rõ ràng. Khi cần đối chiếu lại với
+Local, dùng `npm.cmd run db:introspect --prefix backend`; lệnh chỉ đọc database,
+có ghi lại file schema.prisma, cần xem Git diff sau đó. Không có script migrate,
+db push, reset hoặc seed trong Backend này.
+
+Repository tương lai lấy Client bằng `const prisma = await getPrisma()` từ
+`src/database/prisma.js`. Các lời gọi đồng thời trong một tiến trình chia sẻ một
+Client và một pool, tối đa 5 connection. Không khởi tạo Client hoặc disconnect sau
+mỗi request. Khi tắt server, HTTP đóng trước, sau đó `$disconnect()` và `pool.end()`;
+script độc lập phải gọi `disconnectDatabase()` trong finally.
+
+Pool có connection timeout 5 giây, idle timeout 10 giây và statement timeout
+15 giây. Các session của pool dùng UTC để xử lý đúng timestamptz với adapter
+Prisma 7; không thay cấu hình PostgreSQL toàn cục. Xem [báo cáo và các giới hạn ánh xạ](prisma/README.md)
+trước khi viết bất kỳ migration hoặc API nghiệp vụ nào.
 
 ## Kiểm thử
 
@@ -114,7 +161,12 @@ Giữ Supabase làm nền tảng PostgreSQL và lưu ảnh. Chưa cài Prisma cl
 npm.cmd test --prefix backend
 ```
 
-Dùng `node:test`, `assert` và HTTP server thật ở cổng ngẫu nhiên; không cần Supabase, credential, test database hay cổng 4000 còn trống. Kiểm tra health, CORS/preflight, 404, JSON sai/quá lớn, lỗi async, cấu hình môi trường, cổng bị chiếm và vòng đời server. Server được đóng sau kiểm thử.
+Dùng `node:test`, `assert` và HTTP server thật ở cổng ngẫu nhiên; `npm test` không cần Supabase, credential, test database hay cổng 4000 còn trống. Hiện có **60 tests**: 42 test BE01 và 18 test mới về cấu hình/khoanh vùng database, giữ kín secret và khởi tạo trễ. Integration test được tách riêng trong `integration/`, chỉ chạy qua `npm run test:db`.
+
+`test:db` kiểm tra kết nối thật, đọc 19 model, 30 relation, 12 composite key,
+kiểu dữ liệu, timezone, pool/shutdown và catalog trước/sau. Phần đọc nghiệp vụ
+chạy trong transaction READ ONLY; không tạo fixture. Database Local rỗng nên đây
+là kiểm thử truy vấn và ánh xạ, chưa phải kiểm thử CRUD nghiệp vụ có dữ liệu.
 
 Để chạy bộ model test Frontend hiện có, dùng `npm.cmd test` từ root.
 

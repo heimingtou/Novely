@@ -39,7 +39,7 @@ export function loadConfig(environment = process.env) {
   return Object.freeze({ nodeEnv, port, corsOrigins: Object.freeze([...new Set(corsOrigins)]) });
 }
 
-export function loadEnvironment() {
+export function loadBackendEnvironment() {
   // Resolve from this module, not cwd, to avoid loading the frontend .env.
   const envPath = fileURLToPath(new URL("../../.env", import.meta.url));
   try {
@@ -47,5 +47,9 @@ export function loadEnvironment() {
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
-  return loadConfig();
+  return process.env;
+}
+
+export function loadEnvironment() {
+  return loadConfig(loadBackendEnvironment());
 }
