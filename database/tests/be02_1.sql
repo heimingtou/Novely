@@ -1,4 +1,5 @@
--- LOCAL, empty novely_test only. No Supabase connection or credentials here.
+-- LOCAL, empty novely_reconcile_test only. No Supabase connection or credentials.
+-- Keep novely_test and its previously tested schema untouched.
 -- Run with psql -X -v ON_ERROR_STOP=1 -f database/tests/be02_1.sql.
 -- The schema is retained after a successful run; every fixture row is rolled back.
 -- Explicit identity values prevent even sequence increments from fixture inserts.
@@ -13,10 +14,10 @@ SET client_encoding = 'UTF8';
 
 DO $guard$
 BEGIN
-  IF current_database() <> 'novely_test'
+  IF current_database() <> 'novely_reconcile_test'
      OR inet_server_addr() IS DISTINCT FROM '127.0.0.1'::inet
      OR inet_server_port() IS DISTINCT FROM 5432 THEN
-    RAISE EXCEPTION 'STOP: this test may only run on 127.0.0.1:5432/novely_test';
+    RAISE EXCEPTION 'STOP: this test may only run on 127.0.0.1:5432/novely_reconcile_test';
   END IF;
 END;
 $guard$;
@@ -46,9 +47,9 @@ BEGIN
     WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
       AND schemaname NOT LIKE 'pg_temp_%'
   ) THEN
-    RAISE EXCEPTION 'STOP: novely_test is not empty; no schema or test data was changed';
+    RAISE EXCEPTION 'STOP: novely_reconcile_test is not empty; no schema or test data was changed';
   END IF;
-  RAISE NOTICE 'PREFLIGHT PASS: local novely_test has no business tables';
+  RAISE NOTICE 'PREFLIGHT PASS: local novely_reconcile_test has no business tables';
 END;
 $empty_guard$;
 \endif
@@ -140,7 +141,7 @@ DO $metadata$
 DECLARE
   item record;
 BEGIN
-  FOR item IN SELECT * FROM (VALUES ('p', 19), ('f', 30), ('u', 11), ('c', 48)) AS counts(kind, expected)
+  FOR item IN SELECT * FROM (VALUES ('p', 19), ('f', 30), ('u', 11), ('c', 49)) AS counts(kind, expected)
   LOOP
     PERFORM pg_temp.assert_true('Constraint count ' || item.kind || ' = ' || item.expected,
       (SELECT count(*) = item.expected FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace
@@ -182,15 +183,16 @@ INSERT INTO expected_indexes VALUES
   ('forum_reaction_post_type_idx', 'forum_reaction', ARRAY['post_id','reaction_type']),
   ('forum_report_user_created_idx', 'forum_report', ARRAY['user_id','created_at']),
   ('forum_report_post_created_idx', 'forum_report', ARRAY['post_id','created_at']),
-  ('forum_report_status_created_idx', 'forum_report', ARRAY['status','created_at']);
+  ('forum_report_status_created_idx', 'forum_report', ARRAY['status','created_at']),
+  ('interact_novel_day_day_novel_idx', 'interact_novel_day', ARRAY['day','novel_id']);
 
 DO $indexes$
 DECLARE
   item record;
   actual_columns text[];
 BEGIN
-  PERFORM pg_temp.assert_true('56 indexes = 19 PK + 11 UNIQUE + 26 explicit',
-    (SELECT count(*) = 56 FROM pg_index i JOIN pg_class t ON t.oid = i.indrelid JOIN pg_namespace n ON n.oid = t.relnamespace WHERE n.nspname = 'public'));
+  PERFORM pg_temp.assert_true('57 indexes = 19 PK + 11 UNIQUE + 27 explicit',
+    (SELECT count(*) = 57 FROM pg_index i JOIN pg_class t ON t.oid = i.indrelid JOIN pg_namespace n ON n.oid = t.relnamespace WHERE n.nspname = 'public'));
   FOR item IN
     SELECT i.*, c.relname AS index_name FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid
     JOIN pg_class t ON t.oid = i.indrelid JOIN pg_namespace n ON n.oid = t.relnamespace WHERE n.nspname = 'public'
@@ -331,6 +333,7 @@ BEGIN
   LOOP
     SELECT a.attname INTO column_name FROM pg_attribute a WHERE a.attrelid=item.conrelid AND a.attnum=item.conkey[1];
     assignment := CASE
+      WHEN item.conname='chapters_published_at_check' THEN 'status = ''published'', published_at = NULL'
       WHEN item.conname='follows_no_self_check' THEN 'follower_id = follow_id'
       WHEN item.conname IN ('comments_no_self_parent_check','forum_comment_no_self_parent_check') THEN 'parent_id = comment_id'
       WHEN column_name='level' THEN 'level = 0'
@@ -369,7 +372,7 @@ SELECT pg_temp.expect_error('INTEGRITY','Chapter reply cannot use another chapte
 SELECT pg_temp.expect_error('INTEGRITY','Forum reply cannot use another posts parent',
   'UPDATE public.forum_comment SET parent_id=6002 WHERE comment_id=6003','23503','fk_forum_comment_parent');
 SELECT pg_temp.expect_error('INTEGRITY','Referenced user cannot be removed implicitly',
-  'DELETE FROM public.users WHERE user_id=101','23503');
+  'DELETE FROM public.users WHERE user_id=101','23001','fk_novels_author');
 SELECT pg_temp.expect_error('INTEGRITY','Progress cannot exceed 100 percent',
   'UPDATE public.reading_progress SET progress_percent=1.01 WHERE user_id=101','23514','reading_progress_progress_percent_check');
 SELECT pg_temp.expect_error('INTEGRITY','Review cannot exceed five stars',
@@ -417,10 +420,12 @@ SELECT pg_temp.assert_true('Progress accepts another chapter of the same novel a
 UPDATE public.profiles SET birthday=NULL,gender=NULL,phone_number=NULL,fb_link=NULL WHERE user_id=101;
 SELECT pg_temp.assert_true('Profile optional attributes accept null',(SELECT birthday IS NULL AND gender IS NULL AND phone_number IS NULL AND fb_link IS NULL FROM public.profiles WHERE user_id=101));
 
+\ir reconciliation.sql
+
 DO $coverage$
 DECLARE item record;
 BEGIN
-  FOR item IN SELECT * FROM (VALUES ('PRIMARY_KEY',19),('UNIQUE',11),('FOREIGN_KEY',30),('CHECK',48)) counts(category,expected)
+  FOR item IN SELECT * FROM (VALUES ('PRIMARY_KEY',19),('UNIQUE',11),('FOREIGN_KEY',30),('CHECK',49)) counts(category,expected)
   LOOP
     PERFORM pg_temp.assert_true('Full constraint test coverage: ' || item.category,
       (SELECT count(*)=item.expected FROM pg_temp.test_results r WHERE r.category=item.category));

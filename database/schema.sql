@@ -3,9 +3,12 @@
 -- Do not execute this file against the existing Supabase database.
 -- Before migration, preserve chapter_contents.content verbatim in chapters.content
 -- and archive chapter_likes plus chapters.count_like outside the target schema.
--- Existing grants, RLS policies and counter-maintenance triggers must be audited
--- separately. DEFAULT now() initializes timestamps; services must set updated_at
--- on subsequent changes. Aggregate counters are not recalculated by this DDL.
+-- Delete actions and counter behavior below follow the supplied Supabase audit,
+-- which differs from the implicit NO ACTION clauses in commit 6acb8b7.
+-- RLS, grants and runtime-role access still require separate migration tests.
+-- Triggers own comment/follow/novel-like counters and updated_at on eight tables.
+-- Services continue to own chapter word_count and novel publication aggregates;
+-- do not introduce a second increment/decrement for trigger-managed counters.
 
 BEGIN;
 
@@ -32,7 +35,7 @@ CREATE TABLE public.profiles (
   avatar character varying,
   bio text,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
-  CONSTRAINT fk_profiles_user FOREIGN KEY (user_id) REFERENCES public.users(user_id)
+  CONSTRAINT fk_profiles_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE
 );
 CREATE TABLE public.follows (
   follower_id integer NOT NULL,
@@ -40,8 +43,8 @@ CREATE TABLE public.follows (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT follows_pkey PRIMARY KEY (follower_id, follow_id),
   CONSTRAINT follows_no_self_check CHECK (follower_id <> follow_id),
-  CONSTRAINT fk_follows_follower FOREIGN KEY (follower_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_follows_follow FOREIGN KEY (follow_id) REFERENCES public.users(user_id)
+  CONSTRAINT fk_follows_follower FOREIGN KEY (follower_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_follows_follow FOREIGN KEY (follow_id) REFERENCES public.users(user_id) ON DELETE CASCADE
 );
 CREATE TABLE public.genres (
   genre_id smallint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -66,22 +69,22 @@ CREATE TABLE public.novels (
   description text,
   count_like integer NOT NULL DEFAULT 0 CHECK (count_like >= 0),
   CONSTRAINT novels_pkey PRIMARY KEY (novel_id),
-  CONSTRAINT fk_novels_author FOREIGN KEY (author_id) REFERENCES public.users(user_id)
+  CONSTRAINT fk_novels_author FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON DELETE RESTRICT
 );
 CREATE TABLE public.novel_genres (
   novel_id integer NOT NULL,
   genre_id smallint NOT NULL,
   CONSTRAINT novel_genres_pkey PRIMARY KEY (novel_id, genre_id),
-  CONSTRAINT fk_novel_genres_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id),
-  CONSTRAINT fk_novel_genres_genre FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id)
+  CONSTRAINT fk_novel_genres_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE,
+  CONSTRAINT fk_novel_genres_genre FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id) ON DELETE RESTRICT
 );
 CREATE TABLE public.novel_likes (
   user_id integer NOT NULL,
   novel_id integer NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT novel_likes_pkey PRIMARY KEY (user_id, novel_id),
-  CONSTRAINT fk_novel_likes_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_novel_likes_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT fk_novel_likes_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_novel_likes_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 CREATE TABLE public.chapters (
   chapter_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -100,7 +103,8 @@ CREATE TABLE public.chapters (
   CONSTRAINT chapters_novel_number_key UNIQUE (novel_id, chapter_number),
   -- The composite key is required by reading_progress's same-novel foreign key.
   CONSTRAINT chapters_id_novel_key UNIQUE (chapter_id, novel_id),
-  CONSTRAINT fk_chapters_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT chapters_published_at_check CHECK (status <> 'published' OR published_at IS NOT NULL),
+  CONSTRAINT fk_chapters_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 CREATE TABLE public.bookshelves (
   user_id integer NOT NULL,
@@ -110,8 +114,8 @@ CREATE TABLE public.bookshelves (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT bookshelves_pkey PRIMARY KEY (user_id, novel_id),
   CONSTRAINT bookshelves_reading_status_check CHECK (reading_status IN ('plan_to_read', 'reading', 'completed', 'dropped')),
-  CONSTRAINT fk_bookshelves_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_bookshelves_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT fk_bookshelves_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_bookshelves_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 CREATE TABLE public.reading_progress (
   user_id integer NOT NULL,
@@ -123,10 +127,11 @@ CREATE TABLE public.reading_progress (
   -- scroll_position is a nonnegative vertical offset in pixels, not a paragraph ID.
   scroll_position integer NOT NULL DEFAULT 0 CHECK (scroll_position >= 0),
   CONSTRAINT reading_progress_pkey PRIMARY KEY (user_id, novel_id),
-  CONSTRAINT fk_reading_progress_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_reading_progress_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id),
+  CONSTRAINT fk_reading_progress_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_reading_progress_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE,
   -- MATCH SIMPLE permits chapter_id = NULL while novel_id remains valid.
-  CONSTRAINT fk_reading_progress_chapter FOREIGN KEY (chapter_id, novel_id) REFERENCES public.chapters(chapter_id, novel_id)
+  -- Preserve the user's novel row and percentage when its chapter is removed.
+  CONSTRAINT fk_reading_progress_chapter FOREIGN KEY (chapter_id, novel_id) REFERENCES public.chapters(chapter_id, novel_id) ON DELETE SET NULL (chapter_id)
 );
 CREATE TABLE public.comments (
   comment_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -140,9 +145,9 @@ CREATE TABLE public.comments (
   CONSTRAINT comments_pkey PRIMARY KEY (comment_id),
   CONSTRAINT comments_id_chapter_key UNIQUE (comment_id, chapter_id),
   CONSTRAINT comments_no_self_parent_check CHECK (parent_id IS NULL OR parent_id <> comment_id),
-  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_comments_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id),
-  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_id, chapter_id) REFERENCES public.comments(comment_id, chapter_id)
+  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_chapter FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_id, chapter_id) REFERENCES public.comments(comment_id, chapter_id) ON DELETE CASCADE
 );
 CREATE TABLE public.reviews (
   review_id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -154,8 +159,8 @@ CREATE TABLE public.reviews (
   content text,
   CONSTRAINT reviews_pkey PRIMARY KEY (review_id),
   CONSTRAINT reviews_user_novel_key UNIQUE (user_id, novel_id),
-  CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES public.users(user_id),
-  CONSTRAINT fk_reviews_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_reviews_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 CREATE TABLE public.interact_novel (
   view bigint NOT NULL DEFAULT 0 CHECK (view >= 0),
@@ -169,7 +174,7 @@ CREATE TABLE public.interact_novel (
   female integer NOT NULL DEFAULT 0 CHECK (female >= 0),
   gender_other integer NOT NULL DEFAULT 0 CHECK (gender_other >= 0),
   CONSTRAINT interact_novel_pkey PRIMARY KEY (novel_id),
-  CONSTRAINT fk_interact_novel_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT fk_interact_novel_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 CREATE TABLE public.interact_novel_day (
   novel_id integer NOT NULL,
@@ -177,7 +182,7 @@ CREATE TABLE public.interact_novel_day (
   count_view integer NOT NULL DEFAULT 0 CHECK (count_view >= 0),
   count_like integer NOT NULL DEFAULT 0 CHECK (count_like >= 0),
   CONSTRAINT interact_novel_day_pkey PRIMARY KEY (novel_id, day),
-  CONSTRAINT fk_interact_novel_day_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id)
+  CONSTRAINT fk_interact_novel_day_novel FOREIGN KEY (novel_id) REFERENCES public.novels(novel_id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.forum_category (
@@ -248,7 +253,7 @@ CREATE TABLE public.forum_report (
 
 -- PK/UNIQUE constraints already create indexes. The following indexes cover
 -- foreign-key lookups in the opposite direction and existing list/filter paths.
--- Keep default NO ACTION delete behavior: no implicit deletion of user content.
+-- Forum deliberately retains default NO ACTION; moderation uses status changes.
 CREATE INDEX follows_follow_created_idx ON public.follows (follow_id, created_at DESC);
 CREATE INDEX novels_author_updated_idx ON public.novels (author_id, updated_at DESC);
 CREATE INDEX novels_published_latest_idx ON public.novels (published, last_chapter_at DESC, novel_id);
@@ -265,6 +270,8 @@ CREATE INDEX comments_chapter_deleted_created_idx ON public.comments (chapter_id
 CREATE INDEX comments_user_created_idx ON public.comments (user_id, created_at DESC);
 CREATE INDEX comments_parent_chapter_idx ON public.comments (parent_id, chapter_id);
 CREATE INDEX reviews_novel_created_idx ON public.reviews (novel_id, created_at DESC);
+-- The PK starts with novel_id; a day-first index supports cross-novel daily work.
+CREATE INDEX interact_novel_day_day_novel_idx ON public.interact_novel_day (day, novel_id);
 CREATE INDEX forum_post_user_created_idx ON public.forum_post (user_id, created_at DESC);
 CREATE INDEX forum_post_category_status_created_idx ON public.forum_post (category_id, status, created_at DESC, post_id DESC);
 CREATE INDEX forum_post_status_created_idx ON public.forum_post (status, created_at DESC, post_id DESC);
@@ -275,5 +282,147 @@ CREATE INDEX forum_reaction_post_type_idx ON public.forum_reaction (post_id, rea
 CREATE INDEX forum_report_user_created_idx ON public.forum_report (user_id, created_at DESC);
 CREATE INDEX forum_report_post_created_idx ON public.forum_report (post_id, created_at DESC);
 CREATE INDEX forum_report_status_created_idx ON public.forum_report (status, created_at);
+
+-- Reconcile trigger behavior from the supplied audit, not cloud function bodies.
+-- These are SECURITY INVOKER functions. Required grants/RLS must be checked using
+-- the real application role before migration; no grants or RLS changes here.
+CREATE FUNCTION public.set_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog
+AS $function$
+BEGIN
+  NEW.updated_at := pg_catalog.now();
+  RETURN NEW;
+END;
+$function$;
+
+CREATE FUNCTION public.update_comments_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog
+AS $function$
+DECLARE
+  old_chapter integer;
+  new_chapter integer;
+  old_delta integer := 0;
+  new_delta integer := 0;
+  target record;
+BEGIN
+  IF TG_OP <> 'INSERT' AND OLD.deleted_at IS NULL THEN
+    old_chapter := OLD.chapter_id;
+    old_delta := -1;
+  END IF;
+  IF TG_OP <> 'DELETE' AND NEW.deleted_at IS NULL THEN
+    new_chapter := NEW.chapter_id;
+    new_delta := 1;
+  END IF;
+  -- Aggregate same-parent changes to zero. Apply atomic deltas in ID order to
+  -- reduce lock inversions when two comments move in opposite directions.
+  FOR target IN
+    SELECT d.chapter_id, sum(d.delta)::integer AS delta
+    FROM (VALUES (old_chapter, old_delta), (new_chapter, new_delta)) AS d(chapter_id, delta)
+    WHERE d.chapter_id IS NOT NULL
+    GROUP BY d.chapter_id HAVING sum(d.delta) <> 0 ORDER BY d.chapter_id
+  LOOP
+    UPDATE public.chapters SET count_comment = count_comment + target.delta
+    WHERE chapter_id = target.chapter_id;
+  END LOOP;
+  -- During a cascade the parent may already be gone; updating zero rows is OK.
+  RETURN NULL;
+END;
+$function$;
+
+CREATE FUNCTION public.update_follows_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog
+AS $function$
+DECLARE
+  old_follower integer;
+  old_followed integer;
+  new_follower integer;
+  new_followed integer;
+  target record;
+BEGIN
+  IF TG_OP <> 'INSERT' THEN
+    old_follower := OLD.follower_id;
+    old_followed := OLD.follow_id;
+  END IF;
+  IF TG_OP <> 'DELETE' THEN
+    new_follower := NEW.follower_id;
+    new_followed := NEW.follow_id;
+  END IF;
+  FOR target IN
+    SELECT d.user_id, sum(d.following_delta)::integer AS following_delta,
+           sum(d.follower_delta)::integer AS follower_delta
+    FROM (VALUES (old_follower, -1, 0), (old_followed, 0, -1),
+                 (new_follower, 1, 0), (new_followed, 0, 1)) AS d(user_id, following_delta, follower_delta)
+    WHERE d.user_id IS NOT NULL
+    GROUP BY d.user_id HAVING sum(d.following_delta) <> 0 OR sum(d.follower_delta) <> 0
+    ORDER BY d.user_id
+  LOOP
+    UPDATE public.users
+    SET count_following = count_following + target.following_delta,
+        count_follower = count_follower + target.follower_delta
+    WHERE user_id = target.user_id;
+  END LOOP;
+  RETURN NULL;
+END;
+$function$;
+
+CREATE FUNCTION public.update_novel_likes_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog
+AS $function$
+DECLARE
+  old_novel integer;
+  new_novel integer;
+  target record;
+BEGIN
+  IF TG_OP <> 'INSERT' THEN old_novel := OLD.novel_id; END IF;
+  IF TG_OP <> 'DELETE' THEN new_novel := NEW.novel_id; END IF;
+  FOR target IN
+    SELECT d.novel_id, sum(d.delta)::integer AS delta
+    FROM (VALUES (old_novel, -1), (new_novel, 1)) AS d(novel_id, delta)
+    WHERE d.novel_id IS NOT NULL
+    GROUP BY d.novel_id HAVING sum(d.delta) <> 0 ORDER BY d.novel_id
+  LOOP
+    UPDATE public.novels SET count_like = count_like + target.delta
+    WHERE novel_id = target.novel_id;
+  END LOOP;
+  RETURN NULL;
+END;
+$function$;
+
+CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON public.users
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_novels_updated_at BEFORE UPDATE ON public.novels
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+-- All chapter updates, including the merged content column, touch updated_at.
+-- word_count remains owned by the writer service, as in the existing code.
+CREATE TRIGGER trg_chapters_updated_at BEFORE UPDATE ON public.chapters
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_comments_updated_at BEFORE UPDATE ON public.comments
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_bookshelves_updated_at BEFORE UPDATE ON public.bookshelves
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_reviews_updated_at BEFORE UPDATE ON public.reviews
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_forum_post_updated_at BEFORE UPDATE ON public.forum_post
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_forum_comment_updated_at BEFORE UPDATE ON public.forum_comment
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE TRIGGER trg_comments_count
+AFTER INSERT OR DELETE OR UPDATE OF deleted_at, chapter_id ON public.comments
+FOR EACH ROW EXECUTE FUNCTION public.update_comments_count();
+CREATE TRIGGER trg_follows_count
+AFTER INSERT OR DELETE OR UPDATE OF follower_id, follow_id ON public.follows
+FOR EACH ROW EXECUTE FUNCTION public.update_follows_count();
+CREATE TRIGGER trg_novel_likes_count
+AFTER INSERT OR DELETE OR UPDATE OF user_id, novel_id ON public.novel_likes
+FOR EACH ROW EXECUTE FUNCTION public.update_novel_likes_count();
 
 COMMIT;

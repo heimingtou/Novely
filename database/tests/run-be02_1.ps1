@@ -1,5 +1,5 @@
 param(
-  [string]$ReportDirectory = (Join-Path $PSScriptRoot '.local'),
+  [string]$ReportDirectory = (Join-Path $PSScriptRoot '.local/reconciliation'),
   [switch]$ReuseSchema
 )
 
@@ -17,7 +17,8 @@ $env:PGCLIENTENCODING = 'UTF8'
 $env:PGCONNECT_TIMEOUT = '10'
 
 Write-Host 'Novely BE02.1 - LOCAL PostgreSQL test only'
-Write-Host 'Target: 127.0.0.1:5432 / novely_test / postgres'
+Write-Host 'Target: 127.0.0.1:5432 / novely_reconcile_test / postgres'
+Write-Host 'Create this separate empty test database manually first. This script never creates or resets a database.'
 Write-Host 'Enter the password at the psql prompt. It is not saved in this script or the report.'
 Write-Host 'The SQL runner verifies the target and an empty database before loading the schema.'
 
@@ -25,8 +26,9 @@ try {
   # Capture PostgreSQL errors as well as query results. Password input stays on
   # the console: psql disables its echo and never emits its value to this pipe.
   $ErrorActionPreference = 'Continue'
-  & $psqlPath -X -W -h 127.0.0.1 -p 5432 -U postgres -d novely_test `
+  & $psqlPath -X -W -h 127.0.0.1 -p 5432 -U postgres -d novely_reconcile_test `
     -v ON_ERROR_STOP=1 -v "reuse_schema=$($ReuseSchema.IsPresent)" -P pager=off -L $logPath -f $sqlPath 2>&1 |
+    ForEach-Object { $_.ToString() } |
     Tee-Object -FilePath $consolePath
   $testExitCode = $LASTEXITCODE
   $ErrorActionPreference = 'Stop'
@@ -36,7 +38,7 @@ try {
 }
 
 [ordered]@{
-  database = 'novely_test'
+  database = 'novely_reconcile_test'
   host = '127.0.0.1'
   port = 5432
   exitCode = $testExitCode
@@ -44,6 +46,7 @@ try {
   completedAt = [DateTime]::UtcNow.ToString('o')
   logPath = $logPath
   consolePath = $consolePath
+  schemaSha256 = (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot '../schema.sql') -Algorithm SHA256).Hash
 } | ConvertTo-Json | Set-Content -LiteralPath $resultPath -Encoding UTF8
 
 Write-Host "Test process exit code: $testExitCode"
