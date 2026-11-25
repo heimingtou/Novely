@@ -19,7 +19,12 @@
     "db:introspect": "node scripts/prisma.js introspect",
     "db:validate": "node scripts/prisma.js validate",
     "db:generate": "node scripts/prisma.js generate",
-    "db:format": "node scripts/prisma.js format"
+    "db:format": "node scripts/prisma.js format",
+    "db:transition:check": "node scripts/migrate-restore.js --check",
+    "db:transition:apply": "node scripts/migrate-restore.js --apply",
+    "db:transition:validate": "node scripts/prisma-transition.js validate",
+    "db:transition:generate": "node scripts/prisma-transition.js generate",
+    "test:transition": "node --test transition-tests/*.test.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

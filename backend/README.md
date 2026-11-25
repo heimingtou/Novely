@@ -1,4 +1,4 @@
-# Novely Backend — Foundation đến BE02.3
+# Novely Backend — Foundation đến BE02.4
 
 Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local. BE02.3 bổ sung readiness, repository tham chiếu, transaction, xử lý lỗi database và JSON serialization; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
 
@@ -168,8 +168,9 @@ chiếu. Chỉ chụp lại khi chủ động bắt đầu lượt đối chiế
 
 Schema đã được introspect và đặt tên model/cột rõ ràng. Khi cần đối chiếu lại với
 Local, dùng `npm.cmd run db:introspect --prefix backend`; lệnh chỉ đọc database,
-có ghi lại file schema.prisma, cần xem Git diff sau đó. Không có script migrate,
-db push, reset hoặc seed trong Backend này.
+có ghi lại file schema.prisma, cần xem Git diff sau đó. Các lệnh Prisma không
+cung cấp db push, migrate/reset hoặc seed. Migration SQL chuyển tiếp BE02.4
+được tách riêng và chỉ cho phép chạy trên `novely_restore_test` qua tool Local.
 
 Repository tương lai lấy Client bằng `const prisma = await getPrisma()` từ
 `src/database/prisma.js`. Các lời gọi đồng thời trong một tiến trình chia sẻ một
@@ -237,6 +238,42 @@ Kết quả BE02.3: 94 unit + 126 integration + 479 SQL đều PASS; sau test c�
 19 bảng rỗng, 57 index, 11 trigger, 4 function, cả 10 sequence chưa sử dụng.
 
 Để chạy bộ model test Frontend hiện có, dùng `npm.cmd test` từ root.
+
+## Migration chuyển tiếp BE02.4
+
+Database phục hồi `novely_restore_test` đã được nâng từ 16 lên **21 bảng** trên
+Local, giữ hai bảng legacy và dữ liệu để Next.js tiếp tục hoạt động. Database
+`novely_reconcile_test` vẫn là baseline 19 bảng của BE02.2/3, không được chỉnh
+sửa trong BE02.4. Runtime Express và Client chính tiếp tục giữ cấu hình cũ.
+
+Library cũ giữ `reading_status = NULL` theo xác nhận người dùng. Client chính
+khai báo trạng thái bắt buộc, vì vậy BE02.4 tạo Prisma schema/Client chuyển tiếp
+riêng, chưa chuyển cấu hình runtime Express sang database có dữ liệu này.
+
+Chạy từ root:
+
+```powershell
+npm.cmd run db:transition:validate --prefix backend
+npm.cmd run db:transition:generate --prefix backend
+npm.cmd run test:transition --prefix backend
+```
+
+Tool dùng credential Local trong `backend/.env` ở bộ nhớ, chỉ kết nối
+`127.0.0.1:5432/novely_restore_test` và xác minh lại database qua SQL. Không cần
+đổi DATABASE_URL của ứng dụng hoặc nạp `.env` Frontend. Client riêng được sinh
+trong `src/generated/prisma-transition/`; báo cáo tổng hợp/test log ở `.local/`,
+đều được gitignore.
+
+`db:transition:check` và `db:transition:apply` chỉ dùng cho bản restore nguyên
+trạng 16 bảng; database hiện tại đã apply sẽ bị chặn chạy lại. Bộ 39 test chuyển
+tiếp tách khỏi 94 unit test và 126 integration test baseline. Nó thử auto ID thật
+nên sequence tăng dù fixture được rollback/dọn sạch; không reset sequence.
+
+Xem [báo cáo BE02.4](../docs/database-migration-preparation.md) và
+[hướng dẫn migration, rollback và triển khai có phê duyệt](../database/migrations/README.md).
+Hai luồng ghi chương có thể deadlock và cần chính sách writer/retry trước vận
+hành đồng thời; test Local không thay thế kiểm thử PostgreSQL 17, quyền Supabase
+hoặc PostgREST. BE02.4 không kết nối Supabase và chưa chuyển API nghiệp vụ.
 
 ## Tài liệu tham khảo
 
