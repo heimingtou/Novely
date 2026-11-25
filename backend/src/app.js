@@ -1,0 +1,18 @@
+import express from "express";
+import { loadConfig } from "./config/env.js";
+import { createCorsMiddleware } from "./middlewares/cors.js";
+import { createErrorHandler } from "./middlewares/error-handler.js";
+import { notFound } from "./middlewares/not-found.js";
+import { apiRouter } from "./routes.js";
+
+// Creating the app never opens a port or connects to a database.
+export function createApp({ config = loadConfig(), logger = console } = {}) {
+  const app = express();
+  app.disable("x-powered-by");
+  app.use(createCorsMiddleware(config.corsOrigins));
+  app.use(express.json({ limit: "100kb" }));
+  app.use("/api/v1", apiRouter);
+  app.use(notFound);
+  app.use(createErrorHandler(logger));
+  return app;
+}
