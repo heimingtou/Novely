@@ -1,11 +1,16 @@
 # BE02.4 — Quy trình triển khai có phê duyệt
 
+Permission hardening cập nhật: đọc [báo cáo quyền](supabase-permission-hardening.md).
+Migration hiện thu hồi ACL ngoài owner trên đúng 5 bảng Forum, 4 sequence và 2
+function đồng bộ mới. Không còn giữ nguyên bản SQL d99e41d. Phải dùng bản SQL mới
+cho dry-run/staging trước phê duyệt COMMIT; không chạy lại trên restore 21 bảng.
+
 Trạng thái hiện tại: **NOT READY cho COMMIT migration Supabase** cho đến khi
 hoàn tất các bước xác minh bên dưới. Task review chỉ thực hiện Local. Không chạy
 các lệnh cloud trong tài liệu khi chưa được nhóm cho phép.
 
-Migration `database/migrations/20261125_01_expand_legacy.sql` giữ nguyên từ
-`d99e41d`. Không dùng `database/schema.sql`, Prisma db push/reset hoặc seed để
+Migration `database/migrations/20261125_01_expand_legacy.sql` mở rộng bản
+`d99e41d` với hardening 11 đối tượng mới. Không dùng `database/schema.sql`, Prisma db push/reset hoặc seed để
 nâng database có dữ liệu. Next.js Writer là luồng ghi chương chính; chưa có API
 ghi chương Express. Không cho các script/manual writer khác cùng ghi trực tiếp
 `chapters.content` trong giai đoạn chuyển tiếp.
@@ -113,6 +118,7 @@ ROLLBACK TO SAVEPOINT compatibility;
 RELEASE SAVEPOINT compatibility;
 
 \i database/checks/migration-postflight.sql
+\i database/checks/new-object-permissions.sql
 \i database/checks/supabase-access-audit.sql
 \i database/checks/legacy-data-fingerprint.sql
 SELECT sequencename,last_value FROM pg_catalog.pg_sequences
@@ -152,9 +158,9 @@ sau đó trên cloud đã commit bằng HEAD/limit=0, không in dữ liệu:
   interact_novel, profiles, reviews→novels và follows→users!fk_follows_follow.
 - Comments truy vấn phẳng comment_id/chapter_id/parent_id. Không mặc định rằng
   self-embed comments hoặc chỉ thêm !constraint sẽ giải quyết mọi nhập nhằng.
-- Forum không có policy: role thường không được nhìn/ghi hàng. Xác minh role
-  không bypass/owner và privilege thực tế; chỉ role server đã duyệt mới có quyền
-  quản trị dự kiến. Không dùng thao tác ghi thật lên cloud để thử trong task này.
+- Forum owner-only, không có policy: anon/authenticated/service_role đều phải
+  bị từ chối quyền bảng, kể cả service_role có BYPASSRLS. Chỉ owner quản lý đến
+  khi API Forum có thiết kế quyền riêng được duyệt. Không thử ghi cloud trong task này.
 
 Ví dụ hình dạng kiểm tra không trả nội dung, chỉ dùng trong môi trường được duyệt:
 

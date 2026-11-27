@@ -248,6 +248,53 @@ BEGIN
 END;
 $indexes$;
 
+-- BEGIN NEW OBJECT ACL HARDENING
+-- No Forum server operations exist yet: owner-only, including service_role.
+-- Remove inherited DEFAULT ACL grants on these objects, not the defaults.
+-- Trigger functions remain invoker; legacy DML privileges are unchanged.
+DO $new_object_acl$
+DECLARE obj record; entry record; total integer := 0;
+BEGIN
+  FOR obj IN
+    SELECT c.oid,c.relowner AS owner,c.relacl AS acl,
+      CASE WHEN c.relkind='S' THEN 'SEQUENCE' ELSE 'TABLE' END AS kind,
+      format('%I.%I',n.nspname,c.relname) AS identity,
+      CASE WHEN c.relkind='S' THEN 'S'::"char" ELSE 'r'::"char" END AS aclkind
+    FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND (c.relname IN
+      ('forum_category','forum_post','forum_comment','forum_reaction','forum_report')
+      OR c.oid IN (SELECT pg_get_serial_sequence('public.'||t,'category_id')::regclass
+        FROM (VALUES ('forum_category')) x(t))
+      OR c.oid IN (SELECT pg_get_serial_sequence('public.'||t,col)::regclass
+        FROM (VALUES ('forum_post','post_id'),('forum_comment','comment_id'),('forum_report','report_id')) x(t,col)))
+    UNION ALL
+    SELECT p.oid,p.proowner,p.proacl,'FUNCTION',
+      format('%I.%I()',n.nspname,p.proname),'f'::"char"
+    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.pronargs=0
+      AND p.proname IN ('novely_sync_legacy_content','novely_sync_chapter_content')
+  LOOP
+    total := total+1;
+    FOR entry IN SELECT DISTINCT a.grantee FROM aclexplode(COALESCE(obj.acl,acldefault(obj.aclkind,obj.owner))) a
+      WHERE a.grantee<>obj.owner
+    LOOP
+      EXECUTE format('REVOKE ALL PRIVILEGES ON %s %s FROM %s',obj.kind,obj.identity,
+        CASE WHEN entry.grantee=0 THEN 'PUBLIC' ELSE quote_ident(pg_get_userbyid(entry.grantee)) END);
+    END LOOP;
+    FOR entry IN SELECT oid FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role') LOOP
+      IF (obj.kind='TABLE' AND (has_table_privilege(entry.oid,obj.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER,MAINTAIN')
+          OR has_any_column_privilege(entry.oid,obj.oid,'SELECT,INSERT,UPDATE,REFERENCES')))
+        OR (obj.kind='SEQUENCE' AND has_sequence_privilege(entry.oid,obj.oid,'USAGE,SELECT,UPDATE'))
+        OR (obj.kind='FUNCTION' AND has_function_privilege(entry.oid,obj.oid,'EXECUTE')) THEN
+        RAISE EXCEPTION 'STOP: application role retains unexpected new-object privileges';
+      END IF;
+    END LOOP;
+  END LOOP;
+  IF total<>11 THEN RAISE EXCEPTION 'Expected exactly 11 new ACL targets'; END IF;
+END;
+$new_object_acl$;
+-- END NEW OBJECT ACL HARDENING
+
 DO $postflight$
 BEGIN
   IF (SELECT count(*) FROM pg_catalog.pg_tables WHERE schemaname='public')<>21 THEN

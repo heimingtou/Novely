@@ -1,4 +1,6 @@
 -- READ ONLY, before migration. A false gate requires STOP/review, not repair.
+-- Broad default ACLs in the provided Supabase audit are handled per new object
+-- by the pending migration. Do not revoke legacy ACLs or change defaults here.
 -- Local already migrated: legacy_16_tables/content_not_added/scoped_trigger
 -- correctly report false. PostgreSQL 17 gate is verified only on PG17 staging.
 WITH tables AS (

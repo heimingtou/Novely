@@ -1,4 +1,7 @@
 -- READ ONLY, after migration, inside the same transaction before COMMIT/ROLLBACK.
+-- REQUIRED companion: new-object-permissions.sql must return 11 owner-only rows;
+-- supabase-access-audit.sql must also show no effective rights for app roles on
+-- the new objects. Its legacy-table rights are observations, not modified here.
 SELECT 'expanded_catalog' AS audit,
   (SELECT count(*)::integer FROM pg_catalog.pg_tables WHERE schemaname='public') AS tables,
   (SELECT count(*)::integer FROM pg_catalog.pg_indexes WHERE schemaname='public') AS indexes,
