@@ -17,6 +17,7 @@ export function restoreConfig() {
   // Reuse local credentials in memory. Never connect to the baseline URL.
   // The application's BE02.2/3 database gate stays unchanged.
   const config = loadDatabaseConfig();
+  assert.equal(config.profile, "local", "Local restore tooling requires the baseline Local profile; never Supabase");
   const url = new URL(config.pool.connectionString);
   url.pathname = "/novely_restore_test";
   return { url: url.toString(), pool: { ...config.pool, connectionString: url.toString(), max: 2, application_name: "novely-be02.4-local" } };

@@ -1,4 +1,4 @@
-# Novely Backend — Foundation đến BE02.4
+# Novely Backend — Foundation đến BE02.5
 
 Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local. BE02.3 bổ sung readiness, repository tham chiếu, transaction, xử lý lỗi database và JSON serialization; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
 
@@ -33,14 +33,17 @@ Frontend tiếp tục chạy bằng lệnh hiện có ở root, ví dụ `npm.cm
 
 ## Cấu hình môi trường
 
-Node.js tự nạp **backend/.env** bằng `process.loadEnvFile()`. Đường dẫn được tính theo file module, nên chạy từ root hay `backend/` đều không nạp nhầm `.env` của Frontend. Biến đã đặt trong môi trường tiến trình được ưu tiên hơn file. Không có `.env` thì dùng mặc định; cấu hình không hợp lệ khiến tiến trình thoát với mã 1.
+Node.js tự nạp **backend/.env** bằng `process.loadEnvFile()`. Đường dẫn được tính theo file module, nên chạy từ root hay `backend/` đều không nạp nhầm `.env` của Frontend. Biến đã đặt trong môi trường tiến trình được ưu tiên hơn file; có thể dùng Node `--env-file` để nạp cấu hình runtime ngoài Git mà vẫn giữ backend/.env Local. Không có `.env` thì dùng mặc định; cấu hình không hợp lệ khiến tiến trình thoát với mã 1.
 
 | Biến | Mặc định | Ý nghĩa |
 | --- | --- | --- |
 | `NODE_ENV` | `development` | Nhận `development`, `test`, `production` |
 | `PORT` | `4000` | Số nguyên từ 1 đến 65535 |
 | `CORS_ORIGINS` | localhost và 127.0.0.1, cổng 3000/3100 | Danh sách HTTP/HTTPS origin, phân cách bằng dấu phẩy |
-| `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Dùng cho Prisma, readiness và integration test; khóa đích Local `127.0.0.1:5432/novely_reconcile_test`, schema public |
+| `DATABASE_PROFILE` | `local` | `local`: baseline 19 bảng; `local-transition`: restore 21 bảng; `supabase`: runtime Foundation chỉ đọc qua TLS |
+| `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Đích phải khớp profile, schema public; không cho SSL/options ghi đè trong URL |
+| `SUPABASE_PROJECT_REF`, `SUPABASE_DB_HOST`, `SUPABASE_DB_ROLE` | Không có | Bắt buộc với Supabase; project/host đã duyệt và role runtime riêng, không dùng tài khoản quản trị |
+| `DATABASE_CA_FILE` | Không có | Đường dẫn tuyệt đối tới CA tin cậy; Supabase bắt buộc xác minh certificate và hostname |
 
 CORS trả origin cụ thể và hỗ trợ credentials cho origin được cấu hình; origin khác nhận JSON 403. Preflight được xử lý bởi middleware. Request không có `Origin` (CLI/server) vẫn được chấp nhận. CORS chưa phải cơ chế xác thực người dùng.
 
@@ -281,9 +284,20 @@ Ngày 27/11/2026, migration Production BE02.4 đã COMMIT sau phê duyệt; hậ
 SQL và PostgREST PASS, schema chuyển tiếp 21 bảng. Xem
 [biên bản nghiệm thu Production](../docs/be02-4-production-acceptance.md).
 Chưa đủ bằng chứng về deployment Vercel Production chứa bản sửa retry Writer
-để Resume. Runtime Express vẫn giữ gate Local; chưa chuyển API nghiệp vụ.
+để Resume. Tại mốc BE02.4, runtime Express vẫn giữ gate Local; phần tích hợp
+Supabase của BE02.5 được ghi nhận riêng bên dưới. Chưa chuyển API nghiệp vụ.
 
 ## Tài liệu tham khảo
+
+BE02.5 đã nghiệm thu: profile Supabase kiểm tra TLS, identity, quyền và đủ 21
+bảng trước khi giao từng kết nối mới cho Prisma; dùng Client chuyển tiếp hiện
+có. Role novely_backend chỉ có SELECT genres trong phạm vi dữ liệu ứng dụng,
+không BYPASSRLS hoặc quyền quản trị. Policy SELECT riêng cho role này giữ RLS
+bật và cho Prisma thấy đúng 24 thể loại. HTTP health/ready production trả 200
+qua tiến trình Express kiểm tra, không phải deployment Vercel. Hai profile Local
+vẫn PASS. Credential runtime nằm ngoài Git tại
+`C:\Novely_Backups\novely-backend-runtime.env`, không thay backend/.env Local.
+Xem [cấu hình và nghiệm thu BE02.5](../docs/be02-5-supabase-integration.md).
 
 - [Express 5 — Error handling](https://expressjs.com/en/5x/guide/error-handling/)
 - [Express — CORS middleware](https://expressjs.com/en/resources/middleware/cors/)

@@ -1,4 +1,5 @@
 import { loadDatabaseConfig } from "../config/database.js";
+import { verifySupabaseConnection } from "./verify-supabase.js";
 
 let runtimePromise;
 let shutdownPromise;
@@ -7,11 +8,20 @@ async function createRuntime() {
   const config = loadDatabaseConfig();
   // Lazy imports keep health/BE01 independent of credentials and generated files.
   const [{ PrismaClient }, { PrismaPg }, { default: pg }] = await Promise.all([
-    import("../generated/prisma/index.js"), import("@prisma/adapter-pg"), import("pg"),
+    config.client === "transition" ? import("../generated/prisma-transition/index.js") : import("../generated/prisma/index.js"),
+    import("@prisma/adapter-pg"), import("pg"),
   ]);
-  const pool = new pg.Pool(config.pool);
+  const pool = new pg.Pool({ ...config.pool,
+    ...(config.profile === "supabase" ? { onConnect: (client) => verifySupabaseConnection(client, config) } : {}),
+  });
   pool.on("error", () => console.error("[database] Idle connection failed; details hidden."));
   try {
+    if (config.profile === "supabase") {
+      // Finish remote TLS/admission before an interactive transaction starts
+      // its maxWait deadline. Readiness remains unavailable while this drains.
+      const initialConnection = await pool.connect();
+      initialConnection.release();
+    }
     const adapter = new PrismaPg(pool, { schema: config.schema, disposeExternalPool: false });
     const prisma = new PrismaClient({ adapter, log: [], errorFormat: "minimal" });
     return { pool, prisma };

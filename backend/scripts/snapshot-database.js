@@ -6,7 +6,9 @@ import { baselinePath, digest, readCatalog, readRowCounts, sqlSchemaPath, verify
 let pool;
 let connection;
 try {
-  pool = new pg.Pool(loadDatabaseConfig().pool);
+  const config = loadDatabaseConfig();
+  if (config.profile !== "local") throw new Error("Baseline snapshot requires the Local profile.");
+  pool = new pg.Pool(config.pool);
   pool.on("error", () => console.error("[database] Snapshot connection failed; credentials hidden."));
   connection = await pool.connect();
   await connection.query("BEGIN READ ONLY");

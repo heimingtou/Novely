@@ -14,6 +14,9 @@ try {
   const args = Object.hasOwn(commands, process.argv[2]) ? commands[process.argv[2]] : null;
   if (!args || process.argv.length !== 3) throw new Error("Chỉ hỗ trợ introspect, validate, generate, format.");
   const config = loadDatabaseConfig();
+  if (config.profile !== "local" && !["validate", "generate"].includes(process.argv[2])) {
+    throw new Error("Profile chuyển tiếp/Supabase chỉ hỗ trợ validate và generate; không ghi đè schema đã nghiệm thu.");
+  }
   const url = new URL(config.url);
   const redact = (value) => {
     let output = value ?? "";
