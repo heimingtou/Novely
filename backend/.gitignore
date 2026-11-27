@@ -1,0 +1,9 @@
+/node_modules/
+/coverage/
+/logs/
+/.local/
+/src/generated/
+*.log
+.env*
+!.env.example
+

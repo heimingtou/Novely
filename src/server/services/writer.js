@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiError, assertNoDbError, notFound } from "@/server/http";
 import { removeImage, uploadImage } from "@/server/storage";
 import { FALLBACK_COVER, formatDate } from "@/server/presenters";
+import { retryDeadlockedQuery } from "@/server/retry-deadlock.mjs";
 
 // Quản lý truyện của tác giả. MỌI hàm nhận `user` lấy từ phiên đăng nhập (DAL) và kiểm tra
 // quyền sở hữu trước khi đọc/ghi — không bao giờ tin author_id do client gửi lên.
@@ -193,17 +194,19 @@ export async function updateNovel(user, novelId, { title, description, genreIds,
   if (coverUrl !== novel.cover_url) await removeImage("covers", novel.cover_url);
 }
 
-// Xoá phụ thuộc theo thứ tự khoá ngoại (schema không có ON DELETE CASCADE).
+// Next.js Writer remains the primary chapter-content writer during transition.
+// Each retry below covers one aborted PostgREST transaction, never this workflow.
+// Keep the legacy child-first deletion order; some FKs still use NO ACTION.
 async function deleteChapterRows(chapterIds) {
   if (!chapterIds.length) return;
   const steps = [
-    db().from("comments").delete().in("chapter_id", chapterIds),
-    db().from("chapter_likes").delete().in("chapter_id", chapterIds),
-    db().from("reading_progress").update({ chapter_id: null }).in("chapter_id", chapterIds),
-    db().from("chapter_contents").delete().in("chapter_id", chapterIds),
+    () => db().from("comments").delete().in("chapter_id", chapterIds),
+    () => db().from("chapter_likes").delete().in("chapter_id", chapterIds),
+    () => db().from("reading_progress").update({ chapter_id: null }).in("chapter_id", chapterIds),
+    () => db().from("chapter_contents").delete().in("chapter_id", chapterIds),
+    () => db().from("chapters").delete().in("chapter_id", chapterIds),
   ];
-  for (const step of steps) assertNoDbError((await step).error);
-  assertNoDbError((await db().from("chapters").delete().in("chapter_id", chapterIds)).error);
+  for (const step of steps) assertNoDbError((await retryDeadlockedQuery(step)).error);
 }
 
 export async function deleteNovel(user, novelId) {
@@ -224,15 +227,15 @@ export async function saveChapter(user, novelId, chapterId, { title, content, pu
 
   if (chapterId) {
     const { novel, chapter } = await ownChapter(user, novelId, chapterId);
-    const { error } = await db().from("chapters").update({
+    const { error } = await retryDeadlockedQuery(() => db().from("chapters").update({
       title,
       word_count: wordCount,
       status,
       published_at: publish ? chapter.published_at ?? now() : null,
       updated_at: now(),
-    }).eq("chapter_id", chapter.chapter_id);
+    }).eq("chapter_id", chapter.chapter_id));
     assertNoDbError(error);
-    assertNoDbError((await db().from("chapter_contents").upsert({ chapter_id: chapter.chapter_id, content })).error);
+    assertNoDbError((await retryDeadlockedQuery(() => db().from("chapter_contents").upsert({ chapter_id: chapter.chapter_id, content }))).error);
     await refreshNovelCounters(novel.novel_id);
     return chapter.chapter_id;
   }
@@ -241,18 +244,18 @@ export async function saveChapter(user, novelId, chapterId, { title, content, pu
   const { data: last, error: lastError } = await db().from("chapters").select("chapter_number")
     .eq("novel_id", novel.novel_id).order("chapter_number", { ascending: false }).limit(1).maybeSingle();
   assertNoDbError(lastError);
-  const { data, error } = await db().from("chapters").insert({
+  const { data, error } = await retryDeadlockedQuery(() => db().from("chapters").insert({
     novel_id: novel.novel_id,
     chapter_number: (last?.chapter_number ?? 0) + 1,
     title,
     word_count: wordCount,
     status,
     published_at: publish ? now() : null,
-  }).select("chapter_id").single();
+  }).select("chapter_id").single());
   assertNoDbError(error);
-  const { error: contentError } = await db().from("chapter_contents").insert({ chapter_id: data.chapter_id, content });
+  const { error: contentError } = await retryDeadlockedQuery(() => db().from("chapter_contents").insert({ chapter_id: data.chapter_id, content }));
   if (contentError) {
-    await db().from("chapters").delete().eq("chapter_id", data.chapter_id);
+    await retryDeadlockedQuery(() => db().from("chapters").delete().eq("chapter_id", data.chapter_id));
     assertNoDbError(contentError);
   }
   await refreshNovelCounters(novel.novel_id);

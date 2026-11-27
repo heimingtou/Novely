@@ -1,0 +1,351 @@
+// BE02.2: introspected from Local PostgreSQL; database/schema.sql is the full SQL authority.
+// CHECK constraints, triggers/functions, IDENTITY ALWAYS and SET NULL(column) remain database-owned.
+// prisma-client-js is supported in Prisma 7 and emits JavaScript; no TypeScript build required.
+generator client {
+  provider   = "prisma-client-js"
+  output     = "../src/generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider     = "postgresql"
+  relationMode = "foreignKeys"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Bookshelf {
+  userId        Int      @map("user_id")
+  novelId       Int      @map("novel_id")
+  savedAt       DateTime @default(now()) @map("saved_at") @db.Timestamptz(6)
+  readingStatus String   @default("plan_to_read") @map("reading_status") @db.VarChar
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  novel         Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_bookshelves_novel")
+  user          User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_bookshelves_user")
+
+  @@id([userId, novelId], map: "bookshelves_pkey")
+  @@index([novelId], map: "bookshelves_novel_idx")
+  @@index([userId, readingStatus, updatedAt(sort: Desc)], map: "bookshelves_user_status_updated_idx")
+  @@map("bookshelves")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Chapter {
+  chapterId       Int               @id(map: "chapters_pkey") @default(autoincrement()) @map("chapter_id")
+  novelId         Int               @map("novel_id")
+  publishedAt     DateTime?         @map("published_at") @db.Timestamptz(6)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @map("updated_at") @db.Timestamptz(6)
+  chapterNumber   Int               @map("chapter_number")
+  wordCount       Int               @default(0) @map("word_count")
+  countView       Int               @default(0) @map("count_view")
+  countComment    Int               @default(0) @map("count_comment")
+  status          String            @default("draft") @db.VarChar
+  title           String            @db.VarChar
+  content         String            @default("")
+  novel           Novel             @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_chapters_novel")
+  comments        Comment[]
+  readingProgress ReadingProgress[]
+
+  @@unique([chapterId, novelId], map: "chapters_id_novel_key")
+  @@unique([novelId, chapterNumber], map: "chapters_novel_number_key")
+  @@index([novelId, status, chapterNumber], map: "chapters_novel_status_number_idx")
+  @@map("chapters")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Comment {
+  commentId BigInt    @id(map: "comments_pkey") @default(autoincrement()) @map("comment_id")
+  parentId  BigInt?   @map("parent_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+  userId    Int       @map("user_id")
+  chapterId Int       @map("chapter_id")
+  content   String
+  chapter   Chapter   @relation(fields: [chapterId], references: [chapterId], onDelete: Cascade, onUpdate: NoAction, map: "fk_comments_chapter")
+  parent    Comment?  @relation("commentsTocomments", fields: [parentId, chapterId], references: [commentId, chapterId], onDelete: Cascade, onUpdate: NoAction, map: "fk_comments_parent")
+  replies   Comment[] @relation("commentsTocomments")
+  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_comments_user")
+
+  @@unique([commentId, chapterId], map: "comments_id_chapter_key")
+  @@index([chapterId, deletedAt, createdAt(sort: Desc)], map: "comments_chapter_deleted_created_idx")
+  @@index([parentId, chapterId], map: "comments_parent_chapter_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "comments_user_created_idx")
+  @@map("comments")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Follow {
+  followerId   Int      @map("follower_id")
+  followId     Int      @map("follow_id")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  followedUser User     @relation("follows_follow_idTousers", fields: [followId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_follows_follow")
+  follower     User     @relation("follows_follower_idTousers", fields: [followerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_follows_follower")
+
+  @@id([followerId, followId], map: "follows_pkey")
+  @@index([followId, createdAt(sort: Desc)], map: "follows_follow_created_idx")
+  @@map("follows")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ForumCategory {
+  categoryId  Int         @id(map: "forum_category_pkey") @default(autoincrement()) @map("category_id")
+  name        String      @unique @db.VarChar
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  posts       ForumPost[]
+
+  @@map("forum_category")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ForumComment {
+  commentId BigInt         @id(map: "forum_comment_pkey") @default(autoincrement()) @map("comment_id")
+  postId    BigInt         @map("post_id")
+  userId    Int            @map("user_id")
+  parentId  BigInt?        @map("parent_id")
+  content   String
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  parent    ForumComment?  @relation("forum_commentToforum_comment", fields: [parentId, postId], references: [commentId, postId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_comment_parent")
+  replies   ForumComment[] @relation("forum_commentToforum_comment")
+  post      ForumPost      @relation(fields: [postId], references: [postId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_comment_post")
+  user      User           @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_comment_user")
+
+  @@unique([commentId, postId], map: "forum_comment_id_post_key")
+  @@index([parentId, postId], map: "forum_comment_parent_post_idx")
+  @@index([postId, createdAt, commentId], map: "forum_comment_post_created_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "forum_comment_user_created_idx")
+  @@map("forum_comment")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ForumPost {
+  postId     BigInt          @id(map: "forum_post_pkey") @default(autoincrement()) @map("post_id")
+  userId     Int             @map("user_id")
+  categoryId Int             @map("category_id")
+  title      String          @db.VarChar
+  content    String
+  status     String          @default("published") @db.VarChar
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  comments   ForumComment[]
+  category   ForumCategory   @relation(fields: [categoryId], references: [categoryId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_post_category")
+  author     User            @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_post_user")
+  reactions  ForumReaction[]
+  reports    ForumReport[]
+
+  @@index([categoryId, status, createdAt(sort: Desc), postId(sort: Desc)], map: "forum_post_category_status_created_idx")
+  @@index([status, createdAt(sort: Desc), postId(sort: Desc)], map: "forum_post_status_created_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "forum_post_user_created_idx")
+  @@map("forum_post")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ForumReaction {
+  userId       Int       @map("user_id")
+  postId       BigInt    @map("post_id")
+  reactionType String    @default("like") @map("reaction_type") @db.VarChar
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  post         ForumPost @relation(fields: [postId], references: [postId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_reaction_post")
+  user         User      @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_reaction_user")
+
+  @@id([userId, postId], map: "forum_reaction_pkey")
+  @@index([postId, reactionType], map: "forum_reaction_post_type_idx")
+  @@map("forum_reaction")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ForumReport {
+  reportId  BigInt    @id(map: "forum_report_pkey") @default(autoincrement()) @map("report_id")
+  userId    Int       @map("user_id")
+  postId    BigInt    @map("post_id")
+  reason    String
+  status    String    @default("pending") @db.VarChar
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  post      ForumPost @relation(fields: [postId], references: [postId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_report_post")
+  reporter  User      @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_forum_report_user")
+
+  @@index([postId, createdAt(sort: Desc)], map: "forum_report_post_created_idx")
+  @@index([status, createdAt], map: "forum_report_status_created_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "forum_report_user_created_idx")
+  @@map("forum_report")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Genre {
+  genreId     Int          @id(map: "genres_pkey") @default(autoincrement()) @map("genre_id") @db.SmallInt
+  name        String       @unique @db.VarChar
+  slug        String       @unique @db.VarChar
+  novelGenres NovelGenre[]
+
+  @@map("genres")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model InteractNovel {
+  view                 BigInt   @default(0)
+  updatedAt            DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  novelId              Int      @id(map: "interact_novel_pkey") @map("novel_id")
+  underEighteen        Int      @default(0) @map("under_eighteen")
+  eighteenToThirtyFive Int      @default(0) @map("eighteen_to_thirty_five")
+  overThirtyFive       Int      @default(0) @map("over_thirty_five")
+  ageUnknown           Int      @default(0) @map("age_unknown")
+  male                 Int      @default(0)
+  female               Int      @default(0)
+  genderOther          Int      @default(0) @map("gender_other")
+  novel                Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_interact_novel_novel")
+
+  @@map("interact_novel")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model InteractNovelDay {
+  novelId   Int      @map("novel_id")
+  day       DateTime @db.Date
+  countView Int      @default(0) @map("count_view")
+  countLike Int      @default(0) @map("count_like")
+  novel     Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_interact_novel_day_novel")
+
+  @@id([novelId, day], map: "interact_novel_day_pkey")
+  @@index([day, novelId], map: "interact_novel_day_day_novel_idx")
+  @@map("interact_novel_day")
+}
+
+model NovelGenre {
+  novelId Int   @map("novel_id")
+  genreId Int   @map("genre_id") @db.SmallInt
+  genre   Genre @relation(fields: [genreId], references: [genreId], onDelete: Restrict, onUpdate: NoAction, map: "fk_novel_genres_genre")
+  novel   Novel @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_novel_genres_novel")
+
+  @@id([novelId, genreId], map: "novel_genres_pkey")
+  @@index([genreId, novelId], map: "novel_genres_genre_novel_idx")
+  @@map("novel_genres")
+}
+
+model NovelLike {
+  userId    Int      @map("user_id")
+  novelId   Int      @map("novel_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  novel     Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_novel_likes_novel")
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_novel_likes_user")
+
+  @@id([userId, novelId], map: "novel_likes_pkey")
+  @@index([novelId, createdAt(sort: Desc)], map: "novel_likes_novel_created_idx")
+  @@map("novel_likes")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Novel {
+  novelId         Int                @id(map: "novels_pkey") @default(autoincrement()) @map("novel_id")
+  authorId        Int                @map("author_id")
+  lastChapterAt   DateTime?          @map("last_chapter_at") @db.Timestamptz(6)
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  countChapter    Int                @default(0) @map("count_chapter")
+  published       Boolean            @default(false)
+  upper18         Boolean            @default(false)
+  vip             Boolean            @default(false)
+  status          String             @default("ongoing") @db.VarChar
+  title           String             @db.VarChar
+  slug            String             @unique @db.VarChar
+  coverUrl        String?            @map("cover_url") @db.VarChar
+  description     String?
+  countLike       Int                @default(0) @map("count_like")
+  bookshelves     Bookshelf[]
+  chapters        Chapter[]
+  statistics      InteractNovel?
+  dailyStatistics InteractNovelDay[]
+  novelGenres     NovelGenre[]
+  likes           NovelLike[]
+  author          User               @relation(fields: [authorId], references: [userId], onDelete: Restrict, onUpdate: NoAction, map: "fk_novels_author")
+  readingProgress ReadingProgress[]
+  reviews         Review[]
+
+  @@index([authorId, updatedAt(sort: Desc)], map: "novels_author_updated_idx")
+  @@index([published, lastChapterAt(sort: Desc), novelId], map: "novels_published_latest_idx")
+  @@index([published, countLike(sort: Desc), novelId], map: "novels_published_likes_idx")
+  @@map("novels")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Profile {
+  userId      Int       @id(map: "profiles_pkey") @map("user_id")
+  birthday    DateTime? @db.Date
+  gender      String?   @db.VarChar
+  phoneNumber String?   @map("phone_number") @db.VarChar
+  fbLink      String?   @map("fb_link") @db.VarChar
+  avatar      String?   @db.VarChar
+  bio         String?
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_profiles_user")
+
+  @@map("profiles")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ReadingProgress {
+  userId          Int      @map("user_id")
+  novelId         Int      @map("novel_id")
+  lastReadAt      DateTime @default(now()) @map("last_read_at") @db.Timestamptz(6)
+  chapterId       Int?     @map("chapter_id")
+  progressPercent Float    @default(0) @map("progress_percent") @db.Real
+  scrollPosition  Int      @default(0) @map("scroll_position")
+  // PostgreSQL sets ONLY chapter_id to NULL, preserving required novel_id.
+  // PSL SetNull cannot express a column list. Never generate DDL from this relation.
+  chapter         Chapter? @relation(fields: [chapterId, novelId], references: [chapterId, novelId], onDelete: SetNull, onUpdate: NoAction, map: "fk_reading_progress_chapter")
+  novel           Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reading_progress_novel")
+  user            User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reading_progress_user")
+
+  @@id([userId, novelId], map: "reading_progress_pkey")
+  @@index([chapterId, novelId], map: "reading_progress_chapter_novel_idx")
+  @@index([novelId], map: "reading_progress_novel_idx")
+  @@index([userId, lastReadAt(sort: Desc)], map: "reading_progress_user_last_read_idx")
+  @@map("reading_progress")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Review {
+  reviewId  Int      @id(map: "reviews_pkey") @default(autoincrement()) @map("review_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  novelId   Int      @map("novel_id")
+  rating    Int      @db.SmallInt
+  content   String?
+  novel     Novel    @relation(fields: [novelId], references: [novelId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reviews_novel")
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "fk_reviews_user")
+
+  @@unique([userId, novelId], map: "reviews_user_novel_key")
+  @@index([novelId, createdAt(sort: Desc)], map: "reviews_novel_created_idx")
+  @@map("reviews")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model User {
+  userId          Int               @id(map: "users_pkey") @default(autoincrement()) @map("user_id")
+  level           Int               @default(1)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @map("updated_at") @db.Timestamptz(6)
+  emailVerified   Boolean           @default(false) @map("email_verified")
+  username        String            @unique @db.VarChar
+  email           String            @unique @db.VarChar
+  passwordHash    String            @map("password_hash") @db.VarChar
+  role            String            @default("reader") @db.VarChar
+  countFollowing  Int               @default(0) @map("count_following")
+  countFollower   Int               @default(0) @map("count_follower")
+  bookshelves     Bookshelf[]
+  comments        Comment[]
+  followers       Follow[]          @relation("follows_follow_idTousers")
+  following       Follow[]          @relation("follows_follower_idTousers")
+  forumComments   ForumComment[]
+  forumPosts      ForumPost[]
+  forumReactions  ForumReaction[]
+  forumReports    ForumReport[]
+  novelLikes      NovelLike[]
+  novels          Novel[]
+  profile         Profile?
+  readingProgress ReadingProgress[]
+  reviews         Review[]
+
+  @@map("users")
+}
