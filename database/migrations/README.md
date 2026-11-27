@@ -6,6 +6,8 @@ tiếp tục hoạt động. `database/schema.sql` vẫn là thiết kế đích
 database rỗng; không chạy file đó lên database có dữ liệu.
 
 Xem [báo cáo và kết quả kiểm thử](../../docs/database-migration-preparation.md).
+Final review: [kết quả và giới hạn](../../docs/backend-predeployment-review.md),
+[runbook preflight/dry-run/hậu kiểm](../../docs/supabase-deployment-runbook.md).
 
 ## Chạy lại trên Local
 
@@ -75,11 +77,11 @@ lặp lại toàn bộ vòng migration.
 - Năm bảng Forum bật RLS, không tạo policy hoặc grant công khai. Chưa mở API Forum.
 
 Hai transaction ghi hai bản nội dung theo thứ tự khóa ngược nhau có thể deadlock.
-Test chủ động tái hiện, rollback transaction bị hủy, retry trong test rồi xác
-nhận không lệch nội dung. Ứng dụng Next.js hiện chưa có retry tương ứng. Trước
-khi vận hành đồng thời hai luồng ghi, nhóm phải chọn một luồng chủ đạo hoặc bổ
-sung cơ chế retry/điều phối ghi và kiểm thử riêng. BE02.4 chưa tạo API ghi chương
-Express và chưa chỉnh source nghiệp vụ.
+Final review giữ Next.js Writer là luồng chính và bổ sung tối đa hai retry cho
+từng câu ghi bị hủy với 40P01; không retry toàn bộ quy trình tạo chương. Helper
+đã thử với deadlock PostgreSQL thật. Hết lượt vẫn trả lỗi; chưa bật luồng ghi
+chương Express. Cần thử client/PostgREST/PG17 và quyền thật theo runbook trước
+triển khai Supabase.
 
 ## Transaction và rollback
 

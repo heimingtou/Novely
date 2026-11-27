@@ -265,15 +265,18 @@ trong `src/generated/prisma-transition/`; báo cáo tổng hợp/test log ở `.
 đều được gitignore.
 
 `db:transition:check` và `db:transition:apply` chỉ dùng cho bản restore nguyên
-trạng 16 bảng; database hiện tại đã apply sẽ bị chặn chạy lại. Bộ 39 test chuyển
+trạng 16 bảng; database hiện tại đã apply sẽ bị chặn chạy lại. Bộ 43 test chuyển
 tiếp tách khỏi 94 unit test và 126 integration test baseline. Nó thử auto ID thật
 nên sequence tăng dù fixture được rollback/dọn sạch; không reset sequence.
 
 Xem [báo cáo BE02.4](../docs/database-migration-preparation.md) và
 [hướng dẫn migration, rollback và triển khai có phê duyệt](../database/migrations/README.md).
-Hai luồng ghi chương có thể deadlock và cần chính sách writer/retry trước vận
-hành đồng thời; test Local không thay thế kiểm thử PostgreSQL 17, quyền Supabase
-hoặc PostgREST. BE02.4 không kết nối Supabase và chưa chuyển API nghiệp vụ.
+Final review giữ Next.js Writer là luồng chính, thêm retry giới hạn cho từng câu
+ghi 40P01 và thử helper với deadlock thật. Xem
+[kết quả review](../docs/backend-predeployment-review.md) và
+[runbook triển khai](../docs/supabase-deployment-runbook.md). Test Local không thay
+kiểm thử PostgreSQL 17, quyền Supabase hoặc PostgREST. Chưa kết nối Supabase và
+chưa chuyển API nghiệp vụ.
 
 ## Tài liệu tham khảo
 

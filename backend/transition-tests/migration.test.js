@@ -10,6 +10,7 @@ import { mapDatabaseError } from "../src/shared/errors/database-error.js";
 import { isolatedCase } from "../integration/helpers/be02_3-fixtures.js";
 import { catalog, contentSummary, dataSignatures, forumTables, legacyCounts, legacyTables, migrationPath, openRestore, restoreConfig, rowCounts } from "../scripts/lib/restore-target.js";
 import test from "node:test";
+import { retryDeadlockedQuery } from "../../src/server/retry-deadlock.mjs";
 
 const safe = (error) => new Error(`Local transition check failed; private details suppressed. ${JSON.stringify(mapDatabaseError(error)?.diagnostic ?? { code: /^[0-9A-Z]{5}$/.test(error?.code ?? "") ? error.code : undefined })}`);
 const withoutSequenceValues = (metadata) => ({ ...metadata, sequences: metadata.sequences.map(({ last_value, ...rest }) => rest) });
@@ -40,6 +41,12 @@ test("BE02.4 transition on Local restored data, aggregate-only reporting", { tim
     const sourceSql = await readFile(new URL("../../database/schema.sql", import.meta.url), "utf8");
     const mainSchema = await readFile(new URL("../prisma/schema.prisma", import.meta.url), "utf8");
     const caseTest = (name, work) => context.test(name, async () => { try { await work(); } catch (error) { throw safe(error); } });
+    const readOnlyCheck = async (name) => {
+      await audit.query("BEGIN READ ONLY");
+      try { return await audit.query(await readFile(new URL(`../../database/checks/${name}`, import.meta.url), "utf8")); }
+      finally { await audit.query("ROLLBACK"); }
+    };
+    let originalFingerprint;
 
     await caseTest("all 19 mapped Prisma models can count the 21-table transition", async () => {
       for (const model of Prisma.dmmf.datamodel.models) {
@@ -80,6 +87,45 @@ test("BE02.4 transition on Local restored data, aggregate-only reporting", { tim
       await audit.query("BEGIN");
       try { await assert.rejects(audit.query(await readFile(migrationPath, "utf8")), (error) => error.code === "P0001"); }
       finally { await audit.query("ROLLBACK"); }
+    });
+    await caseTest("Supabase access audit executes read-only and reports local role limits", async () => {
+      const results = await readOnlyCheck("supabase-access-audit.sql");
+      const rows = (name) => results.find((result) => result.rows[0]?.audit === name)?.rows ?? [];
+      assert.equal(rows("roles").find((role) => role.role_name === "postgres").present, true);
+      for (const name of ["anon", "authenticated", "service_role"]) {
+        assert.equal(rows("roles").find((role) => role.role_name === name).present, false);
+      }
+      assert.equal(rows("forum_state").length, 5);
+      assert.ok(rows("forum_state").every((table) => table.present && table.rls_enabled && table.policy_count === 0));
+      assert.equal(rows("comments_relationships").filter((fk) => fk.constraint_name.startsWith("fk_comments_parent")).length, 2);
+      assert.ok(rows("trigger_function_privileges").filter((fn) => fn.function_name.startsWith("novely_sync_")).every((fn) => fn.present && !fn.security_definer && fn.catalog_only_search_path));
+      assert.ok(rows("migration_role_default_components").length > 0);
+    });
+    await caseTest("read-only legacy preflight refuses an already-expanded database", async () => {
+      const { rows: [state] } = await readOnlyCheck("legacy-preflight.sql");
+      assert.equal(state.legacy_16_tables, false);
+      assert.equal(state.content_not_added, false);
+      assert.equal(state.scoped_timestamp_trigger, false);
+      assert.equal(state.is_postgresql_17, false);
+      assert.equal(state.legacy_functions, 6);
+      assert.equal(state.missing_contents + state.cross_chapter_parents, 0);
+    });
+    await caseTest("read-only fingerprints expose only sixteen aggregate counts and checksums", async () => {
+      originalFingerprint = (await readOnlyCheck("legacy-data-fingerprint.sql")).rows;
+      assert.equal(originalFingerprint.length, 16);
+      for (const row of originalFingerprint) {
+        assert.deepEqual(Object.keys(row).sort(), ["checksum", "row_count", "table_name"]);
+        assert.equal(Number(row.row_count), legacyCounts[row.table_name]);
+        assert.match(row.checksum, /^[a-f0-9]{32}$/);
+      }
+    });
+    await caseTest("read-only postflight validates expanded catalog, content and backfill", async () => {
+      const [{ rows: [metadata] }, { rows: [data] }, { rows: [forum] }] = await readOnlyCheck("migration-postflight.sql");
+      assert.deepEqual(metadata, { audit: "expanded_catalog", tables: 21, indexes: 70, triggers: 14, trigger_functions: 7, identity_sequences: 10, invalid_indexes: 0 });
+      for (const [key, value] of Object.entries(data)) {
+        if (key !== "audit") assert.equal(value, key === "missing_statistics" ? 1 : 0);
+      }
+      for (const [key, value] of Object.entries(forum)) if (key !== "audit") assert.equal(value, 0);
     });
 
     const rollback = new Error("BE024_FIXTURES_ROLLBACK");
@@ -238,7 +284,7 @@ test("BE02.4 transition on Local restored data, aggregate-only reporting", { tim
     } catch (error) { if (error !== rollback) throw error; }
 
     let retries = 0;
-    await caseTest("concurrent legacy/modern writers remain atomic; retry a deadlock victim safely", async () => {
+    await caseTest("the Writer retry helper recovers a real SQLSTATE 40P01 without content divergence", async () => {
       const right = await pool.connect();
       try {
         assert.equal((await audit.query("SELECT count(*)::integer AS count FROM public.users WHERE user_id=-240911")).rows[0].count, 0);
@@ -248,25 +294,29 @@ test("BE02.4 transition on Local restored data, aggregate-only reporting", { tim
         await audit.query("INSERT INTO public.chapters(chapter_id,novel_id,chapter_number,title,content) OVERRIDING SYSTEM VALUE VALUES(-240931,-240921,1,'BE024 concurrent chapter','Synthetic initial body')");
         await audit.query("COMMIT");
         await audit.query("BEGIN"); await right.query("BEGIN");
-        for (const connection of [audit, right]) await connection.query("SET LOCAL lock_timeout='4s'");
+        for (const connection of [audit, right]) {
+          await connection.query("SET LOCAL lock_timeout='4s'");
+          await connection.query("SET LOCAL deadlock_timeout='100ms'");
+        }
         await audit.query("SELECT chapter_id FROM public.chapters WHERE chapter_id=-240931 FOR UPDATE");
         await right.query("SELECT chapter_id FROM public.chapter_contents WHERE chapter_id=-240931 FOR UPDATE");
         const writes = [
           [audit, "UPDATE public.chapters SET content='Synthetic modern concurrent' WHERE chapter_id=-240931"],
           [right, "UPDATE public.chapter_contents SET content='Synthetic legacy concurrent' WHERE chapter_id=-240931"],
         ];
-        const outcomes = await Promise.all(writes.map(async ([connection, sql]) => {
-          try { await connection.query(sql); await connection.query("COMMIT"); return true; }
-          catch (error) {
-            await connection.query("ROLLBACK");
-            if (!["40P01", "40001", "55P03"].includes(error.code)) throw error;
-            return false;
+        const attempts = [0, 0];
+        await Promise.all(writes.map(([connection, sql], index) => retryDeadlockedQuery(async () => {
+          if (attempts[index]++ > 0) {
+            retries++;
+            await connection.query("BEGIN");
+            await connection.query("SET LOCAL lock_timeout='4s'");
           }
-        }));
-        for (let i = 0; i < outcomes.length; i++) if (!outcomes[i]) {
-          retries++;
-          await writes[i][0].query("BEGIN"); await writes[i][0].query(writes[i][1]); await writes[i][0].query("COMMIT");
-        }
+          // Emulate one PostgREST request: rollback the failed transaction before
+          // surfacing its SQLSTATE. Never retry SQL inside an aborted transaction.
+          try { await connection.query(sql); await connection.query("COMMIT"); return { error: null }; }
+          catch (error) { await connection.query("ROLLBACK"); throw error; }
+        })));
+        assert.ok(attempts.every((attempt) => attempt <= 3));
         assert.ok(retries >= 1);
         const [{ equal }] = (await audit.query("SELECT convert_to(c.content,'UTF8')=convert_to(cc.content,'UTF8') AS equal FROM public.chapters c JOIN public.chapter_contents cc USING(chapter_id) WHERE c.chapter_id=-240931")).rows;
         assert.equal(equal, true);
@@ -282,6 +332,7 @@ test("BE02.4 transition on Local restored data, aggregate-only reporting", { tim
       assert.deepEqual(withoutSequenceValues(after), withoutSequenceValues(before));
       assert.deepEqual(await dataSignatures(audit, before.columns), signatures);
       assert.deepEqual(await rowCounts(audit), legacyCounts);
+      assert.deepEqual((await readOnlyCheck("legacy-data-fingerprint.sql")).rows, originalFingerprint);
       for (const name of forumTables) assert.equal((await audit.query(`SELECT count(*)::integer AS count FROM public.${name}`)).rows[0].count, 0);
       assert.equal((await contentSummary(audit)).mismatches, 0);
       assert.equal((await audit.query("SELECT count(*)::integer AS count FROM public.novels n LEFT JOIN public.interact_novel i USING(novel_id) WHERE i.novel_id IS NULL")).rows[0].count, 1);

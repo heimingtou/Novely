@@ -1,5 +1,9 @@
 # BE02.4 — Chuẩn bị migration Supabase và kiểm thử Local
 
+Báo cáo này ghi nhận lượt triển khai Local ban đầu tại d99e41d. Xem
+[Final Pre-deployment Review](backend-predeployment-review.md) để biết retry
+Writer mới, 43 test chuyển tiếp và các gate còn thiếu trước triển khai Supabase.
+
 **Kết luận: PASS cho migration và kiểm thử Local.** Chưa triển khai Supabase;
 kiểm thử thực thi PostgreSQL 17, quyền cloud và PostgREST vẫn cần hoàn tất trước
 phê duyệt triển khai. Ngày 25/11/2026, branch `feature/backend-foundation`.
