@@ -9,6 +9,11 @@ Xem [báo cáo và kết quả kiểm thử](../../docs/database-migration-prepa
 Final review: [kết quả và giới hạn](../../docs/backend-predeployment-review.md),
 [runbook preflight/dry-run/hậu kiểm](../../docs/supabase-deployment-runbook.md).
 
+Ngày 27/11/2026: migration Production đã COMMIT với phê duyệt riêng; hậu kiểm
+SQL và PostgREST PASS. Xem [nghiệm thu Production](../../docs/be02-4-production-acceptance.md)
+về bằng chứng và điều kiện mở lại Vercel. Không chạy lại migration trên schema
+21 bảng đã nghiệm thu.
+
 ## Chạy lại trên Local
 
 Các lệnh sau chạy từ root repository bằng Node.js 24 và dependencies Backend
@@ -109,7 +114,9 @@ trên staging và đánh giá dung lượng thực tế.
 
 ## Triển khai Supabase sau khi nhóm phê duyệt
 
-Chưa có bước nào dưới đây được thực thi trên Supabase trong BE02.4.
+Các bước dưới là tham chiếu quy trình trước triển khai. Staging và Production
+đã hoàn tất theo runbook và biên bản nghiệm thu ở trên; không chạy lại chúng
+trên database đã nâng cấp.
 
 1. Chốt quy tắc NULL của Library, luồng chủ đạo khi ghi chương, thời gian bảo
    trì, role chạy migration và kế hoạch phục hồi. Giữ hai bảng cũ đến task dọn

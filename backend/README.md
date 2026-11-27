@@ -275,8 +275,13 @@ Final review giữ Next.js Writer là luồng chính, thêm retry giới hạn c
 ghi 40P01 và thử helper với deadlock thật. Xem
 [kết quả review](../docs/backend-predeployment-review.md) và
 [runbook triển khai](../docs/supabase-deployment-runbook.md). Test Local không thay
-kiểm thử PostgreSQL 17, quyền Supabase hoặc PostgREST. Chưa kết nối Supabase và
-chưa chuyển API nghiệp vụ.
+kiểm thử PostgreSQL 17, quyền Supabase hoặc PostgREST.
+
+Ngày 27/11/2026, migration Production BE02.4 đã COMMIT sau phê duyệt; hậu kiểm
+SQL và PostgREST PASS, schema chuyển tiếp 21 bảng. Xem
+[biên bản nghiệm thu Production](../docs/be02-4-production-acceptance.md).
+Chưa đủ bằng chứng về deployment Vercel Production chứa bản sửa retry Writer
+để Resume. Runtime Express vẫn giữ gate Local; chưa chuyển API nghiệp vụ.
 
 ## Tài liệu tham khảo
 
