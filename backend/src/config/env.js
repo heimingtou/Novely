@@ -36,7 +36,8 @@ export function loadConfig(environment = process.env) {
     }
   });
 
-  return Object.freeze({ nodeEnv, port, corsOrigins: Object.freeze([...new Set(corsOrigins)]) });
+  // Auth validates this lazily so liveness remains independent of auth credentials.
+  return Object.freeze({ nodeEnv, port, corsOrigins: Object.freeze([...new Set(corsOrigins)]), authSecret: environment.AUTH_SECRET });
 }
 
 export function loadBackendEnvironment() {

@@ -13,7 +13,7 @@ export function createApp({ config = loadConfig(), logger = console, getClient, 
   app.disable("x-powered-by");
   app.use(createCorsMiddleware(config.corsOrigins));
   app.use(express.json({ limit: "100kb" }));
-  app.use("/api/v1", createApiRouter({ getClient, readinessTimeoutMs }));
+  app.use("/api/v1", createApiRouter({ getClient, readinessTimeoutMs, config }));
   app.use(notFound);
   app.use(createErrorHandler(logger));
   return app;

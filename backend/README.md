@@ -1,6 +1,6 @@
-# Novely Backend — Foundation đến BE02.5
+# Novely Backend — Foundation và BE03.2 Authentication
 
-Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. BE02.2 bổ sung Prisma Client cho 19 bảng PostgreSQL Local. BE02.3 bổ sung readiness, repository tham chiếu, transaction, xử lý lỗi database và JSON serialization; chưa chuyển API nghiệp vụ, xác thực hoặc upload từ Next.js sang Express.
+Express 5 chạy độc lập với Frontend Next.js ở thư mục gốc, theo kiến trúc Layered Modular Monolith. Foundation cung cấp Prisma, readiness, transaction và cấu hình Supabase chỉ đọc. BE03.2 bổ sung bốn API Authentication trên Local; Frontend chưa chuyển sang Express, User API và upload chưa triển khai.
 
 ## Yêu cầu và chạy local
 
@@ -39,17 +39,64 @@ Node.js tự nạp **backend/.env** bằng `process.loadEnvFile()`. Đường d�
 | --- | --- | --- |
 | `NODE_ENV` | `development` | Nhận `development`, `test`, `production` |
 | `PORT` | `4000` | Số nguyên từ 1 đến 65535 |
+| `AUTH_SECRET` | Không có | Tối thiểu 32 ký tự, server-only; phải trùng Next.js khi dùng chung cookie. Thiếu/sai secret khiến thao tác Auth cần ký/xác minh token trả 500; không tạo tài khoản dở dang. Liveness không phụ thuộc secret |
 | `CORS_ORIGINS` | localhost và 127.0.0.1, cổng 3000/3100 | Danh sách HTTP/HTTPS origin, phân cách bằng dấu phẩy |
 | `DATABASE_PROFILE` | `local` | `local`: baseline 19 bảng; `local-transition`: restore 21 bảng; `supabase`: runtime Foundation chỉ đọc qua TLS |
 | `DATABASE_URL` | Không có; ví dụ trong `.env.example` | Đích phải khớp profile, schema public; không cho SSL/options ghi đè trong URL |
 | `SUPABASE_PROJECT_REF`, `SUPABASE_DB_HOST`, `SUPABASE_DB_ROLE` | Không có | Bắt buộc với Supabase; project/host đã duyệt và role runtime riêng, không dùng tài khoản quản trị |
 | `DATABASE_CA_FILE` | Không có | Đường dẫn tuyệt đối tới CA tin cậy; Supabase bắt buộc xác minh certificate và hostname |
 
-CORS trả origin cụ thể và hỗ trợ credentials cho origin được cấu hình; origin khác nhận JSON 403. Preflight được xử lý bởi middleware. Request không có `Origin` (CLI/server) vẫn được chấp nhận. CORS chưa phải cơ chế xác thực người dùng.
+CORS trả origin cụ thể và hỗ trợ credentials cho origin được cấu hình; origin khác nhận JSON 403. Preflight được xử lý bởi middleware. Request không có `Origin` vẫn được phép ở endpoint đọc; mọi POST Auth bắt buộc có Origin chính xác trong allowlist, kể cả CLI/server. CORS không thay thế kiểm tra CSRF hoặc xác thực.
 
 JSON request có giới hạn 100 KB; JSON sai nhận 400, payload quá lớn nhận 413, charset/encoding không hỗ trợ nhận 415. Lỗi nội bộ trả thông báo chung, không trả stack hoặc nội dung request. Express 5 chuyển lỗi/rejection của async handler về middleware xử lý lỗi; không cần thêm thư viện bọc async.
 
 ## API hiện có
+
+### Authentication (BE03.2, Local)
+
+| Endpoint | JSON input | Kết quả |
+| --- | --- | --- |
+| `POST /api/v1/auth/register` | `username, email, password, confirmPassword, agreeTerms:true` | 201 `{data:{user:SessionUser}}`, cookie 1 ngày |
+| `POST /api/v1/auth/login` | `identifier, password, rememberMe:boolean=false` | 200 `{data:{user:SessionUser}}`, cookie 1 hoặc 30 ngày |
+| `POST /api/v1/auth/logout` | Không yêu cầu body/session hợp lệ | 200 `{data:{ok:true}}`, xóa cookie |
+| `GET /api/v1/auth/me` | Cookie tùy chọn | 200 `{data:SessionUser hoặc null}`; lỗi DB không bị biến thành null |
+
+SessionUser chỉ gồm `id, username, role, avatar, expiresAt` (milliseconds). Không trả token,
+email, password hash hoặc raw Prisma record. Role lấy từ DB, không từ body hoặc claim JWT.
+Mọi response đi qua Auth router có `Cache-Control:no-store`. Cookie `novely_session`
+dùng HS256, HttpOnly, SameSite=Lax, Path=/, không Domain, Secure khi NODE_ENV=production.
+Logout xóa cookie ở cùng scope; JWT đã sao chép vẫn có hiệu lực đến hết hạn như Next hiện tại.
+Không có refresh token/revocation store trong phạm vi này.
+
+POST phải gửi `Origin` thuộc `CORS_ORIGINS`; JSON boolean thay cho checkbox `on`.
+Thông báo validation/login/trùng tài khoản giữ như Next; HTTP lần lượt 400/401/409.
+Origin sai/thiếu trả 403, lỗi kết nối DB trả 503. Input role/ID/hash không được dùng để ghi.
+
+Chạy với cấu hình Local sẵn có trong `backend/.env`, bổ sung AUTH_SECRET ngoài Git.
+Để dùng schema 21 bảng, chọn `DATABASE_PROFILE=local-transition` và URL Local
+`127.0.0.1:5432/novely_restore_test`; không thay URL bằng production.
+Client transition phải được generate theo hướng dẫn Foundation đã có.
+Đặt cùng AUTH_SECRET với Next khi kiểm tra cookie giữa hai server; backend không tự nạp env Frontend.
+Việc chuyển Server Actions/BFF và phản chiếu Set-Cookie về browser cần phê duyệt riêng.
+
+Chỉ chạy bộ Auth, từ root:
+
+```powershell
+npm.cmd run test:auth --prefix backend
+```
+
+Bộ này yêu cầu `backend/.env` vẫn là profile `local` với credential Local đã duyệt;
+tự pin đích `novely_restore_test`, dùng Prisma transition, và từ chối Supabase trước kết nối.
+Fixture có prefix ngẫu nhiên, được dọn khi kết thúc; sequence Local có thể tăng do INSERT/rollback.
+Không reset database hoặc chạy migration. Báo cáo: [BE03.2](../docs/be03-2-authentication-acceptance.md).
+
+**Giới hạn bcrypt được giữ để tương thích:** validation vẫn 6–200 ký tự khi đăng ký,
+1–200 khi login, nhưng bcrypt chỉ xử lý 72 byte UTF-8 đầu. Mật khẩu khác nhau sau
+72 byte có thể cùng khớp. Chưa thay validation/hash; cần quyết định tương thích riêng trước khi đổi.
+Production Foundation vẫn chỉ đọc genres, chưa được cấp quyền Auth hoặc bật write mode.
+Không dùng bốn API này trên production trước review quyền/RLS và cutover riêng.
+
+### Health
 
 `GET /api/v1/health` trả HTTP 200, `Cache-Control: no-store` và:
 

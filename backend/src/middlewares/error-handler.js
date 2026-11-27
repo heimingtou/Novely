@@ -22,7 +22,7 @@ export function createErrorHandler(logger = console) {
     }
 
     if (error instanceof ApiError && Number.isInteger(error.status)
-      && error.status >= 400 && error.status < 500) {
+      && error.status >= 400 && error.status < 600) {
       return response.status(error.status).json({ error: { code: error.code, message: error.message } });
     }
 
